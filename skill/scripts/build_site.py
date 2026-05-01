@@ -315,6 +315,15 @@ def render_index(template: str, agg: dict, generated_at: datetime) -> str:
     def fm(v):
         return fmt_money(v, cur)
 
+    def fm_kpi(v):
+        """KPI display: drop cents — confidence at a glance, no overflow.
+        Stripe/Mercury both round to integers in their KPI strips. The
+        downloads CSV preserves full precision for users who want the
+        cents."""
+        sym = {"USD": "$", "EUR": "€", "GBP": "£"}.get(cur, cur + " ")
+        sign = "-" if v < 0 else ""
+        return f"{sign}{sym}{abs(round(v)):,}"
+
     payload_json = json.dumps(agg, default=str)
 
     date_from = agg["months"][0] if agg["months"] else "—"
@@ -330,12 +339,12 @@ def render_index(template: str, agg: dict, generated_at: datetime) -> str:
         "{{ N_MONTHS }}":          str(kpis["n_months"]),
         "{{ N_ACCOUNTS }}":        str(len(agg["accounts"])),
         "{{ CURRENCY }}":          cur,
-        "{{ KPI_INCOME }}":        fm(kpis["income_total"]),
-        "{{ KPI_SPEND }}":         fm(kpis["spend_total"]),
-        "{{ KPI_NET }}":           fm(kpis["net_total"]),
-        "{{ KPI_INCOME_AVG }}":    fm(kpis["income_avg_per_month"]),
-        "{{ KPI_SPEND_AVG }}":     fm(kpis["spend_avg_per_month"]),
-        "{{ KPI_NET_AVG }}":       fm(kpis["net_avg_per_month"]),
+        "{{ KPI_INCOME }}":        fm_kpi(kpis["income_total"]),
+        "{{ KPI_SPEND }}":         fm_kpi(kpis["spend_total"]),
+        "{{ KPI_NET }}":           fm_kpi(kpis["net_total"]),
+        "{{ KPI_INCOME_AVG }}":    fm_kpi(kpis["income_avg_per_month"]),
+        "{{ KPI_SPEND_AVG }}":     fm_kpi(kpis["spend_avg_per_month"]),
+        "{{ KPI_NET_AVG }}":       fm_kpi(kpis["net_avg_per_month"]),
         "{{ KPI_SAVINGS_RATE }}":  (f"{kpis['savings_rate_pct']}%"
                                     if kpis["savings_rate_pct"] is not None else "—"),
         "{{ DASHBOARD_DATA_JSON }}": payload_json,

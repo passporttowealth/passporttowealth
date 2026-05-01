@@ -238,6 +238,7 @@
       padding: var(--s5);
       box-shadow: var(--sh-sm);
       transition: transform 160ms ease, box-shadow 160ms ease;
+      min-width: 0;                       /* grid-item shrink fix: prevents overflow */
     }
     .kpi:hover { transform: translateY(-1px); box-shadow: var(--sh-md); }
     .kpi .label {
@@ -245,9 +246,13 @@
       text-transform: uppercase; letter-spacing: 0.10em; font-weight: 500;
     }
     .kpi .value {
-      font-size: clamp(30px, 4.2vw, 44px); font-weight: 600;
+      /* Sized to fit a 7-digit currency string ($999,999) at the minimum
+         220px card width (172px content area) without overflowing. Tabular
+         numerals + word-break: keep-all guard against any leftover tightness. */
+      font-size: clamp(26px, 3.4vw, 34px); font-weight: 600;
       margin-top: var(--s3); letter-spacing: -0.02em; line-height: 1.05;
       color: var(--accent); font-variant-numeric: tabular-nums;
+      white-space: nowrap; overflow-wrap: normal;
     }
     .kpi .sub { font-size: 12px; color: var(--text-subtle); margin-top: var(--s2); }
     .kpi.positive .value { color: var(--positive); }

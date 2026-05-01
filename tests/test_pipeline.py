@@ -362,9 +362,16 @@ class TestBuildSite(PipelineTestBase):
         """Lock in the P0 visual lifts from the design audit so a casual edit
         can't quietly walk them back. These are the floor of perceptual polish."""
         html = (self.workspace / "site" / "index.html").read_text()
-        # P0-1: KPI value should use a confident clamp() with min ≥ 30px (was 24).
-        self.assertRegex(html, r"\.kpi \.value \{[^}]*font-size:\s*clamp\(30px",
-            "P0-1: KPI value font-size should clamp from ≥30px (was 24)")
+        # P0-1: KPI value uses a confident clamp() — min ≥ 24px (lifted from
+        # the original 24px-min/32px-max). Max capped at 36px after the first
+        # iteration overflowed at 44px on a $XX,XXX value in a 220px grid cell.
+        self.assertRegex(html, r"\.kpi \.value \{[^}]*font-size:\s*clamp\(2[4-9]px",
+            "P0-1: KPI value font-size should clamp from ≥24px")
+        # KPI overflow guards: tabular-nums + nowrap + min-width:0 on .kpi.
+        self.assertRegex(html, r"\.kpi\s*\{[^}]*min-width:\s*0",
+            "min-width:0 on .kpi prevents grid-item overflow")
+        self.assertRegex(html, r"\.kpi \.value \{[^}]*white-space:\s*nowrap",
+            ".kpi .value should be white-space:nowrap so $-prefixed numbers don't wrap")
         # P0-2: hero-band wraps hero+KPI strip outside <main>.
         self.assertIn('class="hero-band"', html, "P0-2: hero-band wrapper missing")
         self.assertIn(".hero-band", html, "P0-2: hero-band CSS rule missing")
