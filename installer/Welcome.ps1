@@ -92,8 +92,10 @@ Write-Say "If you do not accept Anthropic's terms, please stop here and contact"
 Write-Say "your advisor - we can talk about alternatives."
 Write-Say ""
 
-# Open privacy hub in default browser
-try { Start-Process "https://privacy.anthropic.com/" | Out-Null } catch {}
+# NOTE (B9.1): we deliberately do NOT auto-open the privacy hub here.
+# Auto-opening mid-flow snaps focus away from Terminal and confuses users
+# about what to type next. Windows Terminal also linkifies URLs — users
+# can click if they want to read first.
 
 Write-Say "By typing 'I accept' below you confirm:"
 Write-Say "  1. You accept Anthropic's data-handling terms (linked above)."

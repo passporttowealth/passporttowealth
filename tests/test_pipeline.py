@@ -514,6 +514,25 @@ class TestPipelineHealth(unittest.TestCase):
             self.assertTrue(p.exists(), f"script missing: {name}")
             self.assertTrue(os.access(p, os.X_OK), f"script not executable: {name}")
 
+    def test_installer_does_not_auto_open_privacy_hub(self):
+        """B9.1 regression: auto-opening privacy.anthropic.com in the browser
+        mid-consent-gate snaps focus away from Terminal and confuses users.
+        Terminal/Windows-Terminal linkify URLs — let the user click if they
+        want to read first."""
+        cmd_path = REPO / "installer" / "Welcome.command"
+        ps1_path = REPO / "installer" / "Welcome.ps1"
+        cmd = cmd_path.read_text(encoding="utf-8")
+        ps1 = ps1_path.read_text(encoding="utf-8")
+        self.assertNotIn('open "https://privacy.anthropic.com', cmd,
+            "Welcome.command must not auto-open the privacy hub (B9.1)")
+        self.assertNotIn('Start-Process "https://privacy.anthropic.com', ps1,
+            "Welcome.ps1 must not auto-open the privacy hub (B9.1)")
+        # Both files must still mention the URL so users know where to look:
+        self.assertIn("privacy.anthropic.com", cmd,
+            "URL should still be PRINTED for the user to click")
+        self.assertIn("privacy.anthropic.com", ps1,
+            "URL should still be PRINTED for the user to click")
+
     def test_progress_helper_silent_when_not_tty(self):
         """B9.5 invariant: the progress() helper must produce zero output
         when stderr isn't a TTY. Tests, CI, and JSON-pipe consumers all

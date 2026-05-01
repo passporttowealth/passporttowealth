@@ -106,10 +106,10 @@ say "If you do not accept Anthropic's terms, please ${BOLD}stop here${RESET} and
 say "your advisor — we can talk about alternatives."
 say
 
-# Open the privacy hub in the user's browser so it's one click away.
-if command -v open >/dev/null 2>&1; then
-  open "https://privacy.anthropic.com/" 2>/dev/null || true
-fi
+# NOTE (B9.1): we deliberately do NOT auto-open the privacy hub in a
+# browser here. Auto-opening mid-flow snaps focus away from this Terminal
+# and confuses users about what to type next. Terminal already linkifies
+# the URLs printed above — the user clicks if they want to read first.
 
 say "${BOLD}By typing 'I accept' below you confirm:${RESET}"
 say "  1. You accept Anthropic's data-handling terms (linked above)."
