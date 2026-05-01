@@ -19,7 +19,19 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SKILL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+WS="${FCB_WORKSPACE:-${HOME}/Documents/my-finances}"
 PY="${PYTHON:-python3}"
+
+# Bootstrap a workspace config.yaml from the skill's example if missing.
+# Lets users edit feedback.endpoint_url, advisor.feedback_email, etc.
+# without having to know where the example lives.
+if [ ! -f "$WS/config.yaml" ] && [ -f "$SKILL_ROOT/config.example.yaml" ]; then
+  mkdir -p "$WS"
+  cp "$SKILL_ROOT/config.example.yaml" "$WS/config.yaml"
+  echo "▸ Created $WS/config.yaml from the skill's example."
+  echo "  Edit it to point product feedback at your team."
+fi
 
 AUTO_CONFIRM=""
 for arg in "$@"; do

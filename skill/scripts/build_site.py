@@ -60,10 +60,15 @@ def load_tagged() -> list[dict]:
 
 
 def _read_workspace_config() -> dict:
-    """Read config.yaml from the workspace; return {} if missing/unparseable."""
+    """Read config.yaml from the workspace. Fall back to the skill's bundled
+    config.example.yaml so the dashboard always has SOMETHING — this guarantees
+    the in-page feedback widget has a delivery channel even when the workspace
+    hasn't been set up yet (e.g. demo runs, fresh installs)."""
     p = workspace_root() / "config.yaml"
     if not p.exists():
-        return {}
+        p = SKILL_ROOT / "config.example.yaml"
+        if not p.exists():
+            return {}
     try:
         import yaml
         return yaml.safe_load(p.read_text()) or {}

@@ -450,16 +450,23 @@ class TestBuildSite(PipelineTestBase):
 
     def test_feedback_config_in_dashboard_data(self):
         """Dashboard JSON exposes the feedback endpoint config (so the
-        in-page form knows where to POST)."""
+        in-page form knows where to POST). REGRESSION: at least one of
+        (endpoint_url, advisor_email) must be set, otherwise the widget
+        shows 'no delivery channel configured' and the user can't send
+        anything. The skill's config.example.yaml is the floor."""
         html = (self.workspace / "site" / "index.html").read_text()
         m = re.search(r'<script id="dashboard-data"[^>]*>(.+?)</script>', html, re.DOTALL)
         d = json.loads(m.group(1))
         self.assertIn("feedback", d, "dashboard JSON missing 'feedback' block")
         fb = d["feedback"]
-        for k in ("advisor_id", "skill_version"):
+        for k in ("advisor_id", "skill_version", "endpoint_url"):
             self.assertIn(k, fb)
-        # endpoint_url may be None when no config.yaml — we accept both
-        self.assertIn("endpoint_url", fb)
+        # At least one delivery channel must exist so the widget never
+        # shows the "no channel configured" error to a real user.
+        self.assertTrue(
+            fb.get("endpoint_url") or fb.get("advisor_email"),
+            "feedback widget would have no delivery channel — at least one of "
+            "endpoint_url or advisor_email must be set in config.example.yaml")
 
     def test_transactions_table_default_pagesize_10(self):
         """Default page size is 10 rows + show-more flow."""
