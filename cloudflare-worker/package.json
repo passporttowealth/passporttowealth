@@ -1,0 +1,14 @@
+{
+  "name": "passport-feedback-worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cloudflare Worker that receives product-feedback POSTs from published Finance Clarity dashboards and creates GitHub issues. One deployment serves all clients. See README.md.",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail",
+    "dev": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

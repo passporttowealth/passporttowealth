@@ -1,0 +1,19 @@
+name = "passport-feedback"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+
+# Non-secret config. Secrets (GITHUB_TOKEN, FEEDBACK_BEARER_TOKEN) are
+# managed via `wrangler secret put` — never commit them here.
+[vars]
+GITHUB_OWNER = "rafaeldavid"
+GITHUB_REPO = "passporttowealth"
+ALLOWED_ADVISOR_ID = "passporttowealth"
+ISSUE_LABEL = "client-feedback"
+# CORS — allow the published-dashboard origin pattern.
+# Browser POSTs from {slug}.here.now will work; everything else gets rejected.
+ALLOWED_ORIGIN_SUFFIX = ".here.now"
+
+# Observability — Cloudflare-managed log retention. Off by default for privacy
+# (we don't want feedback message bodies sitting in Cloudflare logs).
+[observability]
+enabled = false

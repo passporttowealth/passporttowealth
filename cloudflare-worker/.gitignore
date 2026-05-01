@@ -1,0 +1,7 @@
+# Wrangler scratch space — runtime state, never commit
+.wrangler/
+.dev.vars
+
+# Local secrets — should never exist; defense in depth
+.env
+secrets.json
