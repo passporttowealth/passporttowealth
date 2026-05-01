@@ -18,6 +18,21 @@ function Write-Ok  { param([string]$msg) Write-Host "  ✓ $msg" -ForegroundColo
 function Write-WarnLine { param([string]$msg) Write-Host "  ! $msg" -ForegroundColor Yellow }
 function Write-FailLine { param([string]$msg) Write-Host "  X $msg" -ForegroundColor Red }
 
+# B9.3 — pacing helpers (Mac-mirror). --Auto bypasses for CI / Rafa's reruns.
+$Global:AutoMode = $false
+$Global:PaceMs = 400
+foreach ($a in $args) { if ($a -eq "--auto" -or $a -eq "-Auto") { $Global:AutoMode = $true; $Global:PaceMs = 0 } }
+
+function Write-OkPaced  { param([string]$msg) Write-Ok $msg;  if (-not $Global:AutoMode) { Start-Sleep -Milliseconds $Global:PaceMs } }
+function Write-SayPaced { param([string]$msg) Write-Say $msg; if (-not $Global:AutoMode) { Start-Sleep -Milliseconds $Global:PaceMs } }
+
+# Pause-ForUser — Mac-mirror of pause_for_user. Skipped when --Auto or no host UI.
+function Pause-ForUser {
+    if ($Global:AutoMode) { return }
+    Write-Host ""
+    Read-Host "Press Enter to continue" | Out-Null
+}
+
 # Log file in the same place pattern as macOS: under user's local app data.
 $LogDir  = Join-Path $env:LOCALAPPDATA "PassportToWealth\Logs"
 $LogPath = Join-Path $LogDir "passport-to-wealth-install.log"
@@ -145,7 +160,7 @@ if ($buildNum -lt 18362) {
     Read-Host "Press Enter to close" | Out-Null
     exit 1
 }
-Write-Ok "Windows version OK (build $buildNum)"
+Write-OkPaced "Windows version OK (build $buildNum)"
 
 # Free disk space on home drive
 $drive = (Get-Item $env:USERPROFILE).PSDrive
@@ -157,7 +172,7 @@ if ($freeGB -lt 5) {
     Read-Host "Press Enter to close" | Out-Null
     exit 1
 }
-Write-Ok "Free disk space OK ($freeGB GB)"
+Write-OkPaced "Free disk space OK ($freeGB GB)"
 
 # MDM / Intune detection (best-effort)
 $mdmEnrolled = $false
@@ -173,16 +188,18 @@ if ($mdmEnrolled) {
     Read-Host "Press Enter to close" | Out-Null
     exit 1
 }
-Write-Ok "Personal computer (not MDM-managed)"
+Write-OkPaced "Personal computer (not MDM-managed)"
 
 # Network reachability
 try {
     Invoke-WebRequest -Uri "https://api.frankfurter.app/latest" -UseBasicParsing -TimeoutSec 5 | Out-Null
-    Write-Ok "Network reachable"
+    Write-OkPaced "Network reachable"
 } catch {
     Write-WarnLine "Couldn't reach the exchange-rate service. The installer will continue but FX may be stale."
     Write-Log "FCB-0010 network_check_failed"
 }
+
+Pause-ForUser  # B9.3 — gate before tools-install section
 
 # ── Stub: runtime / auth / publishing-host / finalize ─────────────────────────
 Write-Say ""
@@ -238,7 +255,9 @@ switch ($authChoice) {
         exit 1
     }
 }
-Write-Ok "AI assistant ready"
+Write-OkPaced "AI assistant ready"
+
+Pause-ForUser  # B9.3 — gate before publishing-host signup
 
 Write-Say ""
 Write-Hr

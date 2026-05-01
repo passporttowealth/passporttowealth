@@ -36,6 +36,31 @@ warn(){ printf '  %s⚠%s %s\n' "$YELLOW" "$RESET" "$*"; }
 fail(){ printf '  %s✗%s %s\n' "$RED" "$RESET" "$*"; }
 hr()  { printf '%s%s%s\n' "$DIM" "──────────────────────────────────────────────────────" "$RESET"; }
 
+# B9.3 — pacing helpers. Pre-flight ✓s flash by faster than humans can read.
+# These give the user time to absorb each line and put them in control of
+# section transitions. --auto bypasses all pacing for CI / Rafa's reruns.
+PACE_SLEEP="0.4"
+AUTO_MODE=0
+for arg in "$@"; do
+  case "$arg" in
+    --auto) AUTO_MODE=1; PACE_SLEEP="0" ;;
+  esac
+done
+
+ok_paced()  { ok "$@"; [ "$AUTO_MODE" = "0" ] && sleep "$PACE_SLEEP"; }
+say_paced() { say "$@"; [ "$AUTO_MODE" = "0" ] && sleep "$PACE_SLEEP"; }
+
+# pause_for_user — explicit "Press Enter to continue" gate between major
+# sections. Converts the firehose into a conversation. TTY-guarded so
+# non-interactive runs (--auto, scripts, CI) don't hang.
+pause_for_user() {
+  if [ "$AUTO_MODE" = "1" ] || [ ! -t 0 ]; then
+    return 0
+  fi
+  printf '\n'
+  read -r -p "$(printf '%sPress Enter to continue%s ' "$DIM" "$RESET")" _
+}
+
 INSTALL_LOG="${HOME}/Library/Logs/passport-to-wealth-install.log"
 mkdir -p "$(dirname "$INSTALL_LOG")"
 exec 3>>"$INSTALL_LOG"
@@ -156,7 +181,7 @@ if [[ "$macos_major" -lt 13 ]]; then
   log "FCB-0001 macos_version=$(sw_vers -productVersion)"
   exit 1
 fi
-ok "macOS version OK ($(sw_vers -productVersion))"
+ok_paced "macOS version OK ($(sw_vers -productVersion))"
 
 # Disk space
 free_kb=$(df -k "$HOME" | awk 'NR==2 {print $4}')
@@ -167,7 +192,7 @@ if [[ "$free_gb" -lt 5 ]]; then
   log "FCB-0002 free_gb=$free_gb"
   exit 1
 fi
-ok "Free disk space OK (${free_gb} GB)"
+ok_paced "Free disk space OK (${free_gb} GB)"
 
 # MDM check
 if profiles status -type enrollment 2>/dev/null | grep -q "Enrolled via DEP: Yes\|MDM enrollment: Yes"; then
@@ -177,14 +202,16 @@ if profiles status -type enrollment 2>/dev/null | grep -q "Enrolled via DEP: Yes
   log "FCB-0003 mdm_detected=true"
   exit 1
 fi
-ok "Personal Mac (not MDM-managed)"
+ok_paced "Personal Mac (not MDM-managed)"
 
 # Network reachability
 if ! curl -fsS --max-time 5 -o /dev/null https://api.frankfurter.app/latest; then
   warn "Couldn't reach the exchange-rate service. The installer will continue but FX may be stale."
   log "FCB-0010 network=frankfurter unreachable"
 fi
-ok "Network reachable"
+ok_paced "Network reachable"
+
+pause_for_user  # B9.3 — gate before tools-install section
 
 # Xcode CLT detection drives the time estimate
 if xcode-select -p >/dev/null 2>&1; then
@@ -247,7 +274,9 @@ case "$auth_choice" in
     exit 1
     ;;
 esac
-ok "AI assistant ready"
+ok_paced "AI assistant ready"
+
+pause_for_user  # B9.3 — gate before publishing-host signup
 
 # ── Publishing-host signup (§4.4) ─────────────────────────────────────────────
 say

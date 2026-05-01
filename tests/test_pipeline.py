@@ -514,6 +514,35 @@ class TestPipelineHealth(unittest.TestCase):
             self.assertTrue(p.exists(), f"script missing: {name}")
             self.assertTrue(os.access(p, os.X_OK), f"script not executable: {name}")
 
+    def test_installer_has_pause_gates_and_auto_flag(self):
+        """B9.3 invariant: paced output + Press-Enter gates between sections.
+        Without these, pre-flight ✓s flash by faster than humans can read.
+        Both Mac (.command, bash) and Windows (.ps1) installers must:
+        - define paced sub-step helper (ok_paced / Write-OkPaced)
+        - define a pause helper that's TTY-guarded
+        - support an --auto / -Auto flag to skip pacing for CI
+        - actually CALL the pause helper at least 2× between major sections."""
+        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        ps1 = (REPO / "installer" / "Welcome.ps1").read_text(encoding="utf-8")
+
+        # Mac: helpers + gates + --auto
+        self.assertIn("ok_paced()", cmd, "Welcome.command missing ok_paced helper")
+        self.assertIn("pause_for_user()", cmd, "Welcome.command missing pause_for_user helper")
+        self.assertGreaterEqual(cmd.count("pause_for_user"), 4,
+            "Welcome.command should INVOKE pause_for_user at ≥2 transition points "
+            "(plus the function definition + check, that's ≥4 occurrences)")
+        self.assertIn("--auto", cmd, "Welcome.command must support --auto flag")
+        self.assertIn("AUTO_MODE", cmd, "Welcome.command must implement --auto bypass")
+
+        # Windows: helpers + gates + -Auto
+        self.assertIn("Write-OkPaced", ps1, "Welcome.ps1 missing Write-OkPaced helper")
+        self.assertIn("Pause-ForUser", ps1, "Welcome.ps1 missing Pause-ForUser helper")
+        self.assertGreaterEqual(ps1.count("Pause-ForUser"), 4,
+            "Welcome.ps1 should INVOKE Pause-ForUser at ≥2 transition points")
+        self.assertTrue("-Auto" in ps1 or "--auto" in ps1,
+            "Welcome.ps1 must support -Auto / --auto flag")
+        self.assertIn("AutoMode", ps1, "Welcome.ps1 must implement Auto bypass")
+
     def test_installer_does_not_auto_open_privacy_hub(self):
         """B9.1 regression: auto-opening privacy.anthropic.com in the browser
         mid-consent-gate snaps focus away from Terminal and confuses users.
