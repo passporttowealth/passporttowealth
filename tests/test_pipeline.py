@@ -514,6 +514,31 @@ class TestPipelineHealth(unittest.TestCase):
             self.assertTrue(p.exists(), f"script missing: {name}")
             self.assertTrue(os.access(p, os.X_OK), f"script not executable: {name}")
 
+    def test_progress_helper_silent_when_not_tty(self):
+        """B9.5 invariant: the progress() helper must produce zero output
+        when stderr isn't a TTY. Tests, CI, and JSON-pipe consumers all
+        capture stderr — any \\r-spam would corrupt logs and break parsers."""
+        result = subprocess.run(
+            [sys.executable, "-c",
+             f"import sys; sys.path.insert(0, {str(SCRIPTS)!r}); "
+             "from _lib import progress; progress('x', 1, 10); "
+             "progress('x', 5, 10); progress('x', 10, 10)"],
+            capture_output=True, text=True, check=True, timeout=10,
+        )
+        self.assertEqual(result.stderr, "",
+            f"progress() leaked output to non-TTY stderr: {result.stderr!r}")
+        self.assertEqual(result.stdout, "",
+            f"progress() should never write to stdout: {result.stdout!r}")
+
+    def test_progress_helper_handles_zero_total(self):
+        """progress() with total=0 must be a no-op (no div-by-zero)."""
+        sys.path.insert(0, str(SCRIPTS))
+        try:
+            from _lib import progress
+            progress("x", 0, 0)  # should not raise
+        finally:
+            sys.path.remove(str(SCRIPTS))
+
     def test_no_utcnow_in_pipeline_scripts(self):
         """B9.6 regression: datetime.utcnow() is deprecated in Python 3.12+ and
         prints a DeprecationWarning that confuses non-technical users running

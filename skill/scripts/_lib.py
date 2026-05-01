@@ -181,6 +181,39 @@ def file_sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+# ── Progress (B9.5) ──────────────────────────────────────────────────────────
+# Long-running operations (FX fetch, asset copy) need ongoing-progress signals
+# so the user doesn't think the pipeline got stuck. Stdlib-only helper that
+# prints a single line updated in place via carriage return. Writes to STDERR
+# (so --json stdout stays clean for tests/agents) and is a no-op when stderr
+# isn't a TTY (CI, captured output, redirected logs) — prevents \r spam in
+# captured logs and keeps `subprocess.run(... capture_output=True)` clean.
+
+def progress(label: str, current: int, total: int, width: int = 24) -> None:
+    """Print a single-line progress bar that updates in place.
+
+    Args:
+        label:   short description, e.g. "FX rates"
+        current: 1-indexed completed count
+        total:   total work units; if 0, no-op (avoids div-by-zero)
+        width:   bar width in chars (default 24)
+
+    Goes to stderr. Auto-prints a trailing newline when current >= total so
+    subsequent output appears below. Silent when stderr is not a TTY.
+    """
+    if total <= 0:
+        return
+    if not sys.stderr.isatty():
+        return
+    pct = current * 100 // total
+    filled = width * current // total
+    bar = "█" * filled + "·" * (width - filled)
+    sys.stderr.write(f"\r  {label}: {bar} {current:>4}/{total} ({pct:>3}%)")
+    sys.stderr.flush()
+    if current >= total:
+        sys.stderr.write("\n")
+
+
 # ── Currency helpers ──────────────────────────────────────────────────────────
 def fmt_money(amount: float, currency: str = "USD") -> str:
     sym = {"USD": "$", "EUR": "€", "GBP": "£", "CHF": "CHF "}.get(currency, currency + " ")

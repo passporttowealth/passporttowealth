@@ -20,7 +20,7 @@ from urllib.error import URLError
 from urllib.request import urlopen, Request
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _lib import workspace_root, get_logger, write_envelope
+from _lib import workspace_root, get_logger, write_envelope, progress
 
 log = get_logger("fx_fetch")
 
@@ -101,8 +101,18 @@ def _fetch_frankfurter(d: date, base: str) -> dict | None:
 
 
 def warm_cache(start: date, end: date, base: str, targets: list[str]) -> dict:
-    """Fetch every business day in [start, end] for one base. Idempotent."""
+    """Fetch every business day in [start, end] for one base. Idempotent.
+
+    Emits a stderr progress bar (B9.5) so the user sees ongoing progress
+    rather than ~30-60s of silence during many sequential HTTP requests.
+    The bar auto-suppresses when stderr isn't a TTY (CI, captured output).
+    """
+    # Pre-count business days for accurate progress denominator.
+    total = sum(1 for i in range((end - start).days + 1)
+                if (start + timedelta(days=i)).weekday() < 5)
+
     fetched, skipped, failed = 0, 0, 0
+    done = 0
     cur = start
     while cur <= end:
         if cur.weekday() < 5:  # Mon–Fri
@@ -116,6 +126,8 @@ def warm_cache(start: date, end: date, base: str, targets: list[str]) -> dict:
                     fetched += 1
                 else:
                     failed += 1
+            done += 1
+            progress("FX rates", done, total)
         cur += timedelta(days=1)
     return {"fetched": fetched, "skipped": skipped, "failed": failed,
             "range": [start.isoformat(), end.isoformat()], "base": base}
