@@ -1,8 +1,8 @@
 name: CI
 
-# STUB — runs on every PR and push to main.
-# Currently inert (no fixtures yet, no real scripts). See dev/backlog.md
-# Epic 1.4 + spec §18.3 for the real fixture-runner.
+# Runs on every PR + every push to main. Locks in the regression suite at
+# tests/test_pipeline.py — see dev/backlog.md Epic 1 for what's covered.
+# Real network calls (publish.sh) are NOT exercised here; that's manual.
 
 on:
   pull_request:
@@ -11,8 +11,8 @@ on:
     branches: [main]
 
 jobs:
-  fixture-run:
-    name: End-to-end fixture run
+  pipeline-regression:
+    name: Pipeline regression suite
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,16 +22,13 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Detect whether fixtures exist
-        id: fixtures
+      - name: Install runtime deps
         run: |
-          if [ -d skill/references/test-fixtures ] && [ -n "$(ls -A skill/references/test-fixtures 2>/dev/null | grep -v README.md)" ]; then
-            echo "exist=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exist=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::No test fixtures yet — see skill/references/test-fixtures/README.md"
-          fi
+          pip install --upgrade pip
+          pip install pyyaml pdfplumber openpyxl chardet reportlab
 
-      - name: Run fixtures
-        if: steps.fixtures.outputs.exist == 'true'
-        run: bash skill/scripts/run_fixture.sh
+      - name: Regenerate demo kit (deterministic; verifies generator runs)
+        run: python3 demo-kit/build_demo.py
+
+      - name: Run regression suite
+        run: python3 tests/test_pipeline.py
