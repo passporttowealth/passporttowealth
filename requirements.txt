@@ -1,0 +1,19 @@
+# Runtime + dev dependencies for the finance-clarity-build skill.
+# Single source of truth — referenced by:
+#   - .github/workflows/ci.yml
+#   - installer/Welcome.command (pip install -r at provision time)
+#   - dev setup
+#
+# Pinned with ~= to allow patch releases (security fixes) without breaking
+# the major/minor API surface we depend on.
+
+# Core pipeline
+openpyxl~=3.1        # Excel summary build
+pdfplumber~=0.11     # text-layer PDF parsing (no OCR — see spec OP-1)
+PyYAML~=6.0          # rules.yaml, config.yaml, fx_overrides.yaml
+chardet~=5.2         # CSV encoding detection in normalize.py
+
+# Demo kit generator
+reportlab~=4.4       # synthetic PDF generation (paystub, tax doc, Amazon)
+
+# (Tests use Python stdlib only — no pytest/etc. dependency.)

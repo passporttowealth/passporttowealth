@@ -20,7 +20,7 @@ from collections import defaultdict
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _lib import workspace_root, get_logger, file_sha256, read_csv_with_comments
+from _lib import workspace_root, get_logger, file_sha256, read_csv_with_comments, write_envelope
 
 log = get_logger("dedupe")
 
@@ -72,6 +72,8 @@ def main(argv=None) -> int:
             csv_sigs.append((f, sig))
         except Exception as e:
             log.warning("could not parse %s: %s", f.name, e)
+            write_envelope("FCB-0201", "dedupe", "content_overlap_parse",
+                           f"could not parse {f.name}: {e!r}")
 
     for i, (a, sig_a) in enumerate(csv_sigs):
         for b, sig_b in csv_sigs[i+1:]:

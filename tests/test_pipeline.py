@@ -358,6 +358,65 @@ class TestBuildSite(PipelineTestBase):
         for k in ("income_avg_per_month", "spend_avg_per_month", "net_avg_per_month"):
             self.assertIn(k, d["kpis"])
 
+    def test_section_nav_present_and_anchors_match_section_ids(self):
+        """Every nav link must point to an actual section id on the page."""
+        html = (self.workspace / "site" / "index.html").read_text()
+        self.assertIn('<nav class="sections"', html, "sticky section nav missing")
+        # Extract nav hrefs (#anchor) and section IDs
+        nav_anchors = set(re.findall(r'<nav class="sections"[^>]*>(.*?)</nav>', html, re.DOTALL)[0]
+                          .__class__.__call__('').join([]))  # noop placeholder, replaced below
+        nav_block = re.search(r'<nav class="sections"[^>]*>(.*?)</nav>', html, re.DOTALL).group(1)
+        nav_anchors = set(re.findall(r'href="#([\w-]+)"', nav_block))
+        section_ids = set(re.findall(r'<section[^>]*\bid="([\w-]+)"', html))
+        section_ids |= set(re.findall(r'<\w+[^>]*\bid="([\w-]+)"\s+aria-labelledby', html))
+        section_ids |= set(re.findall(r'\bid="(overview)"', html))
+        missing = nav_anchors - section_ids
+        self.assertFalse(missing, f"nav links point at nonexistent section IDs: {missing}")
+        # Common-sense floor: at least 6 nav items
+        self.assertGreaterEqual(len(nav_anchors), 6, f"expected ≥6 nav items; got {nav_anchors}")
+
+    def test_inter_font_bundled(self):
+        """Inter woff2 files must be in site/assets/fonts and referenced by @font-face."""
+        html = (self.workspace / "site" / "index.html").read_text()
+        for w in (400, 500, 600, 700):
+            f = self.workspace / "site" / "assets" / "fonts" / f"Inter-{w}.woff2"
+            self.assertTrue(f.exists(), f"missing bundled font: {f.name}")
+            self.assertGreater(f.stat().st_size, 5000, f"{f.name} suspiciously small ({f.stat().st_size} bytes)")
+            self.assertIn(f"Inter-{w}.woff2", html, f"@font-face for weight {w} not referenced in HTML")
+
+    def test_feedback_widget_present(self):
+        """Floating button + drawer + form."""
+        html = (self.workspace / "site" / "index.html").read_text()
+        for marker in ['id="fb-open"', 'id="fb-drawer"', 'id="fb-text"', 'id="fb-submit"',
+                       'class="fb-fab"', 'aria-modal="true"']:
+            self.assertIn(marker, html, f"feedback widget marker missing: {marker!r}")
+
+    def test_feedback_config_in_dashboard_data(self):
+        """Dashboard JSON exposes the feedback endpoint config (so the
+        in-page form knows where to POST)."""
+        html = (self.workspace / "site" / "index.html").read_text()
+        m = re.search(r'<script id="dashboard-data"[^>]*>(.+?)</script>', html, re.DOTALL)
+        d = json.loads(m.group(1))
+        self.assertIn("feedback", d, "dashboard JSON missing 'feedback' block")
+        fb = d["feedback"]
+        for k in ("advisor_id", "skill_version"):
+            self.assertIn(k, fb)
+        # endpoint_url may be None when no config.yaml — we accept both
+        self.assertIn("endpoint_url", fb)
+
+    def test_transactions_table_default_pagesize_10(self):
+        """Default page size is 10 rows + show-more flow."""
+        html = (self.workspace / "site" / "index.html").read_text()
+        # The select has '10 rows' selected by default
+        self.assertRegex(html, r'<option value="10"\s+selected', "default page size should be 10")
+        # Time-period filter present with the expected values
+        for v in ('30d', '90d', '6mo', 'ytd'):
+            self.assertIn(f'value="{v}"', html, f"time-period filter missing value {v}")
+        # Show-more button + per-table download button present
+        self.assertIn('id="tx-more"', html)
+        self.assertIn('id="tx-download"', html)
+        self.assertIn('id="tx-pagesize"', html)
+
     def test_insights_are_factual_not_advisory(self):
         """OP — insights section must never give advice. Catch common advisory phrasing."""
         html = (self.workspace / "site" / "index.html").read_text()

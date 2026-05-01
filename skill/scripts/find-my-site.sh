@@ -47,8 +47,30 @@ fi
 # 2. Account API (only if creds + no state)
 if [ ! -f "$STATE" ] && [ -f "$CRED_FILE" ]; then
   step "Looking up sites under your account on the publishing host"
-  echo "  [v0 stub] would: GET https://here.now/api/v1/account/sites"
-  echo "           and re-link the matching slug to this workspace."
+  TOKEN=$(tr -d '[:space:]' < "$CRED_FILE")
+  RESP=$(curl -fsS -H "Authorization: Bearer $TOKEN" \
+    "https://here.now/api/v1/account/sites?limit=50" 2>&1) || RESP=""
+  if [ -z "$RESP" ]; then
+    printf '\033[33m  ⚠ couldn'"'"'t reach the host to list your sites\033[0m\n'
+  else
+    # The shape of /account/sites isn't documented in the public skill ref;
+    # accept either {sites: [...]} or {publishes: [...]} for forward-compat.
+    COUNT=$(echo "$RESP" | jq -r '(.sites // .publishes // []) | length' 2>/dev/null)
+    if [ -z "$COUNT" ] || [ "$COUNT" = "0" ]; then
+      echo "  No sites under your account on the host — nothing to recover."
+    else
+      echo "  Found $COUNT site(s) under your account:"
+      echo "$RESP" | jq -r '(.sites // .publishes // [])[] | "    · slug=\(.slug // .name)  url=\(.siteUrl // ("https://" + (.slug // .name) + ".here.now/"))  expires=\(.expiresAt // "—")"' 2>/dev/null
+      echo ""
+      echo "  Tell me which slug to re-link to this workspace, then I'll restore it:"
+      read -r -p "    Slug (or Enter to cancel): " PICK
+      if [ -n "$PICK" ]; then
+        URL="https://${PICK}.here.now/"
+        printf '{"publishes":{"%s":{"siteUrl":"%s"}}}\n' "$PICK" "$URL" > "$STATE"
+        echo "  ✓ Linked. Run 'refresh' to push your latest content to it."
+      fi
+    fi
+  fi
 fi
 
 if [ ! -f "$STATE" ] && [ ! -f "$CRED_FILE" ]; then

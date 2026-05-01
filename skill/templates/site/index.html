@@ -9,6 +9,19 @@
   <link rel="icon" type="image/png" href="assets/brand/favicon.png">
   <style>
     /* ============================================================
+       INTER — bundled woff2 (latin subset, 4 weights). Self-hosted
+       so the dashboard works fully offline (OP-3: no CDN).
+       ============================================================ */
+    @font-face { font-family: "Inter"; font-style: normal; font-weight: 400; font-display: swap;
+      src: url("assets/fonts/Inter-400.woff2") format("woff2"); }
+    @font-face { font-family: "Inter"; font-style: normal; font-weight: 500; font-display: swap;
+      src: url("assets/fonts/Inter-500.woff2") format("woff2"); }
+    @font-face { font-family: "Inter"; font-style: normal; font-weight: 600; font-display: swap;
+      src: url("assets/fonts/Inter-600.woff2") format("woff2"); }
+    @font-face { font-family: "Inter"; font-style: normal; font-weight: 700; font-display: swap;
+      src: url("assets/fonts/Inter-700.woff2") format("woff2"); }
+
+    /* ============================================================
        DESIGN TOKENS — see skill/references/DESIGN_TOKENS.md
        ============================================================ */
     :root {
@@ -60,7 +73,7 @@
        RESET / BASE
        ============================================================ */
     *, *::before, *::after { box-sizing: border-box; }
-    html { -webkit-text-size-adjust: 100%; }
+    html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 120px; }
     body {
       margin: 0;
       font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
@@ -70,6 +83,9 @@
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
       font-variant-numeric: tabular-nums;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
     }
     h1, h2, h3, h4 { color: var(--text); font-weight: 600; letter-spacing: -0.01em; }
     h1 { font-size: clamp(28px, 4vw, 36px); line-height: 1.15; margin: 0; }
@@ -86,11 +102,66 @@
     section { margin-top: var(--s8); }
 
     /* ============================================================
-       HEADER (brand strip + dashboard title)
+       HEADER (brand strip + dashboard title) + STICKY SECTION NAV
        ============================================================ */
     header.brand {
       background: var(--bg);
       border-bottom: 1px solid var(--border);
+    }
+
+    /* Sticky section nav — anchor links to each main section.
+       Mobile: horizontally scrollable strip (no hidden hamburger state).
+       Desktop: same strip, just doesn't need to scroll. */
+    nav.sections {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: saturate(180%) blur(8px);
+      -webkit-backdrop-filter: saturate(180%) blur(8px);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 0 rgba(20,24,40,0); /* upgraded to a subtle shadow once stuck via .stuck */
+      transition: box-shadow 200ms ease;
+    }
+    nav.sections.stuck { box-shadow: 0 4px 12px rgba(20,24,40,0.05); }
+    nav.sections .nav-inner {
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 0 var(--s5);
+      display: flex; align-items: stretch;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;            /* Firefox */
+      -ms-overflow-style: none;         /* old IE */
+      scroll-snap-type: x proximity;
+    }
+    nav.sections .nav-inner::-webkit-scrollbar { display: none; }   /* WebKit */
+    nav.sections a {
+      display: inline-flex; align-items: center;
+      flex: 0 0 auto;
+      padding: var(--s4) var(--s4);
+      font-size: 14px; font-weight: 500;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
+      white-space: nowrap;
+      scroll-snap-align: start;
+      transition: color 120ms ease, border-color 120ms ease;
+      min-height: 44px;                 /* Apple HIG min tap target */
+    }
+    nav.sections a:hover { color: var(--accent); border-bottom-color: var(--border-strong); }
+    nav.sections a.active { color: var(--accent); border-bottom-color: var(--accent); }
+    nav.sections a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: -4px;
+      border-radius: 4px;
+    }
+    /* Subtle gradient fade on the right edge of the nav scroller hints at more
+       items being scrollable on mobile. */
+    nav.sections .nav-inner::after {
+      content: ""; flex: 0 0 var(--s4);
+    }
+    @media (max-width: 600px) {
+      nav.sections .nav-inner { padding: 0 var(--s4); }
+      nav.sections a { padding: var(--s3) var(--s3); font-size: 13px; }
     }
     .brand-inner {
       max-width: var(--maxw);
@@ -235,12 +306,151 @@
     table.tx td.amount.pos { color: var(--positive); }
     table.tx tbody tr { transition: background 100ms ease; }
     table.tx tbody tr:hover td { background: var(--bg-warm); }
-    .tx-meta { padding: var(--s3) var(--s4); font-size: 12px; color: var(--text-subtle); border-top: 1px solid var(--border); background: var(--surface); }
+    .tx-foot {
+      display: flex; align-items: center; justify-content: space-between; gap: var(--s3);
+      padding: var(--s3) var(--s4); border-top: 1px solid var(--border); background: var(--surface);
+      flex-wrap: wrap;
+    }
+    .tx-meta { font-size: 12px; color: var(--text-subtle); }
+    .tx-show-more { display: flex; align-items: center; gap: var(--s2); }
     .cat-pill {
       display: inline-block; padding: 2px 10px; border-radius: 999px;
       background: var(--accent-soft); color: var(--accent);
       font-size: 12px; font-weight: 500;
     }
+    .tool-btn {
+      font: inherit; font-size: 13px; font-weight: 500;
+      padding: var(--s2) var(--s3);
+      background: var(--bg); color: var(--text);
+      border: 1px solid var(--border-strong); border-radius: var(--r-sm);
+      cursor: pointer;
+      transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+      min-height: 36px;
+    }
+    .tool-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .tool-btn:focus-visible {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15,30,51,0.10);
+    }
+    .tool-btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+
+    /* ============================================================
+       FEEDBACK WIDGET — FAB + drawer
+       ============================================================ */
+    .fb-fab {
+      position: fixed; bottom: var(--s5); right: var(--s5);
+      z-index: 100;
+      display: inline-flex; align-items: center; gap: var(--s2);
+      padding: var(--s3) var(--s5);
+      background: var(--accent); color: #fff;
+      font: inherit; font-size: 14px; font-weight: 500;
+      border: none; border-radius: 999px;
+      box-shadow: 0 4px 14px rgba(15,30,51,0.20);
+      cursor: pointer;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+      min-height: 48px;
+    }
+    .fb-fab:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(15,30,51,0.25); }
+    .fb-fab:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+    @media (max-width: 600px) {
+      .fb-fab { bottom: var(--s4); right: var(--s4); padding: var(--s3) var(--s4); }
+      .fb-fab .fab-label { display: none; }     /* icon-only on small phones */
+      .fb-fab { padding: 14px; }
+    }
+    @media print { .fb-fab, .fb-overlay, .fb-drawer { display: none !important; } }
+
+    /* Backdrop */
+    .fb-overlay {
+      position: fixed; inset: 0; z-index: 99;
+      background: rgba(20,24,40,0.40);
+      opacity: 0; pointer-events: none;
+      transition: opacity 200ms ease;
+    }
+    .fb-overlay.open { opacity: 1; pointer-events: auto; }
+
+    /* Drawer — bottom sheet on mobile, right-side panel on desktop */
+    .fb-drawer {
+      position: fixed; z-index: 101;
+      background: var(--surface-card);
+      box-shadow: -4px 0 24px rgba(20,24,40,0.10);
+      display: flex; flex-direction: column;
+      transition: transform 280ms cubic-bezier(.2,.8,.2,1);
+    }
+    /* Desktop: slide in from right */
+    @media (min-width: 601px) {
+      .fb-drawer {
+        top: 0; right: 0; bottom: 0;
+        width: 440px; max-width: 90vw;
+        transform: translateX(105%);
+        border-left: 1px solid var(--border);
+      }
+      .fb-drawer.open { transform: translateX(0); }
+    }
+    /* Mobile: slide up from bottom */
+    @media (max-width: 600px) {
+      .fb-drawer {
+        left: 0; right: 0; bottom: 0;
+        max-height: 88vh;
+        border-top-left-radius: var(--r-lg);
+        border-top-right-radius: var(--r-lg);
+        transform: translateY(105%);
+        padding-bottom: env(safe-area-inset-bottom, 0);
+      }
+      .fb-drawer.open { transform: translateY(0); }
+      .fb-drawer::before {
+        content: ""; display: block; width: 36px; height: 4px;
+        background: var(--border-strong); border-radius: 2px;
+        margin: var(--s3) auto var(--s2);
+      }
+    }
+    .fb-drawer header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--s4) var(--s5);
+      border-bottom: 1px solid var(--border);
+    }
+    .fb-drawer h3 { margin: 0; font-size: 17px; }
+    .fb-drawer .fb-close {
+      background: none; border: none; cursor: pointer;
+      font-size: 24px; line-height: 1; color: var(--text-muted);
+      padding: var(--s2); min-width: 36px; min-height: 36px;
+    }
+    .fb-drawer .fb-close:hover { color: var(--text); }
+    .fb-drawer .body { padding: var(--s5); overflow-y: auto; flex: 1; }
+    .fb-drawer label { display: block; font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: var(--s2); }
+    .fb-drawer textarea {
+      width: 100%; min-height: 140px;
+      font: inherit; font-size: 15px; padding: var(--s3);
+      background: var(--bg); color: var(--text);
+      border: 1px solid var(--border-strong); border-radius: var(--r-sm);
+      resize: vertical;
+      transition: border-color 120ms ease, box-shadow 120ms ease;
+    }
+    .fb-drawer textarea:focus {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15,30,51,0.10);
+    }
+    .fb-drawer .hint { font-size: 12px; color: var(--text-subtle); margin: var(--s2) 0 var(--s4); }
+    .fb-drawer footer {
+      padding: var(--s4) var(--s5);
+      border-top: 1px solid var(--border);
+      display: flex; gap: var(--s3); align-items: center; justify-content: flex-end;
+    }
+    .fb-drawer .fb-submit {
+      font: inherit; font-size: 14px; font-weight: 500;
+      padding: var(--s3) var(--s5);
+      background: var(--accent); color: #fff;
+      border: none; border-radius: var(--r-sm); cursor: pointer;
+      transition: background 120ms ease;
+      min-height: 40px;
+    }
+    .fb-drawer .fb-submit:hover { background: var(--accent-hover); }
+    .fb-drawer .fb-submit[disabled] { opacity: 0.5; cursor: not-allowed; }
+    .fb-status {
+      font-size: 13px; padding: var(--s3); border-radius: var(--r-sm);
+      margin-top: var(--s3);
+    }
+    .fb-status.ok    { background: #E8F1EC; color: #1F4F38; border: 1px solid #BCD9C9; }
+    .fb-status.err   { background: #F7E6E1; color: #6B2010; border: 1px solid #E5BFB6; }
 
     /* ============================================================
        METHODOLOGY
@@ -352,7 +562,20 @@
     </div>
   </header>
 
-  <section class="hero" style="margin-top: 0;">
+  <nav class="sections" aria-label="On this page">
+    <div class="nav-inner">
+      <a href="#overview">Overview</a>
+      <a href="#insights">What I'm seeing</a>
+      <a href="#cashflow">Cashflow</a>
+      <a href="#by-category">By category</a>
+      <a href="#by-month">By month</a>
+      <a href="#transactions">Transactions</a>
+      <a href="#methodology">Methodology</a>
+      <a href="#downloads">Downloads</a>
+    </div>
+  </nav>
+
+  <section class="hero" id="overview" style="margin-top: 0; scroll-margin-top: 80px;">
     <h1>{{ DASHBOARD_HEADLINE }}</h1>
     <p class="meta">{{ N_MONTHS }} months · {{ DATE_FROM }} → {{ DATE_TO }} · {{ N_ACCOUNTS }} accounts</p>
   </section>
@@ -387,7 +610,7 @@
     </section>
 
     <!-- Insights -->
-    <section class="insights" aria-labelledby="insights-h">
+    <section class="insights" id="insights" aria-labelledby="insights-h">
       <h2 id="insights-h">What I'm seeing</h2>
       <ul id="insights-list">
         <!-- populated by client-side JS from data.insights -->
@@ -396,7 +619,7 @@
     </section>
 
     <!-- Cashflow -->
-    <section aria-labelledby="cashflow-h">
+    <section id="cashflow" aria-labelledby="cashflow-h">
       <h2 id="cashflow-h">Cashflow over time</h2>
       <div class="chart-card">
         <div class="chart-head">
@@ -410,7 +633,7 @@
     </section>
 
     <!-- Spend by category -->
-    <section aria-labelledby="cat-h">
+    <section id="by-category" aria-labelledby="cat-h">
       <h2 id="cat-h">Spend by category</h2>
       <div class="chart-card">
         <div class="chart-head">
@@ -424,7 +647,7 @@
     </section>
 
     <!-- Monthly category stacked -->
-    <section aria-labelledby="monthly-h">
+    <section id="by-month" aria-labelledby="monthly-h">
       <h2 id="monthly-h">Monthly spend by category</h2>
       <div class="chart-card">
         <div class="chart-head">
@@ -438,12 +661,23 @@
     </section>
 
     <!-- Transactions -->
-    <section aria-labelledby="tx-h">
+    <section id="transactions" aria-labelledby="tx-h">
       <h2 id="tx-h">Transactions</h2>
       <div class="table-tools no-print">
         <input id="tx-search" type="search" placeholder="Search description…" aria-label="Search transactions">
+        <select id="tx-period" aria-label="Filter by time period">
+          <option value="all">All time</option>
+          <option value="30d">Last 30 days</option>
+          <option value="90d">Last 90 days</option>
+          <option value="6mo">Last 6 months</option>
+          <option value="ytd">Year to date</option>
+          <option value="last-year">Last year</option>
+        </select>
         <select id="tx-category" aria-label="Filter by category"><option value="">All categories</option></select>
         <select id="tx-account"  aria-label="Filter by account"><option value="">All accounts</option></select>
+        <button id="tx-download" type="button" class="tool-btn" title="Download these rows as CSV">
+          <span aria-hidden="true">↓</span> Download CSV
+        </button>
       </div>
       <div class="table-card">
         <table class="tx" id="tx-table">
@@ -458,12 +692,23 @@
           </thead>
           <tbody></tbody>
         </table>
-        <div class="tx-meta" id="tx-meta">—</div>
+        <div class="tx-foot">
+          <div class="tx-meta" id="tx-meta">—</div>
+          <div class="tx-show-more no-print">
+            <button id="tx-more" type="button" class="tool-btn">Show more</button>
+            <select id="tx-pagesize" aria-label="Rows shown">
+              <option value="10" selected>10 rows</option>
+              <option value="50">50 rows</option>
+              <option value="200">200 rows</option>
+              <option value="all">All rows</option>
+            </select>
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- Methodology -->
-    <section aria-labelledby="meth-h">
+    <section id="methodology" aria-labelledby="meth-h">
       <h2 id="meth-h">Methodology</h2>
       <details class="methodology">
         <summary>How was this dashboard built? — click to expand</summary>
@@ -478,7 +723,7 @@
     </section>
 
     <!-- Downloads -->
-    <section aria-labelledby="dl-h">
+    <section id="downloads" aria-labelledby="dl-h">
       <h2 id="dl-h">Download your data</h2>
       <div class="downloads">
         <p style="margin-top: 0; color: var(--text-muted); font-size: 14px;">Take everything with you. Hand to an accountant, archive, or examine row by row.</p>
@@ -500,6 +745,31 @@
     </section>
 
   </main>
+
+  <!-- ============================================================
+       FEEDBACK WIDGET — floating button + drawer
+       ============================================================ -->
+  <button class="fb-fab" id="fb-open" aria-label="Send feedback to your advisor">
+    <span aria-hidden="true">💬</span>
+    <span class="fab-label">Feedback</span>
+  </button>
+  <div class="fb-overlay" id="fb-overlay" hidden></div>
+  <aside class="fb-drawer" id="fb-drawer" role="dialog" aria-modal="true" aria-labelledby="fb-title" hidden>
+    <header>
+      <h3 id="fb-title">Send feedback</h3>
+      <button class="fb-close" id="fb-close" aria-label="Close">×</button>
+    </header>
+    <div class="body">
+      <label for="fb-text">What's on your mind?</label>
+      <textarea id="fb-text" placeholder="Anything from a one-line note to a longer message — your advisor will see it." aria-required="true"></textarea>
+      <p class="hint">Sent securely to your advisor at Passport to Wealth. Your dashboard data stays private — only the message you type here is shared.</p>
+      <div id="fb-status"></div>
+    </div>
+    <footer>
+      <button type="button" class="tool-btn" id="fb-cancel">Cancel</button>
+      <button type="button" class="fb-submit" id="fb-submit">Send</button>
+    </footer>
+  </aside>
 
   <footer class="site-footer">
     <div class="privacy">
@@ -659,26 +929,72 @@
     });
 
     // ==========================================================
-    // TRANSACTIONS TABLE — filter, sort, render
+    // TRANSACTIONS TABLE — filter (search/category/account/time-period),
+    // sort, paginate (default 10), download filtered CSV
     // ==========================================================
     let txData = data.transactions.slice();
     let sortKey = 'date'; let sortDesc = true;
-    function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-    function render() {
+    let pageSize = 10;
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function periodCutoff(value) {
+      // Returns ISO date string YYYY-MM-DD. The "now" anchor is the latest
+      // transaction date in the dataset (not real-world today) — keeps demo
+      // and historical reports sensible.
+      if (value === 'all' || !value) return null;
+      const dates = txData.map(t => t.date).sort();
+      const last = dates[dates.length - 1];
+      if (!last) return null;
+      const d = new Date(last + 'T00:00:00Z');
+      const wind = (days) => { const c = new Date(d); c.setUTCDate(c.getUTCDate() - days); return c.toISOString().slice(0,10); };
+      switch (value) {
+        case '30d':       return wind(30);
+        case '90d':       return wind(90);
+        case '6mo':       return wind(180);
+        case 'ytd':       return d.getUTCFullYear() + '-01-01';
+        case 'last-year': return (d.getUTCFullYear() - 1) + '-01-01';
+        default: return null;
+      }
+    }
+
+    function periodEnd(value) {
+      // For 'last-year', also clamp the upper end to Dec 31 of last year.
+      if (value !== 'last-year') return null;
+      const dates = txData.map(t => t.date).sort();
+      const last = dates[dates.length - 1];
+      if (!last) return null;
+      const d = new Date(last + 'T00:00:00Z');
+      return (d.getUTCFullYear() - 1) + '-12-31';
+    }
+
+    function currentView() {
       const search = document.getElementById('tx-search').value.toLowerCase();
-      const cat = document.getElementById('tx-category').value;
-      const acct = document.getElementById('tx-account').value;
+      const cat    = document.getElementById('tx-category').value;
+      const acct   = document.getElementById('tx-account').value;
+      const period = document.getElementById('tx-period').value;
+      const cutoff = periodCutoff(period);
+      const upper  = periodEnd(period);
       let view = txData.filter(t =>
         (!search || t.description.toLowerCase().includes(search)) &&
-        (!cat || t.category === cat) &&
-        (!acct || t.account === acct)
+        (!cat    || t.category === cat) &&
+        (!acct   || t.account  === acct) &&
+        (!cutoff || t.date >= cutoff) &&
+        (!upper  || t.date <= upper)
       );
       view.sort((a,b) => {
         const av = a[sortKey], bv = b[sortKey];
         const cmp = (av < bv) ? -1 : (av > bv) ? 1 : 0;
         return sortDesc ? -cmp : cmp;
       });
-      const limit = 200;
+      return view;
+    }
+
+    function render() {
+      const view = currentView();
+      const limit = (pageSize === 'all') ? view.length : Math.min(pageSize, view.length);
       const tbody = document.querySelector('#tx-table tbody');
       tbody.innerHTML = view.slice(0, limit).map(t =>
         `<tr><td>${t.date}</td><td>${escapeHtml(t.description)}</td>` +
@@ -687,21 +1003,28 @@
         `<td class="amount ${t.amount < 0 ? 'neg' : 'pos'}">${fm2(t.amount)}</td></tr>`
       ).join('');
       document.getElementById('tx-meta').textContent =
-        `Showing ${Math.min(limit, view.length).toLocaleString()} of ${view.length.toLocaleString()} matching · ${txData.length.toLocaleString()} total`;
+        `Showing ${limit.toLocaleString()} of ${view.length.toLocaleString()} matching · ${txData.length.toLocaleString()} total`;
       // Sort indicators
       document.querySelectorAll('#tx-table th').forEach(th => {
         th.classList.remove('sorted','asc','desc');
         if (th.dataset.sort === sortKey) th.classList.add('sorted', sortDesc ? 'desc' : 'asc');
       });
+      // Show-more button: hidden when already showing all matching rows
+      const more = document.getElementById('tx-more');
+      const allShown = (pageSize === 'all') || limit >= view.length;
+      more.disabled = allShown;
+      more.textContent = allShown ? 'All shown' : `Show ${Math.min(view.length - limit, 50)} more`;
     }
+
     function populateFilters() {
       const cats  = [...new Set(txData.map(t => t.category))].sort();
       const accts = [...new Set(txData.map(t => t.account))].sort();
       const cs = document.getElementById('tx-category');
       const as = document.getElementById('tx-account');
-      cats.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; cs.appendChild(o); });
+      cats.forEach(c  => { const o = document.createElement('option'); o.value = c; o.textContent = c; cs.appendChild(o); });
       accts.forEach(a => { const o = document.createElement('option'); o.value = a; o.textContent = a; as.appendChild(o); });
     }
+
     document.querySelectorAll('#tx-table th[data-sort]').forEach(th => {
       th.addEventListener('click', () => {
         const k = th.dataset.sort;
@@ -709,11 +1032,159 @@
         render();
       });
     });
-    ['tx-search','tx-category','tx-account'].forEach(id =>
+    ['tx-search','tx-category','tx-account','tx-period'].forEach(id =>
       document.getElementById(id).addEventListener('input', render));
+
+    document.getElementById('tx-pagesize').addEventListener('change', e => {
+      const v = e.target.value;
+      pageSize = (v === 'all') ? 'all' : parseInt(v, 10);
+      render();
+    });
+    document.getElementById('tx-more').addEventListener('click', () => {
+      if (pageSize === 'all') return;
+      pageSize = Math.min(pageSize + 50, 500);
+      render();
+    });
+
+    // Download CSV of the currently-filtered view (browser-side).
+    document.getElementById('tx-download').addEventListener('click', () => {
+      const view = currentView();
+      const head = ['date','description','category','account','amount'];
+      const csv  = [head.join(',')]
+        .concat(view.map(t => head.map(k => {
+          const v = String(t[k] ?? '');
+          return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+        }).join(',')))
+        .join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url;
+      const stamp = new Date().toISOString().slice(0,10);
+      a.download = `transactions-filtered-${stamp}.csv`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
 
     populateFilters();
     render();
+
+    // ==========================================================
+    // STICKY NAV — active-section highlighting + shadow-on-stuck
+    // ==========================================================
+    const navLinks = document.querySelectorAll('nav.sections a');
+    const linkBySection = {};
+    navLinks.forEach(a => { linkBySection[a.getAttribute('href').slice(1)] = a; });
+
+    const sectionsToWatch = Object.keys(linkBySection)
+      .map(id => document.getElementById(id))
+      .filter(Boolean);
+
+    const setActive = (id) => {
+      navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+      // Auto-scroll the nav strip so the active item is visible on mobile.
+      const link = linkBySection[id];
+      if (link && link.scrollIntoView) {
+        link.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    };
+
+    if ('IntersectionObserver' in window && sectionsToWatch.length) {
+      const io = new IntersectionObserver((entries) => {
+        // Pick the topmost section currently in view.
+        const visible = entries.filter(e => e.isIntersecting)
+          .sort((a,b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible.length) setActive(visible[0].target.id);
+      }, { rootMargin: '-100px 0px -55% 0px', threshold: 0 });
+      sectionsToWatch.forEach(s => io.observe(s));
+    }
+
+    // Drop-shadow on the nav once the page has scrolled past the brand header.
+    const navEl = document.querySelector('nav.sections');
+    const stuckObs = new IntersectionObserver(([e]) => {
+      navEl.classList.toggle('stuck', e.intersectionRatio < 1);
+    }, { threshold: [1] });
+    // Sentinel: a 1px element just above the nav.
+    const sentinel = document.createElement('div');
+    sentinel.style.cssText = 'position:absolute;top:0;height:1px;width:100%;';
+    navEl.parentNode.insertBefore(sentinel, navEl);
+    stuckObs.observe(sentinel);
+
+    // ==========================================================
+    // FEEDBACK WIDGET — open/close + submit
+    // ==========================================================
+    const fbConfig = data.feedback || {};
+    const fbOpen   = document.getElementById('fb-open');
+    const fbClose  = document.getElementById('fb-close');
+    const fbCancel = document.getElementById('fb-cancel');
+    const fbDrawer = document.getElementById('fb-drawer');
+    const fbOverlay = document.getElementById('fb-overlay');
+    const fbText   = document.getElementById('fb-text');
+    const fbStatus = document.getElementById('fb-status');
+    const fbSubmit = document.getElementById('fb-submit');
+
+    function openDrawer() {
+      fbDrawer.hidden = false; fbOverlay.hidden = false;
+      // double rAF so the transition runs from the initial transform
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        fbDrawer.classList.add('open'); fbOverlay.classList.add('open');
+      }));
+      setTimeout(() => fbText.focus(), 280);
+    }
+    function closeDrawer() {
+      fbDrawer.classList.remove('open'); fbOverlay.classList.remove('open');
+      setTimeout(() => { fbDrawer.hidden = true; fbOverlay.hidden = true; fbStatus.innerHTML=''; }, 280);
+    }
+    fbOpen.addEventListener('click', openDrawer);
+    [fbClose, fbCancel, fbOverlay].forEach(el => el.addEventListener('click', closeDrawer));
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !fbDrawer.hidden) closeDrawer(); });
+
+    async function submitFeedback() {
+      const msg = fbText.value.trim();
+      if (!msg) { fbStatus.className = 'fb-status err'; fbStatus.textContent = 'Please type something first.'; return; }
+      fbSubmit.disabled = true; fbStatus.className = ''; fbStatus.textContent = '';
+      const payload = {
+        v: 1,
+        ts: new Date().toISOString(),
+        client_id: fbConfig.client_id || 'web-' + (location.host || 'unknown'),
+        advisor_id: fbConfig.advisor_id || 'passporttowealth',
+        skill_version: fbConfig.skill_version || '0.0.1-stub',
+        platform: 'web ' + (navigator.userAgent || '?').slice(0, 80),
+        message: msg,
+        context_level: 'a',
+        context: { source: 'dashboard-widget' },
+      };
+      const endpoint = fbConfig.endpoint_url;
+      const advisorMailto = fbConfig.advisor_email;
+      try {
+        if (endpoint) {
+          const headers = { 'Content-Type': 'application/json' };
+          if (fbConfig.endpoint_token) headers['Authorization'] = 'Bearer ' + fbConfig.endpoint_token;
+          const r = await fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(payload) });
+          if (!r.ok) throw new Error('endpoint returned ' + r.status);
+          fbStatus.className = 'fb-status ok';
+          fbStatus.textContent = '✓ Sent to your advisor. Thanks for the note.';
+          fbText.value = '';
+          setTimeout(closeDrawer, 1800);
+        } else if (advisorMailto) {
+          // No HTTP endpoint configured → fall back to opening the user's mail client.
+          const subject = encodeURIComponent('Finance Clarity feedback');
+          const body    = encodeURIComponent(msg + '\n\n--\nSent from your dashboard.');
+          location.href = `mailto:${advisorMailto}?subject=${subject}&body=${body}`;
+          fbStatus.className = 'fb-status ok';
+          fbStatus.textContent = 'Opened your email — click send to deliver it.';
+        } else {
+          fbStatus.className = 'fb-status err';
+          fbStatus.textContent = "I don't have a delivery channel configured. Please contact your advisor directly.";
+        }
+      } catch (err) {
+        fbStatus.className = 'fb-status err';
+        fbStatus.textContent = "Couldn't send: " + err.message + '. Try again or email your advisor directly.';
+      } finally {
+        fbSubmit.disabled = false;
+      }
+    }
+    fbSubmit.addEventListener('click', submitFeedback);
   })();
   </script>
 </body>

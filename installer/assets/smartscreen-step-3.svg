@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-labelledby="ss3-title ss3-desc">
+  <title id="ss3-title">Step 3: Click "Run anyway"</title>
+  <desc id="ss3-desc">SmartScreen now shows a "Run anyway" button after clicking "More info".</desc>
+  <defs>
+    <filter id="ssh3" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="2" result="o"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.18"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="ss3arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0F1E33"/>
+    </marker>
+  </defs>
+  <rect width="320" height="220" fill="#FAF8F4"/>
+  <g filter="url(#ssh3)">
+    <rect x="40" y="30" width="240" height="160" rx="2" fill="#1E48A8"/>
+    <text x="55" y="58" font-family="Segoe UI, sans-serif" font-size="14" font-weight="600" fill="#fff">Windows protected your PC</text>
+    <text x="55" y="84" font-family="Segoe UI, sans-serif" font-size="10" fill="#E8E8E8">Microsoft Defender SmartScreen prevented an</text>
+    <text x="55" y="98" font-family="Segoe UI, sans-serif" font-size="10" fill="#E8E8E8">unrecognized app from starting. Running this app</text>
+    <text x="55" y="112" font-family="Segoe UI, sans-serif" font-size="10" fill="#E8E8E8">might put your PC at risk.</text>
+    <text x="55" y="135" font-family="Segoe UI, sans-serif" font-size="10" fill="#E8E8E8">App: Welcome.bat</text>
+    <text x="55" y="148" font-family="Segoe UI, sans-serif" font-size="10" fill="#E8E8E8">Publisher: Unknown publisher</text>
+    <!-- Two buttons: Run anyway (primary) + Don't run -->
+    <rect x="80" y="160" width="90" height="22" fill="#fff"/>
+    <text x="125" y="175" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="10" font-weight="600" fill="#1D2433">Run anyway</text>
+    <rect x="180" y="160" width="90" height="22" fill="#fff"/>
+    <text x="225" y="175" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="10" fill="#1D2433">Don't run</text>
+  </g>
+  <g>
+    <path d="M 130 200 Q 130 192 125 184" stroke="#0F1E33" stroke-width="1.5" fill="none" marker-end="url(#ss3arr)"/>
+    <text x="125" y="213" text-anchor="middle" font-family="-apple-system, Segoe UI, sans-serif" font-size="11" fill="#0F1E33" font-weight="600">Click "Run anyway"</text>
+  </g>
+</svg>

@@ -21,7 +21,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _lib import workspace_root, get_logger, output_dir, fmt_money
+from _lib import workspace_root, get_logger, output_dir, fmt_money, write_envelope
 
 log = get_logger("build_site")
 
@@ -57,6 +57,37 @@ def load_tagged() -> list[dict]:
             r["amount"] = float(r["amount"])
             rows.append(r)
     return rows
+
+
+def _read_workspace_config() -> dict:
+    """Read config.yaml from the workspace; return {} if missing/unparseable."""
+    p = workspace_root() / "config.yaml"
+    if not p.exists():
+        return {}
+    try:
+        import yaml
+        return yaml.safe_load(p.read_text()) or {}
+    except Exception:
+        return {}
+
+
+def _feedback_config_for_dashboard() -> dict:
+    """Surface ONLY the values the in-browser feedback widget needs.
+    Per OP-3: never put any other secret into client-visible JSON."""
+    cfg = _read_workspace_config()
+    advisor = cfg.get("advisor", {}) or {}
+    fb = cfg.get("feedback", {}) or {}
+    out = {
+        "advisor_id": "passporttowealth",
+        "skill_version": "0.0.1-stub",
+        "advisor_email": advisor.get("feedback_email") or advisor.get("support_email"),
+        "endpoint_url": fb.get("endpoint_url"),
+    }
+    # Bearer token IS exposed to the browser if configured. The Cloudflare
+    # Worker recipe documents this is a soft gate (anti-abuse), not a real secret.
+    if fb.get("endpoint_token"):
+        out["endpoint_token"] = fb["endpoint_token"]
+    return out
 
 
 def aggregate(rows: list[dict]) -> dict:
@@ -139,6 +170,7 @@ def aggregate(rows: list[dict]) -> dict:
         ],
         "insights": _generate_insights(rows_for_table, by_category, by_month_in, by_month_out, months, currency),
         "methodology": _build_methodology(rows, currency),
+        "feedback": _feedback_config_for_dashboard(),
     }
 
 
@@ -371,4 +403,10 @@ def main(argv=None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except Exception as e:
+        write_envelope("FCB-0601", "build_site", "main",
+                       f"unexpected failure during site build: {e!r}")
+        log.exception("build_site main() failed")
+        raise
