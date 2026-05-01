@@ -291,6 +291,94 @@ Browser opens between the info print and the prompt — focus shift kills the mo
 Recommend option 1 — least surprising, fewest moving parts.
 **Mirror in `Welcome.ps1`** — same bug exists there, same fix.
 
+### B9.2 — Seamless install → first-run handoff (no Desktop double-click required) · **P1 · S**
+**Found by:** dry-run user-interview phase.
+**Symptom (the surface complaint):** The installer ends with "Double-click START-HERE on your Desktop whenever you want to use it." This forces a context switch right when momentum is highest — Terminal → minimize/cmd-tab → find Desktop icon → double-click → wait for new Terminal → resume. The user just spent 10+ minutes installing and now has to *find a thing*.
+**The deeper need (what user-interview surfaced):** First-run should feel like ONE coherent flow, not two disjointed events stitched by a Desktop shortcut. The shortcut is fine for *next time*; it's wrong as the first-run handoff.
+**Comparables:**
+  - **`npm create vue` / `npx create-react-app`**: end with `cd <dir> && npm install` printed — they point but don't launch. (Acceptable for dev tools where the user is technical and probably wants to look around first.)
+  - **Cursor / VS Code installer**: auto-opens the app at the end. Zero friction. Implicit assumption: the user installed it because they want to use it.
+  - **GitHub CLI `gh auth login`**: ends with "✓ Logged in. Try `gh repo list` to see your repos." — points without launching, but the next thing IS a one-line CLI command, not a Desktop hunt.
+  - **Stripe CLI / Vercel CLI install**: end with the "what to run next" line.
+  - **Modern interactive installers** (rustup, fnm, deno-install): explicit "Run `source ~/.bashrc` or restart your terminal to start using it" — equivalent of the Desktop double-click, BUT they understood at install time the user couldn't be auto-relaunched into a new shell.
+**The right pattern for our audience:** **ask, default-yes, launch in place**. We're not constrained the way `rustup` is — we can re-exec from the install script directly into the workflow.
+```
+✓ Your workspace is ready.
+
+Want to start now? [Y/n]: _
+
+  [Y or Enter] → script execs straight into the workflow
+                 (same Terminal window, no Desktop hunt, no context switch)
+  [n]          → "OK — double-click START-HERE on your Desktop whenever you're ready."
+                 (the shortcut still exists for re-entry next time)
+```
+**Implementation sketch:** at the end of `Welcome.command`, after the diagnostic green-✓ block:
+```bash
+read -r -p "Want to start now? [Y/n]: " ANSWER
+case "$(echo "$ANSWER" | tr '[:upper:]' '[:lower:]' | xargs)" in
+  ""|y|yes) exec "$WS/.skill-launcher.sh" ;;     # the same thing START-HERE points at
+  *)        say "OK — double-click START-HERE on your Desktop whenever you're ready." ;;
+esac
+```
+~10 lines. Mirror in `Welcome.ps1` (PowerShell `Start-Process` instead of exec).
+**Bonus:** for the first-ever install, the user could go straight from the install script into the workflow without ever needing the Desktop shortcut. The shortcut is then only for sessions 2+, where it actually makes sense.
+
+### B9.3 — Pace the CLI output so a human can actually read it · **P1 · S**
+**Found by:** dry-run user-interview phase.
+**Symptom (the surface complaint):** "The terminal responses were really quick and it didn't let me read through each of the progress process." Pre-flight checks (4 sequential ✓s) appear in under a second. The user feels processed, not guided.
+**The deeper need (what user-interview surfaced):** The user wants to FEEL competent — like they're following along with what's happening, not watching a robot do work TO them. Pacing is a trust-building mechanism.
+**How best-in-class CLI tools handle this:**
+  - **Stripe CLI / Vercel CLI / npm**: use the `ora` library — every step gets a unicode spinner (`⠋ ⠙ ⠹ ⠸`) that runs for at least the actual work duration. If a step completes in <500ms, the spinner is held for a forced minimum so the user can read the label before it flashes to ✓.
+  - **rustup**: massive vertical spacing between steps, color-coded statuses, generous use of bold text — slow visual rhythm even when work is fast.
+  - **GitHub CLI `gh auth login`**: pauses for input at every major milestone (URL display → "Press Enter to open browser" → wait for OAuth → "Authentication complete"). The user can't get ahead of the script.
+  - **Charm.sh tools (`gum`, `vhs`)**: full TUI with animation timings; nothing renders faster than human reading speed.
+  - **Homebrew `install`**: doesn't need pacing tricks because the actual `git clone` + `make install` work takes minutes — pacing is automatic.
+  - **Anthropic `claude install`**: clean, but does pause for input at decision points.
+**Three patterns to lift, in order of impact:**
+  1. **Explicit "Press Enter to continue" gates between major sections.** Highest leverage. Converts a firehose into a conversation. Place between: pre-flight summary → consent gate; consent → runtime install; auth choice → publishing-host signup; publishing-host → workspace creation; final summary → "want to start now?" (B9.2). Adds 4-5 keypresses to the install. For a 10+ min install, that's worth it for the sense of agency.
+  2. **Forced minimum display time per sub-step.** Add a `say_paced()` helper that wraps `say` with `sleep 0.4`. So the 4 pre-flight checks take ~1.6s instead of <1s. Gives the eye time to land on each line.
+  3. **Real spinner during actual install work.** Once steps 2-4 of the installer become real (Homebrew + Python + Claude Code installs), use a unicode spinner (`spinner='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'`) with the task label. The spinner runs for the duration of the actual work; min display 500ms.
+**Implementation sketch:**
+```bash
+# Helper: paced print
+say_paced() { say "$@"; sleep 0.4; }
+
+# Helper: gate
+pause_for_user() {
+  printf '\n'
+  read -r -p "$(printf '%sPress Enter to continue%s ' "$DIM" "$RESET")" _
+}
+
+# Helper: spinner during long-running command
+spin() {
+  local label="$1"; shift
+  local pid frame=0
+  local frames=(⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏)
+  "$@" >/dev/null 2>&1 &
+  pid=$!
+  while kill -0 $pid 2>/dev/null; do
+    printf '\r  %s %s' "${frames[$((frame % 10))]}" "$label"
+    frame=$((frame + 1))
+    sleep 0.08
+  done
+  wait $pid; local rc=$?
+  printf '\r  %s%s%s %s\n' "$GREEN" "✓" "$RESET" "$label"
+  return $rc
+}
+```
+**Trade-off:** the explicit gates add 4-5 keypresses. For non-technical users this is a clear win. Add `--auto` flag for technical users / CI / Rafa's own re-runs that skips the gates. Pacing the output (sleeps, spinners) costs ~3-5 seconds total per install — negligible against a 10+ min install.
+**Mirror in `Welcome.ps1`** — PowerShell has `Write-Progress` for spinners and `Read-Host` for gates; same patterns translate cleanly.
+
+### B9.4 — Re-evaluate the `START-HERE` shortcut as the primary re-entry method · **P2 · S**
+**Found by:** B9.2 follow-on thinking.
+**Question:** If B9.2 lets the user go straight from install to first run without ever touching the Desktop, do we still need the Desktop shortcut at all? Or is there a better re-entry pattern for sessions 2+?
+**Alternatives to investigate:**
+  - **CLI command**: `passport-clarity` or `pclarity` on PATH — like `gh`, `stripe`, `vercel`. Works for the technical-curious 5%; doesn't help the 95% non-technical audience.
+  - **Menu bar app** (Mac) / **system tray** (Windows): always-visible, one click to open. Adds significant install complexity (needs a real signed `.app`).
+  - **Dock pin**: same as Desktop shortcut, slightly less visible-on-boot but more discoverable than the Desktop for users who keep a clean Desktop.
+  - **Status quo Desktop shortcut**: lowest-tech, most visible, requires zero packaging work. Not glamorous but works.
+**Recommendation:** keep the Desktop shortcut for v1 (it works, costs nothing). Promote it from "the only way to start" to "the re-entry shortcut after the first run." Revisit when v1 ships if a real signed app is on the table.
+
 ## Epic 6.5 — v2 hardening: zero-touch advisor onboarding (deferred from v1)
 
 Items pulled out of `finance-clarity-build-spec.md` v1 to keep the first ship simple. Together they remove the one remaining moment of third-party-service exposure (the publishing-host signup during install) and let the advisor diagnose failures without the user having to email a support bundle.
