@@ -37,10 +37,18 @@ chmod 600 "$ENV_FILE"
 
 step "Updating passcode on host"
 if [ -f "$CRED_FILE" ]; then
-  echo "  [v0 stub] would PATCH https://here.now/api/v1/publish/$SLUG/metadata"
-  echo "           body: {\"password\": \"$NEW_PASSCODE\"}"
+  TOKEN=$(tr -d '[:space:]' < "$CRED_FILE")
+  RESP=$(curl -fsS -X PATCH \
+    -H "Authorization: Bearer $TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "$(jq -n --arg p "$NEW_PASSCODE" '{password: $p}')" \
+    "https://here.now/api/v1/publish/$SLUG/metadata" 2>&1) || \
+    fail "metadata PATCH failed: $RESP"
+  PROTECTED=$(echo "$RESP" | jq -r '.passwordProtected // false')
+  [ "$PROTECTED" = "true" ] || fail "host did not confirm passwordProtected: true (response: $RESP)"
+  echo "  ✓ host confirmed passwordProtected: true"
 else
-  echo "  ⚠ credentials missing — local .env updated but host not yet rotated"
+  printf '\033[33m  ⚠ credentials missing — local .env updated but host not yet rotated\033[0m\n'
 fi
 
 URL=$(jq -r --arg s "$SLUG" '.publishes[$s].siteUrl // ("https://" + $s + ".here.now/")' "$STATE")

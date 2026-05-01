@@ -44,15 +44,20 @@ EOF
   fi
 fi
 
-step "Deleting site"
+step "Deleting site on host"
 if [ -f "$CRED_FILE" ]; then
   TOKEN=$(tr -d '[:space:]' < "$CRED_FILE")
-  # TODO(v0): replace with real call when the publishing-host credential is wired.
-  # curl -fsS -X DELETE -H "Authorization: Bearer $TOKEN" \
-  #   "https://here.now/api/v1/publish/$SLUG"
-  echo "  [v0 stub] would: DELETE https://here.now/api/v1/publish/$SLUG"
+  RESP=$(curl -sS -o /dev/null -w "%{http_code}" -X DELETE \
+    -H "Authorization: Bearer $TOKEN" \
+    "https://here.now/api/v1/publish/$SLUG" 2>&1) || true
+  case "$RESP" in
+    200|204) echo "  ✓ host returned $RESP — site deleted" ;;
+    404)     echo "  · host returned 404 — site already gone (treating as success)" ;;
+    *)       printf '\033[33m  ⚠ host returned %s — verify in your account dashboard\033[0m\n' "$RESP" ;;
+  esac
 else
-  echo "  [v0 stub] credentials missing; would still attempt delete via UI later"
+  printf '\033[33m  ⚠ credentials missing — local state cleared but host still has the site\033[0m\n'
+  echo "    delete it manually from your account dashboard"
 fi
 
 # Clear local state regardless — slug is gone from our perspective
