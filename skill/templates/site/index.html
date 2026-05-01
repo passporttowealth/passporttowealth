@@ -89,8 +89,20 @@
     }
     h1, h2, h3, h4 { color: var(--text); font-weight: 600; letter-spacing: -0.01em; }
     h1 { font-size: clamp(28px, 4vw, 36px); line-height: 1.15; margin: 0; }
-    h2 { font-size: 18px; line-height: 1.3; margin: 0 0 var(--s3); text-transform: uppercase;
-         letter-spacing: 0.06em; color: var(--text-muted); font-weight: 600; }
+    /* h2 styling lives in `section > h2` below — gives every section start
+       a recurring navy "tab" + uppercase eyebrow that reads as a deliberate
+       breakpoint, not just a margin gap. (P0-3 from audit.) */
+    h2 { font-size: 18px; line-height: 1.3; margin: 0 0 var(--s3); }
+    section > h2 {
+      font-size: 12px; letter-spacing: 0.12em; font-weight: 600;
+      color: var(--accent); text-transform: uppercase;
+      margin: 0 0 var(--s4); padding-top: var(--s5);
+      display: block;
+    }
+    section > h2::before {
+      content: ""; display: block; width: 32px; height: 2px;
+      background: var(--accent); margin-bottom: var(--s3);
+    }
     a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent;
         transition: border-color 120ms ease; }
     a:hover { border-color: currentColor; }
@@ -182,17 +194,37 @@
       .brand-inner img { height: 44px; }
     }
 
-    .hero {
+    /* ============================================================
+       HERO BAND — full-bleed warm-to-white tonal break that anchors
+       the summary above the deep dives below (P0-2 from audit).
+       ============================================================ */
+    .hero-band {
+      background: linear-gradient(180deg, var(--bg-warm) 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-band > .hero,
+    .hero-band > .kpi-band {
       max-width: var(--maxw);
       margin: 0 auto;
-      padding: var(--s7) var(--s5) var(--s5);
+      padding-left: var(--s5);
+      padding-right: var(--s5);
+    }
+    .hero-band > .kpi-band { padding-bottom: var(--s7); }
+    main { background: var(--bg); }
+
+    .hero {
+      padding-top: var(--s8); padding-bottom: var(--s4);
+    }
+    .hero h1 {
+      font-size: clamp(32px, 4.5vw, 44px);
+      line-height: 1.1; letter-spacing: -0.015em;
     }
     .hero .meta {
-      color: var(--text-muted); margin: var(--s3) 0 0; font-size: 14px;
+      color: var(--text-muted); margin: var(--s3) 0 0; font-size: 15px;
     }
 
     /* ============================================================
-       KPI CARDS
+       KPI CARDS — bigger numerals with anchor presence (P0-1)
        ============================================================ */
     .kpi-grid {
       display: grid; gap: var(--s4);
@@ -209,15 +241,15 @@
     }
     .kpi:hover { transform: translateY(-1px); box-shadow: var(--sh-md); }
     .kpi .label {
-      font-size: 12px; color: var(--text-subtle);
-      text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500;
+      font-size: 11px; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.10em; font-weight: 500;
     }
     .kpi .value {
-      font-size: clamp(24px, 3vw, 32px); font-weight: 600;
-      margin-top: var(--s2); letter-spacing: -0.02em;
-      color: var(--accent);
+      font-size: clamp(30px, 4.2vw, 44px); font-weight: 600;
+      margin-top: var(--s3); letter-spacing: -0.02em; line-height: 1.05;
+      color: var(--accent); font-variant-numeric: tabular-nums;
     }
-    .kpi .sub { font-size: 13px; color: var(--text-muted); margin-top: var(--s1); }
+    .kpi .sub { font-size: 12px; color: var(--text-subtle); margin-top: var(--s2); }
     .kpi.positive .value { color: var(--positive); }
     .kpi.negative .value { color: var(--negative); }
 
@@ -235,10 +267,13 @@
       display: flex; align-items: baseline; justify-content: space-between;
       margin-bottom: var(--s4); gap: var(--s3); flex-wrap: wrap;
     }
-    .chart-card .chart-title { font-size: 16px; font-weight: 600; color: var(--text); }
-    .chart-card .chart-sub { font-size: 13px; color: var(--text-subtle); }
-    .chart-wrap { position: relative; height: 320px; }
-    @media (max-width: 600px) { .chart-wrap { height: 260px; } }
+    .chart-card .chart-title {
+      font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+      text-transform: uppercase; color: var(--text);
+    }
+    .chart-card .chart-sub { font-size: 12px; color: var(--text-subtle); margin-top: 2px; }
+    .chart-wrap { position: relative; height: 280px; }
+    @media (max-width: 600px) { .chart-wrap { height: 240px; } }
 
     /* ============================================================
        INSIGHTS
@@ -575,15 +610,15 @@
     </div>
   </nav>
 
-  <section class="hero" id="overview" style="margin-top: 0; scroll-margin-top: 80px;">
-    <h1>{{ DASHBOARD_HEADLINE }}</h1>
-    <p class="meta">{{ N_MONTHS }} months · {{ DATE_FROM }} → {{ DATE_TO }} · {{ N_ACCOUNTS }} accounts</p>
-  </section>
+  <!-- Hero band: tonal break between summary (above) and deep dives (in <main>).
+       Sits OUTSIDE <main> so the warm-to-white gradient runs full-bleed. -->
+  <div class="hero-band">
+    <section class="hero" id="overview" style="scroll-margin-top: 80px;">
+      <h1>{{ DASHBOARD_HEADLINE }}</h1>
+      <p class="meta">{{ N_MONTHS }} months · {{ DATE_FROM }} → {{ DATE_TO }} · {{ N_ACCOUNTS }} accounts</p>
+    </section>
 
-  <main>
-
-    <!-- KPI strip -->
-    <section style="margin-top: var(--s5);" aria-labelledby="kpi-h">
+    <section class="kpi-band" aria-labelledby="kpi-h">
       <h2 id="kpi-h" class="sr-only" style="position:absolute;left:-9999px;">Key totals</h2>
       <div class="kpi-grid">
         <div class="kpi positive">
@@ -608,6 +643,9 @@
         </div>
       </div>
     </section>
+  </div>
+
+  <main>
 
     <!-- Insights -->
     <section class="insights" id="insights" aria-labelledby="insights-h">
@@ -807,6 +845,14 @@
     const fm  = (v) => (v < 0 ? '-' : '') + SYM + Math.abs(Math.round(v)).toLocaleString();
     const fm0 = (v) => (v < 0 ? '-' : '') + SYM + Math.abs(v).toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0});
     const fm2 = (v) => (v < 0 ? '-' : '') + SYM + Math.abs(v).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+    // Short axis-tick formatter (P0-4 from audit): $3.2k / $1.5M / $400.
+    // Tooltips use fm2 for full precision; only the gridline labels abbreviate.
+    const fmShort = (v) => {
+      const a = Math.abs(v); const s = v < 0 ? '-' : '';
+      if (a >= 1_000_000) return s + SYM + (a/1_000_000).toFixed(a >= 10_000_000 ? 0 : 1) + 'M';
+      if (a >= 1_000)     return s + SYM + (a/1_000).toFixed(a >= 10_000 ? 0 : 1) + 'k';
+      return s + SYM + Math.round(a);
+    };
 
     // Chart.js global defaults — typography + colors aligned with the page
     Chart.defaults.font.family = '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif';
@@ -845,7 +891,7 @@
         responsive: true, maintainAspectRatio: false,
         scales: {
           x: { grid: { display: false }, ticks: { color: SUBT } },
-          y: { grid: { color: GRID, drawBorder: false }, ticks: { callback: (v) => fm(v), color: SUBT } }
+          y: { grid: { color: GRID, drawBorder: false }, ticks: { callback: (v) => fmShort(v), color: SUBT } }
         },
         plugins: {
           legend: { position: 'top', align: 'end' },
@@ -873,7 +919,7 @@
         indexAxis: 'y',
         responsive: true, maintainAspectRatio: false,
         scales: {
-          x: { grid: { color: GRID, drawBorder: false }, ticks: { callback: (v) => fm(v), color: SUBT } },
+          x: { grid: { color: GRID, drawBorder: false }, ticks: { callback: (v) => fmShort(v), color: SUBT } },
           y: { grid: { display: false }, ticks: { color: TEXT, font: { size: 13 } } }
         },
         plugins: {
@@ -903,7 +949,7 @@
         responsive: true, maintainAspectRatio: false,
         scales: {
           x: { stacked: true, grid: { display: false }, ticks: { color: SUBT } },
-          y: { stacked: true, grid: { color: GRID, drawBorder: false }, ticks: { callback: (v) => fm(v), color: SUBT } }
+          y: { stacked: true, grid: { color: GRID, drawBorder: false }, ticks: { callback: (v) => fmShort(v), color: SUBT } }
         },
         plugins: {
           legend: { position: 'bottom', align: 'start' },

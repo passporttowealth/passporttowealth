@@ -358,6 +358,28 @@ class TestBuildSite(PipelineTestBase):
         for k in ("income_avg_per_month", "spend_avg_per_month", "net_avg_per_month"):
             self.assertIn(k, d["kpis"])
 
+    def test_dashboard_polish_p0_markers(self):
+        """Lock in the P0 visual lifts from the design audit so a casual edit
+        can't quietly walk them back. These are the floor of perceptual polish."""
+        html = (self.workspace / "site" / "index.html").read_text()
+        # P0-1: KPI value should use a confident clamp() with min ≥ 30px (was 24).
+        self.assertRegex(html, r"\.kpi \.value \{[^}]*font-size:\s*clamp\(30px",
+            "P0-1: KPI value font-size should clamp from ≥30px (was 24)")
+        # P0-2: hero-band wraps hero+KPI strip outside <main>.
+        self.assertIn('class="hero-band"', html, "P0-2: hero-band wrapper missing")
+        self.assertIn(".hero-band", html, "P0-2: hero-band CSS rule missing")
+        self.assertIn('class="kpi-band"', html, "P0-2: kpi-band markup missing")
+        # P0-3: section eyebrows — every <section> > h2 gets the navy tab.
+        self.assertIn("section > h2", html, "P0-3: section eyebrow rule missing")
+        self.assertIn("section > h2::before", html,
+            "P0-3: section eyebrow ::before tab missing")
+        # P0-4: thousand-suffix formatter for chart axes.
+        self.assertIn("const fmShort", html,
+            "P0-4: fmShort formatter for axis ticks missing")
+        # All three charts use fmShort (cashflow, category, monthly stacked).
+        self.assertGreaterEqual(html.count("fmShort(v)"), 3,
+            "P0-4: all 3 charts should use fmShort for axis ticks")
+
     def test_no_scrollintoview_in_observer_paths(self):
         """REGRESSION: Element.scrollIntoView from inside an IntersectionObserver
         callback (or any auto-scroll loop) caused a feedback loop where the
