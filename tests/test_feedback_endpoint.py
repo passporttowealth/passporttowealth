@@ -31,15 +31,27 @@ TOKEN = os.environ.get("FEEDBACK_ENDPOINT_TOKEN")
 
 def _post(url: str, payload: dict, token: str | None = None, timeout: int = 10):
     body = json.dumps(payload).encode()
-    headers = {"Content-Type": "application/json"}
+    headers = {
+        "Content-Type": "application/json",
+        # Cloudflare's default ruleset 403s requests with the bare Python-urllib
+        # User-Agent (error 1010 — autonomous-system / bot challenge). Set a
+        # real-looking UA so the test client gets through to the Worker.
+        "User-Agent": "passport-feedback-tests/1.0 (+regression-suite)",
+    }
     if token:
         headers["Authorization"] = f"Bearer {token}"
     req = urllib.request.Request(url, data=body, headers=headers, method="POST")
     try:
         with urllib.request.urlopen(req, timeout=timeout) as resp:
-            return resp.status, json.loads(resp.read().decode())
+            raw = resp.read().decode()
+            return resp.status, json.loads(raw) if raw else {}
     except urllib.error.HTTPError as e:
-        return e.code, json.loads(e.read().decode() or "{}")
+        raw = e.read().decode() if e.fp else ""
+        try:
+            return e.code, json.loads(raw)
+        except json.JSONDecodeError:
+            # Cloudflare's edge rejections don't return JSON
+            return e.code, {"_raw": raw[:200]}
 
 
 def _envelope(message: str = "Test feedback from CI smoke") -> dict:

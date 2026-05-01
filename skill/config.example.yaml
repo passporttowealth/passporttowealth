@@ -16,8 +16,8 @@ advisor:
 # from the POST. Recipe in docs/feedback-channel.md. The Worker holds the
 # GitHub token as a Worker secret — clients never see credentials.
 feedback:
-  endpoint_url: null         # e.g. "https://feedback.passporttowealth.workers.dev"
-  endpoint_token: null       # optional — included as Authorization: Bearer if set
+  endpoint_url: "https://passport-feedback.rafaeldf2.workers.dev"
+  endpoint_token: "n7fQfh_1IYS7pDqsD8O2x0EqMU6l9Mmqu0ZCJWGuqx8"  # anti-abuse soft gate — visible in dashboard HTML by design
 
 # Workspace
 workspace:
