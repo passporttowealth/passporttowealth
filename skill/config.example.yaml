@@ -1,0 +1,35 @@
+# Per-client config — written to ~/Documents/my-finances/config.yaml during install.
+# Contains NO secrets. Secrets live in .env (auto-managed) and the OS keychain.
+
+# Advisor identity (used in error messages, support bundle email To:, etc.)
+advisor:
+  name: "Passport to Wealth"
+  support_email: "support@passporttowealth.com"   # placeholder — set per-deploy
+  feedback_email: "feedback@passporttowealth.com" # for the "I have feedback" intent (§15.1)
+
+# Feedback channel (§15.1)
+# Optional HTTP POST destination for client feedback. When set, the skill POSTs
+# the feedback JSON (schema in spec §15.1.4) in addition to the local save and
+# mailto: paths. When unset, only the local + mailto: paths are used.
+#
+# Recommended setup: deploy a Cloudflare Worker that creates a GitHub issue
+# from the POST. Recipe in docs/feedback-channel.md. The Worker holds the
+# GitHub token as a Worker secret — clients never see credentials.
+feedback:
+  endpoint_url: null         # e.g. "https://feedback.passporttowealth.workers.dev"
+  endpoint_token: null       # optional — included as Authorization: Bearer if set
+
+# Workspace
+workspace:
+  primary_currency: "USD"      # asked at first sanity gate if unset; defaults to most-frequent observed
+  account_aliases: {}          # populated on first run, e.g. "Joint Checking", "Travel Card"
+
+# Calculator slot (kickoff decision — see engagement/kickoff-agenda.md §4)
+calculator:
+  type: "placeholder"          # one of: placeholder | fire | fx-risk | retirement-projection | emergency-fund | buy-vs-rent
+  config: {}                   # calculator-specific config
+
+# Telemetry
+telemetry:
+  heartbeats_enabled: false    # v2 backlog (see backlog.md Epic 6.5)
+  error_inbox_url: null        # v2 backlog

@@ -1,0 +1,87 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Secrets and credentials — never commit any of these
+.env
+.env.*
+!.env.example
+.passcode
+.herenow/
+*.credentials
+*.pem
+*.key
+secrets/
+
+# Client data — never commit any of this
+inbox/
+01_bank_transactions/
+02_payslips/
+03_amazon_orders/
+04_reference_docs/
+05_other/
+my-finances/
+finance-workspace/
+*.csv
+*.xlsx
+*.xml
+*.ofx
+*.qfx
+*.qif
+
+# Pipeline outputs
+pipeline/output/
+fx_cache/
+fx_overrides.yaml
+rules.yaml
+
+# Logs
+*.log
+install.log
+
+# Test fixtures derived from real data
+skill/references/test-fixtures/_real_*
+
+# Build artifacts
+build/
+dist/
+*.zip
+finance-support-bundle-*.zip
+finance-workspace-backup-*.zip
+
+# PDFs — almost always sensitive in this domain
+*.pdf
+!docs/**/*.pdf
+!installer/assets/*.pdf

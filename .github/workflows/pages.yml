@@ -1,0 +1,53 @@
+name: Deploy installer landing page to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "installer/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stage Pages content
+        run: |
+          mkdir -p _site
+          # Landing page + assets. -L dereferences the installer/assets/brand
+          # symlink that points back to assets/brand/ (single source of truth).
+          cp installer/index.html _site/
+          if [ -d installer/assets ]; then cp -RL installer/assets _site/; fi
+          # Make the installers downloadable directly from Pages too
+          # (raw.githubusercontent.com is the canonical source, but Pages-served
+          # copies survive even if the repo is renamed/transferred — useful belt-and-suspenders).
+          cp installer/Welcome.command _site/ 2>/dev/null || true
+          cp installer/Welcome.bat _site/ 2>/dev/null || true
+          cp installer/Welcome.ps1 _site/ 2>/dev/null || true
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,44 @@
+name: Lint user-facing strings (OP-8)
+
+# Scans user-visible copy for OP-8 banned words.
+# OP-8 (spec §2): minimize user exposure to third-party service names and
+# technical plumbing. Banned words must not appear outside the install dialog.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "skill/prompts/**"
+      - "skill/scripts/**"
+      - "skill/templates/**"
+
+jobs:
+  banned-words:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan for banned words in user-facing copy
+        run: |
+          set -eo pipefail
+
+          # Banned words per spec §2 OP-8
+          # Allowed scope: anywhere in skill/prompts/ + user-touching script output.
+          # NOT scanned: install scripts (one-time exposure during install is OK in v1).
+          BANNED='here\.now|API key|credential|slug|Homebrew|Python|pip install|venv|npx|OFX|webhook'
+
+          violations=$(grep -rEn --include="*.md" --include="*.py" --include="*.sh" --include="*.html" \
+            "$BANNED" \
+            skill/prompts/ skill/templates/ skill/scripts/ \
+            2>/dev/null || true)
+
+          if [ -n "$violations" ]; then
+            echo "::error::OP-8 banned words found in user-facing copy:"
+            echo "$violations"
+            echo ""
+            echo "If this is intentional (a comment, a doc link, an internal-only file),"
+            echo "wrap it with a #OP8-OK comment on the same line and re-run."
+            exit 1
+          fi
+
+          echo "✓ No OP-8 banned words in user-facing copy."

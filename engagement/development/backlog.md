@@ -1,0 +1,269 @@
+# Demo Backlog — Items to Make `demo-script.md` Robust for Non-Technical Users
+
+> **⚠ Prototype — pre-release.** Backlog represents the work needed to reach v1 for the May advisor meeting. Items marked P0 are blockers for the prototype to ship at all; P1/P2 are sequenced behind that.
+
+Companion to `demo-script.md`. Each item closes a gap surfaced during red-team. Priority is set against the end-of-May advisor meeting and the 20-hour sprint cap.
+
+**Priority key:** P0 = demo can't ship without it · P1 = demo ships but feels fragile · P2 = Sprint 2 / post-May
+**Size key:** S = <2h · M = 2–6h · L = 6h+
+
+---
+
+## Epic 1 — Bootstrap & install
+
+The whole `demo-script.md` Phase 0 assumes the user already has Terminal literacy, Claude Code, Python, and a here.now account. They don't. The user can copy-paste **one** thing into Terminal — that's the entire ceiling.
+
+### B1.1 — Single bootstrap installer · **P0 · M**
+**Problem:** Five separate installs (Claude Code, Python, `openpyxl`, here.now creds, folder scaffold) each with their own failure mode. Non-technical users abandon at install #2.
+**Recommendation:** Ship one shell script — `install-finance-clarity.command` (Mac double-clickable) — that:
+1. Detects/installs Homebrew (asks for password once)
+2. `brew install python@3.11 jq` (jq is required by here-now skill)
+3. Installs Claude Code via the official one-liner
+4. Creates `~/Desktop/my-finances/` with the four canonical subfolders empty
+5. Creates a `requirements.txt` and runs `pip install -r requirements.txt` in a venv inside the folder
+6. Prompts for the here.now API key (paste once) and writes it to `~/.herenow/credentials` with `chmod 600`
+7. Drops a `START-HERE.command` into `my-finances/` that opens Terminal in that folder and runs `claude`
+8. Logs every step to `install.log` so failures are debuggable remotely
+
+User experience: download one file, double-click it, paste two things (Mac password, here.now key), done. **Distribute via a here.now-hosted page** so the link itself is shareable.
+
+### B1.2 — Pre-flight check command · **P0 · S**
+**Problem:** When something breaks mid-demo, neither the user nor Rafa knows which dependency is the culprit.
+**Recommendation:** A `check.command` that prints a green/red table for: Claude Code installed, Python version, `openpyxl` importable, here.now key present and valid, `my-finances/` folder exists, internet reachable. First diagnostic step for every support request.
+
+### B1.3 — Windows + Linux variants · **P2 · M**
+**Problem:** B1.1 is Mac-only. Arielle's audience may include both.
+**Recommendation:** Defer to Sprint 2. For now, document Mac-only and confirm Arielle's team is on Mac before the demo.
+
+### B1.4 — Idempotent re-install · **P1 · S**
+**Problem:** If the bootstrap is run twice (user panics, runs again), it should skip what's already done, not duplicate or corrupt.
+**Recommendation:** Every step in B1.1 wrapped in `if not exists`. End with a "✓ everything is ready" message either way.
+
+---
+
+## Epic 2 — File ingestion (the messy folder problem)
+
+Users will dump everything into one folder — bank PDFs, screenshots, tax returns, recipes — and expect Claude to figure it out. The current script assumes pre-sorted input.
+
+### E2.1 — Auto-sort routine · **P0 · M**
+**Problem:** `01_bank_transactions/`, `02_payslips/` etc. don't exist in the user's reality.
+**Recommendation:** A Claude routine triggered by "I dropped my files in, what now?" that:
+1. Lists every file in the folder (recursively)
+2. Classifies each by filename + first-page heuristics (without OCR — just filename patterns and PDF text-layer keywords like "Statement", "Paystub", "1099")
+3. Shows the user a proposed sort with a one-line reason per file ("`Chase_Activity_2025.csv` → `01_bank_transactions/` because filename contains 'Activity' + .csv")
+4. Asks for batch confirmation, not file-by-file
+5. Moves files (doesn't copy — keeps single source of truth)
+6. Lists "I wasn't sure about these" separately and asks the user
+
+### E2.2 — Deduplication · **P0 · S**
+**Problem:** Users re-download the same statement 3x. Pipeline double-counts. Numbers look 3x higher than reality.
+**Recommendation:** Hash-based dedupe inside the auto-sort. If two files have identical content, keep one and tell the user. If two CSVs have overlapping date ranges from the same account, flag for review before merging.
+
+### E2.3 — PDF-statement support · **P1 · L**
+**Problem:** Many retail banks (especially European) only give PDF statements, not CSV exports. Current script bans PDF parsing.
+**Recommendation:** Use a deterministic PDF text extractor (`pdfplumber`) for text-layer PDFs only — *not* OCR, *not* AI extraction. If the PDF is a scan with no text layer, tell the user "this bank doesn't give us machine-readable data, here's how to ask them for a CSV export." Keep AI-based extraction as an explicit opt-in per file.
+
+### E2.4 — Multi-currency + sign-convention normalization · **P1 · M**
+**Problem:** EUR/USD mixing, debits-positive vs debits-negative, DD/MM vs MM/DD all silently corrupt the totals.
+**Recommendation:** A normalization step Claude runs after sort. Detects currency from the file/account, detects sign convention from a sample of known-direction transactions (e.g. salary should be positive), detects date format from unambiguous samples (day > 12 anywhere → DD/MM). Surfaces all three decisions to the user before continuing.
+
+### E2.5 — Sanity-check gate · **P0 · S**
+**Problem:** Pipeline can produce numbers that are 10x off (double-counted transfers, wrong sign) and the script publishes them anyway.
+**Recommendation:** Mandatory checkpoint after pipeline, before site build. Claude shows: total in/out per month, top 10 merchants, biggest 5 transactions, transfers detected and excluded. User must respond "looks right" before site builds. If anything looks off, Claude offers to investigate the specific item.
+
+---
+
+## Epic 3 — Update workflow (drop-in new files over time)
+
+The current Phase 5 is two sentences. Real users will return monthly with new exports, expect the site to update, and have forgotten the slug, the passcode, and the folder location.
+
+### E3.1 — Single update command · **P0 · M**
+**Problem:** Phase 5 requires the user to re-prompt Claude through 4 steps. They won't.
+**Recommendation:** A `refresh.command` (or a single Claude prompt: "refresh my report") that:
+1. Auto-sorts any new files in the inbox (Epic 2)
+2. Re-runs the pipeline incrementally
+3. Reports new uncategorized merchants and asks for rules
+4. Rebuilds Excel + site
+5. Republishes to the **same slug** read from `.herenow/state.json`
+6. Keeps the same passcode (no re-PATCH unless the user asks)
+7. Reports what changed: "added 47 transactions, 3 new merchants categorized, totals updated through March 2026"
+
+### E3.2 — "Inbox" folder convention · **P1 · S**
+**Problem:** User doesn't know which subfolder to drop new files into.
+**Recommendation:** A single `inbox/` folder at the top of `my-finances/`. Drop anything here. Auto-sort empties it on every refresh. One folder to remember.
+
+### E3.3 — Slug + passcode recovery · **P1 · S**
+**Problem:** `.herenow/state.json` lives in the project folder. Lose the laptop, lose the slug. User creates a duplicate site instead of updating, leaving the old one orphaned and live.
+**Recommendation:** On first publish, Claude emails the user (via a here.now hosted "your site is ready" page they can bookmark) the slug, the claim URL, and a reminder of the passcode location. Add a `find-my-site.command` that lists all sites under their here.now account.
+
+### E3.4 — Categorization-rule persistence + sharing · **P1 · S**
+**Problem:** Rules built in Session 1 should persist to Session 2. If Arielle wants to share a starter rule set across her clients, there's no mechanism.
+**Recommendation:** Rules live in `my-finances/rules.yaml`, version-controlled by the user (or just backed up). Ship a starter `rules.yaml` with the 100 most common merchants for the EU/US cross-border audience, derived from `finance_ops/custom-build/pipeline/categorize.py`.
+
+### E3.5 — Diff view between refreshes · **P2 · M**
+**Problem:** User can't tell what changed month-over-month.
+**Recommendation:** Site shows "since last refresh on {date}: +47 transactions, category X up 12%, new recurring charge detected." Sprint 2 — not needed for first demo.
+
+---
+
+## Epic 4 — Design system / front-end quality
+
+The current Phase 2 prompt ("bar chart, line chart, table") will produce something visually generic and inconsistent run-to-run. For a brand-aligned demo to ~35 advisors, that's not enough.
+
+### E4.1 — Branded HTML template · **P0 · M**
+**Problem:** Every run produces a different-looking site. Arielle can't show a consistent product to advisors.
+**Recommendation:** A pre-built `site-template/` with locked-in:
+- Color tokens (Passport to Wealth palette — confirm with Arielle)
+- Typography (one display, one body, one mono — system fonts to keep it offline-safe)
+- Layout grid (12-col, mobile-first)
+- Component library (KPI card, chart container, transaction row, downloads block)
+- Inlined chart library — pick one (Chart.js or uPlot) and ship it inlined, not via CDN
+- Empty data slots Claude fills in, rather than Claude generating HTML from scratch
+
+Claude's job is to populate the template, not invent the design.
+
+### E4.2 — `frontend-design` skill or local equivalent · **P0 · M**
+**Problem:** Without a skill, Claude defaults to its generic AI aesthetic. The `frontend-design` skill exists in this environment — leverage it.
+**Recommendation:** Either (a) invoke the existing `frontend-design` skill in the build prompt, or (b) write a project-local skill `finance-clarity-build` that bundles the template (E4.1), the publish flow (Epic 5), and the design constraints into one invocation. Option (b) is cleaner because it also encodes the safety and publish-flow rules in the same place.
+
+### E4.3 — Accessibility + mobile baseline · **P1 · S**
+**Problem:** Advisors will open the demo on phones. Generic Claude HTML won't be responsive or accessible.
+**Recommendation:** Template enforces: WCAG AA contrast, 16px min body text, viewport meta, prefers-reduced-motion, semantic HTML for tables, keyboard-navigable filters. Add a Lighthouse check in the build step that fails the build if score drops below 90.
+
+### E4.4 — Chart selection guide · **P1 · S**
+**Problem:** "Bar chart for spend by category" is the lazy default. Some questions are better answered by a treemap, a sparkline, or a calendar heatmap.
+**Recommendation:** A short decision matrix Claude consults: "spend over time → line; spend by category → horizontal bar (more labels fit); recurring patterns → calendar heatmap; portfolio composition → treemap." Three or four named patterns, not unlimited creativity.
+
+### E4.5 — Print/PDF stylesheet · **P2 · S**
+**Problem:** Advisors will want to print or PDF-export the dashboard for client meetings.
+**Recommendation:** A `@media print` block in the template. Sprint 2.
+
+### E4.6 — Visual calculator slot · **P0 · M**
+**Problem:** The sprint commits to "one visual calculator" (FIRE, FX risk, etc.) but there's no slot for it in the current site structure.
+**Recommendation:** Template has a dedicated "Calculators" section with a plug-in pattern. Whichever calculator is picked at kickoff (per `kickoff-agenda.md` §4) drops into that slot without changing the rest of the site.
+
+---
+
+## Epic 5 — Privacy & safety guardrails
+
+Currently informal ("don't let Claude open the payslip PDFs"). For Claude-as-instructions, these need to be hard rules in the skill, not advice in a markdown doc.
+
+### E5.1 — Default-deny on PDFs with sensitive content · **P0 · S**
+**Problem:** Claude will silently OCR payslips, tax returns, anything PDF.
+**Recommendation:** Skill enforces: never open `02_payslips/`, `04_reference_docs/`, or any file matching `*tax*`, `*1099*`, `*W2*`, `*SSN*` patterns without an explicit per-file confirmation from the user. The pipeline uses **only** bank transactions by default.
+
+### E5.2 — Publish-then-protect race condition · **P0 · S**
+**Problem:** here.now publish creates a live URL before PATCH adds the password. Window of seconds where financial data is publicly accessible.
+**Recommendation:** Two-step publish baked into the skill:
+1. Publish a single `index.html` placeholder that says "site coming soon"
+2. PATCH the password
+3. Verify password is set (response includes `passwordProtected: true`)
+4. **Then** push the real content via update
+The skill must refuse to push real content to an unprotected slug. No exceptions.
+
+### E5.3 — Passcode handling hygiene · **P0 · S**
+**Problem:** Passcode passed via CLI ends up in shell history and `.claude/` logs.
+**Recommendation:** Skill reads passcode from a prompt or a `--password-file` flag, never as a CLI argument. Never echoed to logs. Stored in `my-finances/.passcode` with `chmod 600` so the refresh command can reuse it.
+
+### E5.4 — Log audit + redaction · **P1 · S**
+**Problem:** Claude Code logs in `.claude/` may contain raw transaction descriptions, account fragments, merchant names.
+**Recommendation:** A `redact-logs.command` that scrubs `.claude/` of anything matching account-number patterns or anything from `02_payslips/`. Also: document log location so user can clear them themselves.
+
+### E5.5 — `.gitignore` and cloud-sync warning · **P1 · S**
+**Problem:** User puts `my-finances/` in iCloud/Dropbox/OneDrive without realizing it. Files leave the laptop.
+**Recommendation:** Bootstrap (B1.1) warns if Desktop is iCloud-synced and offers to put `my-finances/` outside the sync root. Ship a `.gitignore` that excludes credentials, state, the inbox, and all data files — so if the user does git-init the folder they don't accidentally commit transactions.
+
+### E5.6 — Plain-language privacy summary on the site · **P2 · S**
+**Problem:** Anyone the user shares the site with should know what here.now sees.
+**Recommendation:** A small footer on the site: "Hosted on here.now. Server sees the files; access is gated by a passcode you control. Source data on owner's laptop." Sprint 2.
+
+---
+
+## Epic 6.5 — v2 hardening: zero-touch advisor onboarding (deferred from v1)
+
+Items pulled out of `finance-clarity-build-spec.md` v1 to keep the first ship simple. Together they remove the one remaining moment of third-party-service exposure (the publishing-host signup during install) and let the advisor diagnose failures without the user having to email a support bundle.
+
+### H6.5.1 — Per-client signed install links · **P2 · M**
+**Problem:** v1 ships one generic `Welcome.command`. Every client signs up for the publishing host themselves during install, which violates the spirit of OP-8 (only justified in v1 by simplicity).
+**Recommendation:** Replace the generic installer with a per-client signed link the advisor generates. The link embeds a single-use bootstrap token. Installer hits a handshake endpoint to fetch a scoped publishing-host credential. User never sees the service.
+
+### H6.5.2 — `advisor-onboard` companion tool · **P2 · M**
+**Problem:** No tool today for the advisor to provision a client.
+**Recommendation:** Small advisor-only script (run from advisor's own Claude Code) that takes a client name + email, provisions a scoped credential under the advisor's publishing-host account, generates a one-time bootstrap token, builds the install URL, and optionally drafts the welcome email. Records the client in a local registry so the advisor can later see who's onboarded, take a site down, or rotate a credential.
+
+### H6.5.3 — Handshake endpoint · **P2 · M**
+**Problem:** Bootstrap token has nothing to redeem against.
+**Recommendation:** Small advisor-controlled HTTPS endpoint (initial implementation: a here.now-hosted serverless function). Accepts the token, returns scoped credentials + advisor identity, marks the token consumed. Dependency for H6.5.1 and H6.5.2.
+
+### H6.5.4 — Auto-transmitted error envelopes + advisor inbox · **P2 · L**
+**Problem:** v1 requires the user to say "I need help" before the advisor sees anything. Quiet failures stay invisible.
+**Recommendation:** Same envelope schema (§17.2 of the spec) but POSTed to an advisor-controlled inbox endpoint on every failure. Queued retry on transmission failure so the user is never blocked. Browseable per-client log on the advisor side. Closes acceptance criteria #6/#7 from the original spec.
+
+### H6.5.5 — Heartbeats · **P2 · S**
+**Problem:** Advisor can't distinguish a silent (broken / abandoned) client from a healthy one.
+**Recommendation:** Once per successful run, post a `heartbeat` envelope. Disclosed in install consent. Disable-able by the user.
+
+### H6.5.6 — Signed and notarized `Welcome.app` · **P2 · M**
+**Problem:** Mac shows an unsigned-binary warning on `Welcome.command`, which can scare non-technical users into bailing.
+**Recommendation:** Bundle the installer as a signed and notarized `.app`. Requires an Apple Developer account ($99/yr — confirm with Arielle whether her org or Rafa absorbs this).
+
+### H6.5.7 — macOS Keychain for credential storage · **P2 · S**
+**Problem:** v1 stores the publishing-host credential in `~/.herenow/credentials` with `chmod 600`. Fine, but Keychain is the OS-blessed path.
+**Recommendation:** Move credentials to Keychain unconditionally. Read via `security find-generic-password`.
+
+---
+
+## Epic 6 — Recovery & operations
+
+What does the user do when they break it.
+
+### E6.1 — `delete-my-site.command` · **P0 · S**
+**Problem:** No documented way to take the site down.
+**Recommendation:** One command that calls `DELETE /api/v1/publish/:slug` and confirms. Critical for "I changed my mind" moments and for a clean demo reset.
+
+### E6.2 — Passcode rotation · **P1 · S**
+**Problem:** User shares passcode with the wrong person. No way to rotate.
+**Recommendation:** `rotate-passcode.command` that prompts for a new passcode, PATCHes the metadata, and updates `.passcode`. Existing sessions invalidate automatically (per here.now docs).
+
+### E6.3 — "Start over" reset · **P1 · S**
+**Problem:** Bad categorization rules cascade. User wants to wipe and try again.
+**Recommendation:** `reset-rules.command` that backs up `rules.yaml` to `rules.yaml.bak.{date}` and restores the starter set.
+
+### E6.4 — Support handoff doc · **P1 · S**
+**Problem:** When the user emails Rafa "it doesn't work," there's no diagnostic to attach.
+**Recommendation:** A `support-bundle.command` that zips `install.log`, the output of `check.command` (B1.2), the contents of `pipeline/output/` (without raw transactions — just file names and counts), and uploads to a here.now URL Rafa can open. No PII leaves the laptop.
+
+---
+
+## Sequencing recommendation
+
+**Before kickoff (week of May 4):**
+- B1.1, B1.2, B1.4 — bootstrap installer + pre-flight + idempotency
+- E5.1, E5.2, E5.3 — the three privacy hard rules
+- E4.1, E4.2 — branded template + skill
+- E2.1, E2.2, E2.5 — auto-sort, dedupe, sanity gate
+- E3.1, E3.2 — single update command + inbox
+
+**During sprint, before the May meeting:**
+- E2.3, E2.4 — PDF support, normalization
+- E3.3, E3.4 — slug recovery, rule starter set
+- E4.3, E4.4, E4.6 — accessibility, chart guide, calculator slot
+- E5.4, E5.5 — log audit, gitignore + sync warning
+- E6.1, E6.2, E6.3, E6.4 — recovery commands
+
+**Sprint 2 (post-May):**
+- B1.3 — Windows/Linux installers
+- E3.5 — diff view between refreshes
+- E4.5 — print stylesheet
+- E5.6 — public privacy footer
+- H6.5.1 through H6.5.7 — full Epic 6.5 (zero-touch advisor onboarding + auto-telemetry)
+
+---
+
+## Two structural decisions to make this week
+
+These don't fit as line items but block multiple items above:
+
+1. **Build as a Claude skill or as a set of shell scripts?** A skill (`finance-clarity-build/`) bundles the template, the prompts, and the safety rules in one place that Claude auto-invokes. Shell scripts are more legible to the user but force the user to remember which command to run. **Recommendation: skill + a minimal set of shell entry points** (`install`, `start`, `refresh`, `delete`) so the user has 4 things to remember and Claude does the rest behind the scenes.
+
+2. **Where does the template live?** If `site-template/` lives in the bootstrap installer, every install gets the same version — but updates require re-installing. If it lives in the skill, Claude can update it without re-installing. **Recommendation: skill owns the template**, installer just provisions Claude Code which loads the skill on first run.

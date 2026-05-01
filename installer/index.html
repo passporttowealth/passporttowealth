@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Welcome — Passport to Wealth Finance Clarity</title>
+  <meta name="description" content="Set up your private financial dashboard from Passport to Wealth.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="assets/brand/favicon.png">
+  <style>
+    :root {
+      --color-bg: #faf8f4;
+      --color-surface: #ffffff;
+      --color-text: #1a1a1a;
+      --color-text-muted: #5a5a5a;
+      --color-accent: #0F1E33;        /* navy — sampled from passporttowealth.com logo */
+      --color-accent-hover: #1A2D48;
+      --color-warning-bg: #fff4d6;
+      --color-warning-border: #d9a300;
+      --color-warning-text: #5a3e00;
+      --radius: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+      --max-width: 640px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.6;
+      color: var(--color-text);
+      background: var(--color-bg);
+      -webkit-font-smoothing: antialiased;
+    }
+    main {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 48px 24px 96px;
+    }
+    header {
+      margin-bottom: 32px;
+    }
+    h1 {
+      font-size: 28px;
+      line-height: 1.25;
+      margin: 0 0 12px;
+      letter-spacing: -0.01em;
+    }
+    .lede {
+      font-size: 18px;
+      color: var(--color-text-muted);
+      margin: 0;
+    }
+    h2 {
+      font-size: 22px;
+      margin: 48px 0 12px;
+      letter-spacing: -0.005em;
+    }
+    p { margin: 12px 0; }
+    .download-block {
+      background: var(--color-surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 32px;
+      margin: 32px 0;
+      text-align: center;
+    }
+    .download-button {
+      display: inline-block;
+      background: var(--color-accent);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 17px;
+      padding: 14px 28px;
+      border-radius: var(--radius);
+      transition: background 0.15s ease;
+    }
+    .download-button:hover { background: var(--color-accent-hover); }
+    .download-fineprint {
+      margin-top: 16px;
+      font-size: 14px;
+      color: var(--color-text-muted);
+    }
+    .gatekeeper {
+      background: var(--color-warning-bg);
+      border-left: 4px solid var(--color-warning-border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin: 32px 0;
+      color: var(--color-warning-text);
+    }
+    .gatekeeper h3 {
+      margin: 0 0 8px;
+      font-size: 17px;
+    }
+    .gatekeeper ol {
+      margin: 12px 0 0;
+      padding-left: 22px;
+    }
+    .gatekeeper li {
+      margin: 8px 0;
+    }
+    .gatekeeper code {
+      background: rgba(0,0,0,0.06);
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.92em;
+    }
+    .gatekeeper-screenshots {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .gatekeeper-screenshots img {
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+    .gatekeeper-screenshots .placeholder {
+      background: rgba(0,0,0,0.04);
+      border: 1px dashed rgba(0,0,0,0.15);
+      border-radius: 6px;
+      padding: 24px 12px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--color-text-muted);
+    }
+    .what-this-does ul {
+      padding-left: 22px;
+    }
+    .what-this-does li {
+      margin: 6px 0;
+    }
+    footer {
+      margin-top: 80px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      font-size: 13px;
+      color: var(--color-text-muted);
+      text-align: center;
+    }
+    footer a {
+      color: var(--color-text-muted);
+      text-decoration: underline;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .download-button { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div style="text-align: center; margin: 0 0 32px;">
+      <img src="assets/brand/logo-blue.png"
+           alt="Passport to Wealth"
+           width="120"
+           height="112"
+           style="display: inline-block; max-width: 100%; height: auto;">
+    </div>
+
+    <aside role="note" aria-label="Prototype warning" style="background: #fff4d6; border: 1px solid #d9a300; border-left-width: 5px; border-radius: 8px; padding: 16px 20px; margin: 0 0 32px; color: #5a3e00;">
+      <strong>⚠ Prototype — pre-release.</strong>
+      This is a pilot tool for clients of Passport to Wealth, under active development.
+      Use it as a complement to — not a replacement for — your existing financial records.
+      Expect bugs and incomplete features. Do not delete original bank exports or statements
+      based on what the dashboard shows.
+    </aside>
+
+    <header>
+      <h1>Welcome to your Finance Clarity setup</h1>
+      <p class="lede">A one-time install on your Mac or Windows PC. About 10 minutes if you've installed developer tools before, up to an hour on a fresh computer.</p>
+    </header>
+
+    <div class="download-block">
+      <div id="primary-download">
+        <!-- Filled in by the OS-detection script below; falls back to showing both. -->
+      </div>
+      <noscript>
+        <a class="download-button" href="https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.command" download="Welcome.command">Download for Mac</a>
+        <p class="download-fineprint" style="margin-top: 12px;">
+          On Windows? Download <a href="https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.bat" download="Welcome.bat">Welcome.bat</a> and <a href="https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.ps1" download="Welcome.ps1">Welcome.ps1</a> (keep them in the same folder).
+        </p>
+      </noscript>
+      <p class="download-fineprint" id="other-platform"></p>
+    </div>
+    <script>
+      (function() {
+        var ua = navigator.userAgent || '';
+        var isMac = /Macintosh|Mac OS X/.test(ua);
+        var isWin = /Windows NT/.test(ua);
+        var primary = document.getElementById('primary-download');
+        var other = document.getElementById('other-platform');
+        var macHTML = '<a class="download-button" href="https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.command" download="Welcome.command">Download for Mac</a>'
+                    + '<p class="download-fineprint">macOS 13 (Ventura) or later · Personal Macs only</p>';
+        var winHTML = '<a class="download-button" href="https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.bat" download="Welcome.bat">Download for Windows</a>'
+                    + '<p class="download-fineprint">Windows 10 (build 1903+) or Windows 11 · Personal PCs only</p>'
+                    + '<p class="download-fineprint" style="font-size: 13px; margin-top: 8px;">You also need <a href="https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.ps1" download="Welcome.ps1">Welcome.ps1</a> in the same folder. (Right-click the link → Save link as.)</p>';
+        if (isWin) {
+          primary.innerHTML = winHTML;
+          other.innerHTML = 'On a Mac? <a href="https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.command" download="Welcome.command">Download for Mac</a> instead.';
+        } else if (isMac) {
+          primary.innerHTML = macHTML;
+          other.innerHTML = 'On Windows? <a href="https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.bat" download="Welcome.bat">Download for Windows</a> instead.';
+        } else {
+          // Unknown OS — show both, default to Mac since that's the v1 reference.
+          primary.innerHTML = macHTML
+            + '<div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(0,0,0,0.08);">' + winHTML + '</div>';
+        }
+      })();
+    </script>
+
+    <section class="what-this-does">
+      <h2>What this does</h2>
+      <p>The installer sets up everything you need to turn a folder of your financial files into a private, password-protected dashboard you can open from any device. After it finishes, you'll have a <strong>START-HERE</strong> shortcut on your Desktop. That's the only thing you ever need to remember.</p>
+      <ul>
+        <li>Your files stay on your laptop.</li>
+        <li>Only the final dashboard is online — and only people with your passcode can see it.</li>
+        <li>The installer asks how you sign in to Claude (Pro, Max, or API key) and walks you through the rest.</li>
+      </ul>
+    </section>
+
+    <aside class="gatekeeper" role="note" aria-label="OS warning instructions" id="gatekeeper-mac">
+      <h3>⚠ Mac will warn you about this file — that's normal. Here's what to do:</h3>
+      <ol>
+        <li>When you double-click <code>Welcome.command</code>, Mac will say "<em>Welcome.command cannot be opened because Apple cannot check it for malicious software.</em>" Click <strong>Cancel</strong>.</li>
+        <li>Open <strong>Finder</strong>, go to your <strong>Downloads</strong> folder. <strong>Right-click</strong> on <code>Welcome.command</code> and choose <strong>Open</strong>.</li>
+        <li>Mac asks again, this time with an <strong>Open</strong> button. Click it.</li>
+      </ol>
+      <p style="margin: 16px 0 0; font-size: 14px;">You only do this the first time. After that, the <strong>START-HERE</strong> shortcut on your Desktop opens normally.</p>
+      <div class="gatekeeper-screenshots" aria-hidden="true">
+        <div class="placeholder">Step 1 screenshot<br><span style="font-size: 11px;">(to be added)</span></div>
+        <div class="placeholder">Step 2 screenshot<br><span style="font-size: 11px;">(to be added)</span></div>
+        <div class="placeholder">Step 3 screenshot<br><span style="font-size: 11px;">(to be added)</span></div>
+      </div>
+    </aside>
+
+    <aside class="gatekeeper" role="note" aria-label="Windows warning instructions" id="gatekeeper-win" style="display: none;">
+      <h3>⚠ Windows will warn you about this file — that's normal. Here's what to do:</h3>
+      <ol>
+        <li>When you double-click <code>Welcome.bat</code>, Windows SmartScreen will show a blue dialog: "<em>Microsoft Defender SmartScreen prevented an unrecognized app from starting.</em>"</li>
+        <li>Click <strong>More info</strong> in the SmartScreen dialog.</li>
+        <li>A <strong>Run anyway</strong> button appears. Click it.</li>
+      </ol>
+      <p style="margin: 16px 0 0; font-size: 14px;">You only do this the first time. After that, the <strong>START-HERE</strong> shortcut on your Desktop opens normally.</p>
+      <p style="margin: 12px 0 0; font-size: 14px;"><strong>Important:</strong> Make sure both <code>Welcome.bat</code> and <code>Welcome.ps1</code> are in the same folder (your Downloads folder is fine). The <code>.bat</code> file calls the <code>.ps1</code> next to it.</p>
+      <div class="gatekeeper-screenshots" aria-hidden="true">
+        <div class="placeholder">SmartScreen step 1<br><span style="font-size: 11px;">(to be added)</span></div>
+        <div class="placeholder">"More info" link<br><span style="font-size: 11px;">(to be added)</span></div>
+        <div class="placeholder">"Run anyway" click<br><span style="font-size: 11px;">(to be added)</span></div>
+      </div>
+    </aside>
+
+    <script>
+      (function() {
+        var ua = navigator.userAgent || '';
+        if (/Windows NT/.test(ua)) {
+          document.getElementById('gatekeeper-mac').style.display = 'none';
+          document.getElementById('gatekeeper-win').style.display = '';
+        }
+      })();
+    </script>
+
+    <section>
+      <h2>If something goes wrong</h2>
+      <p>The installer writes a log file and tells you what to do. If you get stuck, contact your advisor with the log file attached.</p>
+      <ul>
+        <li><strong>Mac:</strong> <code>~/Library/Logs/passport-to-wealth-install.log</code></li>
+        <li><strong>Windows:</strong> <code>%LOCALAPPDATA%\PassportToWealth\Logs\passport-to-wealth-install.log</code></li>
+      </ul>
+    </section>
+
+    <footer>
+      <p>© 2026 Passport to Wealth · All rights reserved · <a href="https://www.passporttowealth.com/">passporttowealth.com</a></p>
+    </footer>
+  </main>
+</body>
+</html>

@@ -1,0 +1,136 @@
+# Starter merchant categorization rules — EU + US + UK cross-border audience.
+# Loaded into ~/Documents/my-finances/rules.yaml on first install. Users add
+# their own rules here over time.
+#
+# Format (per spec §10.1):
+#   - match: "regex pattern (case-insensitive)"
+#     type: regex
+#     category: Top-level category (one of the names listed below)
+#     subcategory: Optional finer-grained label
+#
+# Categories used by the dashboard's spend-by-category chart:
+#   Groceries, Restaurants, Transport, Travel, Housing, Utilities,
+#   Childcare, Healthcare, Personal Care, Shopping, Subscriptions,
+#   Entertainment, Gifts, Cash, Income, Tax, Investment, Insurance,
+#   Fees, Other
+#
+# Special tokens (§10.4):
+#   SPLIT_AMAZON   — proportional split across categories from parsed orders
+#   SPLIT_ATM      — configurable split (default 70/30 household / misc)
+#   EXCLUDE        — drop from totals (transfers between own accounts, etc.)
+#
+# Order matters: first match wins. Specific rules first; general patterns last.
+
+# ─── Self-transfers and credit-card payments (always EXCLUDE) ─────────────────
+- {match: "(?i)wise|transferwise",                          type: regex, category: EXCLUDE,       subcategory: "Cross-currency transfer"}
+- {match: "(?i)revolut",                                     type: regex, category: EXCLUDE,       subcategory: "Revolut transfer"}
+- {match: "(?i)autopay|automatic payment|credit crd autopay", type: regex, category: EXCLUDE,     subcategory: "Credit card payment"}
+- {match: "(?i)paypal\\s*\\*",                              type: regex, category: Shopping,      subcategory: "PayPal (split by merchant tail)"}
+- {match: "(?i)journal|wire received|funds received|incoming wire", type: regex, category: EXCLUDE, subcategory: "Internal transfer"}
+- {match: "(?i)transfer to|transfer from|interaccount",     type: regex, category: EXCLUDE,       subcategory: "Internal transfer"}
+- {match: "(?i)atm|cash withdrawal|geldautomat|bancomat",   type: regex, category: SPLIT_ATM,     subcategory: "Cash withdrawal"}
+
+# ─── Income-shaped credits ────────────────────────────────────────────────────
+- {match: "(?i)salary|payroll|gehalt|lohn",                 type: regex, category: Income,        subcategory: "Salary"}
+- {match: "(?i)kindergeld|familienkasse|child benefit",     type: regex, category: Income,        subcategory: "Child benefit (DE)"}
+- {match: "(?i)bundesagentur",                              type: regex, category: Income,        subcategory: "DE govt benefit"}
+- {match: "(?i)hmrc|tax credit|tax refund|irs refund",      type: regex, category: Income,        subcategory: "Tax refund"}
+
+# ─── Tax (outflows) ───────────────────────────────────────────────────────────
+- {match: "(?i)finanzamt",                                   type: regex, category: Tax,           subcategory: "DE tax payment"}
+- {match: "(?i)hmrc payment",                                type: regex, category: Tax,           subcategory: "UK tax payment"}
+- {match: "(?i)irs|estimated tax",                           type: regex, category: Tax,           subcategory: "US tax payment"}
+
+# ─── Housing ──────────────────────────────────────────────────────────────────
+- {match: "(?i)rent|miete|loyer",                            type: regex, category: Housing,       subcategory: "Rent"}
+- {match: "(?i)mortgage|hypothek",                           type: regex, category: Housing,       subcategory: "Mortgage"}
+- {match: "(?i)hausverwaltung|hoa|building service",         type: regex, category: Housing,       subcategory: "Building/HOA"}
+
+# ─── Utilities ────────────────────────────────────────────────────────────────
+- {match: "(?i)e\\.on|vattenfall|edf|british gas|energie",   type: regex, category: Utilities,     subcategory: "Electricity / gas"}
+- {match: "(?i)berliner wasser|thames water|veolia|water co",type: regex, category: Utilities,     subcategory: "Water"}
+- {match: "(?i)telekom deutschland|vodafone|o2 germany|deutsche telekom", type: regex, category: Utilities, subcategory: "Telecom (DE)"}
+- {match: "(?i)bt group|sky\\s",                             type: regex, category: Utilities,     subcategory: "Telecom (UK)"}
+- {match: "(?i)at&t|verizon|t-mobile|comcast|xfinity",       type: regex, category: Utilities,     subcategory: "Telecom (US)"}
+
+# ─── Groceries (EU) ──────────────────────────────────────────────────────────
+- {match: "(?i)rewe|edeka|aldi|lidl|kaufland|netto|penny|hit",       type: regex, category: Groceries,     subcategory: "Supermarket (DE)"}
+- {match: "(?i)alnatura|bio[- ]?company|denn[\\.\\']?s",             type: regex, category: Groceries,     subcategory: "Supermarket (organic, DE)"}
+- {match: "(?i)carrefour|monoprix|franprix|auchan|leclerc",          type: regex, category: Groceries,     subcategory: "Supermarket (FR)"}
+- {match: "(?i)tesco|sainsbur|waitrose|asda|morrisons|lidl gb",      type: regex, category: Groceries,     subcategory: "Supermarket (UK)"}
+- {match: "(?i)whole foods|trader joe|kroger|safeway|publix|wegmans",type: regex, category: Groceries,     subcategory: "Supermarket (US)"}
+
+# ─── Restaurants & delivery ──────────────────────────────────────────────────
+- {match: "(?i)wolt|deliveroo|uber\\s*\\*?\\s*eats|doordash|grubhub|just eat|lieferando", type: regex, category: Restaurants, subcategory: "Food delivery"}
+- {match: "(?i)mcdonald|burger king|kfc|subway|chipotle|five guys",  type: regex, category: Restaurants,   subcategory: "Fast food"}
+- {match: "(?i)starbucks|costa coffee|pret a manger|cafe|coffee",    type: regex, category: Restaurants,   subcategory: "Coffee / cafe"}
+- {match: "(?i)restaurant|bistro|trattoria|brasserie|pizzeria",      type: regex, category: Restaurants,   subcategory: "Restaurant"}
+- {match: "(?i)bar |pub |kneipe|brewery",                            type: regex, category: Entertainment, subcategory: "Bars"}
+
+# ─── Transport ────────────────────────────────────────────────────────────────
+- {match: "(?i)bvg|mvv|hvv|rmv|s-bahn|deutsche bahn|db vertrieb",    type: regex, category: Transport,     subcategory: "Public transport (DE)"}
+- {match: "(?i)tfl |oyster|transport for london|trainline",          type: regex, category: Transport,     subcategory: "Public transport (UK)"}
+- {match: "(?i)bart|mta|cta|caltrain|amtrak",                        type: regex, category: Transport,     subcategory: "Public transport (US)"}
+- {match: "(?i)uber\\s*\\*?\\s*trip|lyft",                           type: regex, category: Transport,     subcategory: "Ride-hailing"}
+- {match: "(?i)bolt eu|free now|mytaxi",                             type: regex, category: Transport,     subcategory: "Ride-hailing (EU)"}
+- {match: "(?i)lime|bird|tier|voi",                                  type: regex, category: Transport,     subcategory: "Scooter"}
+- {match: "(?i)shell|aral|esso|bp |chevron|exxon|tankstelle|gas station", type: regex, category: Transport, subcategory: "Fuel"}
+- {match: "(?i)avis|hertz|sixt|enterprise|europcar|miles mobility",  type: regex, category: Transport,     subcategory: "Car rental / sharing"}
+
+# ─── Travel ───────────────────────────────────────────────────────────────────
+- {match: "(?i)airbnb|booking\\.com|booking com|expedia|hotels\\.com|hotel ", type: regex, category: Travel, subcategory: "Lodging"}
+- {match: "(?i)lufthansa|british airways|easyjet|ryanair|delta air|united air|american airlines|klm|swiss intl", type: regex, category: Travel, subcategory: "Flights"}
+
+# ─── Childcare ────────────────────────────────────────────────────────────────
+- {match: "(?i)kindergarten|kita |kindergart|daycare|nursery school", type: regex, category: Childcare,    subcategory: "Daycare"}
+- {match: "(?i)babysitter|au-pair|babysitting",                       type: regex, category: Childcare,   subcategory: "Babysitting"}
+
+# ─── Healthcare ───────────────────────────────────────────────────────────────
+- {match: "(?i)apotheke|pharmacy|cvs|walgreens|boots\\.com|boots ",   type: regex, category: Healthcare,   subcategory: "Pharmacy"}
+- {match: "(?i)krankenkasse|tk berlin|aok|barmer|dak ",               type: regex, category: Insurance,    subcategory: "Health insurance (DE)"}
+- {match: "(?i)bupa|nhs ",                                            type: regex, category: Insurance,    subcategory: "Health insurance (UK)"}
+- {match: "(?i)blue cross|blue shield|kaiser perm|aetna|cigna|united health", type: regex, category: Insurance, subcategory: "Health insurance (US)"}
+- {match: "(?i)dr\\.\\s|doctor|arzt|zahnarzt|dental|clinic",          type: regex, category: Healthcare,   subcategory: "Doctor / clinic"}
+
+# ─── Personal care ────────────────────────────────────────────────────────────
+- {match: "(?i)dm[- ]?drogerie|dm sagt",                              type: regex, category: Personal Care, subcategory: "Drugstore (DM)"}
+- {match: "(?i)rossmann|sephora|douglas\\.de",                        type: regex, category: Personal Care, subcategory: "Drugstore / cosmetics"}
+- {match: "(?i)hairdresser|friseur|barber|salon",                     type: regex, category: Personal Care, subcategory: "Hairdresser / barber"}
+- {match: "(?i)holmes place|fitness first|equinox|gym|crossfit|yoga ", type: regex, category: Personal Care, subcategory: "Gym / fitness"}
+
+# ─── Shopping ─────────────────────────────────────────────────────────────────
+- {match: "(?i)amazon|amzn",                                          type: regex, category: SPLIT_AMAZON, subcategory: "Amazon (auto-split)"}
+- {match: "(?i)zalando|asos|hm |h&m|zara|cos |massimo dutti",         type: regex, category: Shopping,     subcategory: "Clothing"}
+- {match: "(?i)ikea|bauhaus|home depot|b&q|leroy merlin",             type: regex, category: Shopping,     subcategory: "Home improvement"}
+- {match: "(?i)media markt|saturn|best buy|currys",                   type: regex, category: Shopping,     subcategory: "Electronics"}
+
+# ─── Subscriptions (digital) ─────────────────────────────────────────────────
+- {match: "(?i)netflix",                                              type: regex, category: Entertainment, subcategory: "Netflix"}
+- {match: "(?i)spotify",                                              type: regex, category: Entertainment, subcategory: "Spotify"}
+- {match: "(?i)apple\\.com/bill|apple one|itunes",                    type: regex, category: Subscriptions, subcategory: "Apple"}
+- {match: "(?i)google one|google\\s*\\*?\\s*storage|google\\s*\\*?\\s*workspace", type: regex, category: Subscriptions, subcategory: "Google services"}
+- {match: "(?i)adobe|microsoft\\s*\\*?\\s*365|microsoft 365",         type: regex, category: Subscriptions, subcategory: "Software"}
+- {match: "(?i)claude\\.ai|anthropic|openai|chatgpt",                 type: regex, category: Subscriptions, subcategory: "AI assistants"}
+- {match: "(?i)disney\\s*\\+?|hbo|hulu|paramount\\+",                 type: regex, category: Entertainment, subcategory: "Streaming"}
+- {match: "(?i)nytimes|economist|wsj|substack|patreon",               type: regex, category: Subscriptions, subcategory: "News / writing"}
+
+# ─── Insurance ────────────────────────────────────────────────────────────────
+- {match: "(?i)allianz|axa |hdi|gothaer|debeka|cosmos direkt",        type: regex, category: Insurance,    subcategory: "Insurance (DE)"}
+- {match: "(?i)direct line|aviva|admiral",                            type: regex, category: Insurance,    subcategory: "Insurance (UK)"}
+- {match: "(?i)geico|state farm|allstate|progressive insurance",      type: regex, category: Insurance,    subcategory: "Insurance (US)"}
+
+# ─── Fees ─────────────────────────────────────────────────────────────────────
+- {match: "(?i)foreign txn fee|foreign transaction fee|fx fee|currency conversion", type: regex, category: Fees, subcategory: "FX fees"}
+- {match: "(?i)wire fee|atm fee|service charge|account fee",          type: regex, category: Fees,         subcategory: "Bank fees"}
+- {match: "(?i)late fee|finance charge",                              type: regex, category: Fees,         subcategory: "Late fees"}
+
+# ─── Investments (usually EXCLUDE in cashflow view) ──────────────────────────
+- {match: "(?i)^buy |^sell |cash dividend|credit interest|dividend",  type: regex, category: EXCLUDE,      subcategory: "Investment activity"}
+- {match: "(?i)vanguard|fidelity|schwab|trading 212|degiro|interactive brokers", type: regex, category: Investment, subcategory: "Brokerage activity"}
+
+# ─── Catch-all hints ─────────────────────────────────────────────────────────
+- {match: "(?i)\\bdonation|red cross|unicef|wwf",                     type: regex, category: Gifts,        subcategory: "Charitable donation"}
+- {match: "(?i)birthday|anniversary|gift card|geschenk",              type: regex, category: Gifts,        subcategory: "Gift"}
+
+# Anything not matched falls into "Uncategorized" — surfaced for the user to
+# create a rule for during the next sanity gate.

@@ -1,0 +1,37 @@
+name: CI
+
+# STUB — runs on every PR and push to main.
+# Currently inert (no fixtures yet, no real scripts). See engagement/development/backlog.md
+# Epic 1.4 + spec §18.3 for the real fixture-runner.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  fixture-run:
+    name: End-to-end fixture run
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Detect whether fixtures exist
+        id: fixtures
+        run: |
+          if [ -d skill/references/test-fixtures ] && [ -n "$(ls -A skill/references/test-fixtures 2>/dev/null | grep -v README.md)" ]; then
+            echo "exist=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exist=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::No test fixtures yet — see skill/references/test-fixtures/README.md"
+          fi
+
+      - name: Run fixtures
+        if: steps.fixtures.outputs.exist == 'true'
+        run: bash skill/scripts/run_fixture.sh

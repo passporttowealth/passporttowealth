@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ DASHBOARD_TITLE }}</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="assets/brand/favicon.png">
+  <style>
+    :root {
+      --color-bg: #FFFFFF;
+      --color-bg-warm: #FAF8F4;
+      --color-surface: #F7F6F3;
+      --color-border: #E5E3DE;
+      --color-text: #2D2D2D;
+      --color-text-muted: #6B6B6B;
+      --color-text-subtle: #9A9A9A;
+      --color-accent: #0F1E33;
+      --color-accent-soft: #E8ECF2;
+      --color-positive: #2E7D5C;
+      --color-negative: #B33A2A;
+      --color-chart-1: #0F1E33;
+      --color-chart-2: #2E7D5C;
+      --color-chart-3: #D9A300;
+      --color-chart-4: #B33A2A;
+      --color-chart-5: #6B4FA1;
+      --color-chart-6: #2D8E9E;
+      --color-chart-7: #C26B3F;
+      --color-chart-8: #5C7A8C;
+      --space-2: 8px; --space-3: 12px; --space-4: 16px;
+      --space-5: 24px; --space-6: 32px; --space-7: 48px;
+      --radius-md: 8px; --radius-lg: 16px;
+      --shadow-sm: 0 1px 2px rgba(20,20,20,0.04), 0 1px 3px rgba(20,20,20,0.04);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 16px; line-height: 1.6;
+      color: var(--color-text); background: var(--color-bg);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--color-accent); }
+    header.brand {
+      text-align: center;
+      padding: var(--space-6) var(--space-4) var(--space-5);
+      background: var(--color-bg-warm);
+      border-bottom: 1px solid var(--color-border);
+    }
+    header.brand img { max-width: 140px; height: auto; }
+    header.brand .tagline {
+      color: var(--color-text-muted); font-size: 14px; margin-top: var(--space-3);
+    }
+    main {
+      max-width: 1080px; margin: 0 auto; padding: var(--space-6) var(--space-4);
+    }
+    h1 {
+      font-size: 28px; line-height: 1.25; margin: 0 0 var(--space-3);
+      letter-spacing: -0.01em;
+    }
+    h2 { font-size: 20px; margin: var(--space-7) 0 var(--space-3); }
+    .meta { color: var(--color-text-muted); font-size: 14px; }
+    .kpi-grid {
+      display: grid; gap: var(--space-4);
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      margin: var(--space-5) 0;
+    }
+    .kpi-card {
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: var(--radius-md); padding: var(--space-4);
+    }
+    .kpi-card .label {
+      color: var(--color-text-muted); font-size: 13px;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .kpi-card .value {
+      color: var(--color-accent); font-size: 28px; font-weight: 600;
+      margin-top: var(--space-2); letter-spacing: -0.01em;
+    }
+    .kpi-card.positive .value { color: var(--color-positive); }
+    .kpi-card.negative .value { color: var(--color-negative); }
+    .chart-card {
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: var(--radius-md); padding: var(--space-4);
+      margin: var(--space-4) 0;
+    }
+    .chart-card canvas { width: 100% !important; height: auto !important; display: block; }
+    table.tx {
+      width: 100%; border-collapse: collapse; font-size: 14px;
+      margin: var(--space-3) 0;
+    }
+    table.tx th, table.tx td {
+      text-align: left; padding: var(--space-2) var(--space-3);
+      border-bottom: 1px solid var(--color-border);
+    }
+    table.tx th {
+      font-weight: 600; color: var(--color-text-muted);
+      text-transform: uppercase; font-size: 12px; letter-spacing: 0.04em;
+      cursor: pointer; user-select: none;
+    }
+    table.tx td.amount { text-align: right; font-variant-numeric: tabular-nums; }
+    table.tx tr:hover td { background: var(--color-bg-warm); }
+    .filter-bar {
+      display: flex; gap: var(--space-3); flex-wrap: wrap;
+      margin: var(--space-3) 0;
+    }
+    .filter-bar input, .filter-bar select {
+      padding: var(--space-2) var(--space-3); font-size: 14px;
+      border: 1px solid var(--color-border); border-radius: var(--radius-md);
+      background: var(--color-bg);
+    }
+    .downloads {
+      background: var(--color-accent-soft); border-radius: var(--radius-md);
+      padding: var(--space-4); margin: var(--space-5) 0;
+    }
+    .downloads ul { margin: var(--space-2) 0 0; padding-left: var(--space-5); }
+    .downloads li { margin: var(--space-2) 0; }
+    footer {
+      max-width: 1080px; margin: var(--space-7) auto 0; padding: var(--space-5) var(--space-4);
+      border-top: 1px solid var(--color-border); color: var(--color-text-muted);
+      font-size: 13px; text-align: center;
+    }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+    @media print { .filter-bar, .no-print { display: none; } }
+  </style>
+</head>
+<body>
+  <header class="brand">
+    <img src="assets/brand/logo-blue.png" alt="Passport to Wealth">
+    <div class="tagline">Your private finance dashboard</div>
+  </header>
+  <main>
+    <h1>Your Finance Dashboard</h1>
+    <p class="meta">Generated <time>{{ GENERATED_AT }}</time> · {{ KPI_MONTHS }} months covered.</p>
+
+    <div class="kpi-grid">
+      <div class="kpi-card positive"><div class="label">Income</div><div class="value">{{ KPI_INCOME }}</div></div>
+      <div class="kpi-card negative"><div class="label">Spend</div><div class="value">{{ KPI_SPEND }}</div></div>
+      <div class="kpi-card"><div class="label">Net</div><div class="value">{{ KPI_NET }}</div></div>
+      <div class="kpi-card"><div class="label">Savings rate</div><div class="value">{{ KPI_SAVINGS_RATE }}</div></div>
+    </div>
+
+    <h2>Monthly cashflow</h2>
+    <div class="chart-card"><canvas id="chart-cashflow" width="900" height="320"></canvas></div>
+
+    <h2>Spend by category</h2>
+    <div class="chart-card"><canvas id="chart-category" width="900" height="400"></canvas></div>
+
+    <h2>Recent transactions</h2>
+    <div class="filter-bar no-print">
+      <input id="tx-search" type="search" placeholder="Search description…" aria-label="Search transactions">
+      <select id="tx-category" aria-label="Filter by category">
+        <option value="">All categories</option>
+      </select>
+      <select id="tx-account" aria-label="Filter by account">
+        <option value="">All accounts</option>
+      </select>
+    </div>
+    <table class="tx" id="tx-table">
+      <thead>
+        <tr>
+          <th data-sort="date">Date</th>
+          <th data-sort="description">Description</th>
+          <th data-sort="category">Category</th>
+          <th data-sort="account">Account</th>
+          <th data-sort="amount" class="amount">Amount</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="downloads">
+      <strong>Download your data</strong>
+      <ul>
+        <li><a href="downloads/transactions_tagged.csv">All transactions (CSV)</a> — every row, with categories</li>
+        <li><a href="downloads/monthly_actuals.csv">Monthly totals (CSV)</a> — month × category pivot</li>
+        <li><a href="downloads/rules.yaml">Categorization rules</a> — what mapped what</li>
+      </ul>
+    </div>
+  </main>
+  <footer>
+    Hosted privately. Server only serves this page after the passcode is verified.
+    Source data lives on the laptop that produced this dashboard.<br>
+    © Passport to Wealth · <a href="https://www.passporttowealth.com/">passporttowealth.com</a>
+  </footer>
+
+  <script id="dashboard-data" type="application/json">{{ DASHBOARD_DATA_JSON }}</script>
+  <script>
+    const data = JSON.parse(document.getElementById('dashboard-data').textContent);
+    const cur = data.currency || 'USD';
+    const fm = (v) => {
+      const sign = v < 0 ? '-' : '';
+      const sym = {USD:'$', EUR:'€', GBP:'£'}[cur] || (cur+' ');
+      return sign + sym + Math.abs(v).toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0});
+    };
+    const palette = ['#0F1E33','#2E7D5C','#D9A300','#B33A2A','#6B4FA1','#2D8E9E','#C26B3F','#5C7A8C'];
+
+    // ── Cashflow chart (canvas, hand-rolled — no chart library dependency) ───
+    function drawCashflow() {
+      const c = document.getElementById('chart-cashflow');
+      const ctx = c.getContext('2d');
+      const W = c.width, H = c.height;
+      const months = data.months;
+      const ins = data.by_month_in, outs = data.by_month_out;
+      const maxV = Math.max(...ins, ...outs, 1);
+      const padL = 60, padR = 16, padT = 16, padB = 36;
+      const innerW = W - padL - padR, innerH = H - padT - padB;
+      const bw = innerW / months.length / 2.5;
+      ctx.clearRect(0,0,W,H);
+      // Y-axis labels (3 ticks)
+      ctx.fillStyle = '#9A9A9A'; ctx.font = '11px -apple-system,sans-serif';
+      ctx.textAlign = 'right';
+      for (let i = 0; i <= 3; i++) {
+        const v = maxV * (1 - i/3);
+        const y = padT + innerH * (i/3);
+        ctx.fillText(fm(v), padL - 8, y + 3);
+        ctx.strokeStyle = '#E5E3DE'; ctx.beginPath();
+        ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+      }
+      // Bars
+      months.forEach((m, i) => {
+        const x = padL + i * (innerW / months.length) + (innerW / months.length / 2);
+        const inH = (ins[i] / maxV) * innerH;
+        const outH = (outs[i] / maxV) * innerH;
+        ctx.fillStyle = palette[1];
+        ctx.fillRect(x - bw - 2, padT + innerH - inH, bw, inH);
+        ctx.fillStyle = palette[3];
+        ctx.fillRect(x + 2, padT + innerH - outH, bw, outH);
+        ctx.fillStyle = '#6B6B6B'; ctx.textAlign = 'center';
+        ctx.fillText(m.slice(5), x, H - 14);
+      });
+      // Legend
+      ctx.fillStyle = palette[1]; ctx.fillRect(padL, padT - 10, 10, 10);
+      ctx.fillStyle = '#2D2D2D'; ctx.textAlign = 'left'; ctx.fillText('Income', padL + 14, padT - 1);
+      ctx.fillStyle = palette[3]; ctx.fillRect(padL + 70, padT - 10, 10, 10);
+      ctx.fillStyle = '#2D2D2D'; ctx.fillText('Spend', padL + 84, padT - 1);
+    }
+
+    // ── Category bar chart (horizontal) ──────────────────────────────────────
+    function drawCategory() {
+      const c = document.getElementById('chart-category');
+      const ctx = c.getContext('2d');
+      const W = c.width, H = c.height;
+      const items = data.category_totals.slice(0, 12);
+      const maxV = Math.max(...items.map(x => x[1]), 1);
+      const padL = 140, padR = 80, padT = 8, padB = 8;
+      const innerW = W - padL - padR;
+      const rowH = (H - padT - padB) / Math.max(items.length, 1);
+      ctx.clearRect(0,0,W,H);
+      ctx.font = '13px -apple-system,sans-serif';
+      items.forEach(([cat, amt], i) => {
+        const y = padT + i * rowH;
+        const w = (amt / maxV) * innerW;
+        ctx.fillStyle = palette[i % palette.length];
+        ctx.fillRect(padL, y + 4, w, rowH - 8);
+        ctx.fillStyle = '#2D2D2D'; ctx.textAlign = 'right';
+        ctx.fillText(cat, padL - 8, y + rowH/2 + 4);
+        ctx.textAlign = 'left'; ctx.fillStyle = '#6B6B6B';
+        ctx.fillText(fm(amt), padL + w + 6, y + rowH/2 + 4);
+      });
+    }
+
+    // ── Transactions table with filter + sort ────────────────────────────────
+    let txData = data.transactions.slice();
+    let sortKey = 'date'; let sortDesc = true;
+    function renderTable() {
+      const search = document.getElementById('tx-search').value.toLowerCase();
+      const cat = document.getElementById('tx-category').value;
+      const acct = document.getElementById('tx-account').value;
+      let view = txData.filter(t =>
+        (!search || t.description.toLowerCase().includes(search)) &&
+        (!cat || t.category === cat) &&
+        (!acct || t.account === acct)
+      );
+      view.sort((a,b) => {
+        const av = a[sortKey], bv = b[sortKey];
+        const cmp = (av < bv) ? -1 : (av > bv) ? 1 : 0;
+        return sortDesc ? -cmp : cmp;
+      });
+      const tbody = document.querySelector('#tx-table tbody');
+      tbody.innerHTML = view.slice(0, 200).map(t =>
+        `<tr><td>${t.date}</td><td>${t.description}</td><td>${t.category}</td>` +
+        `<td>${t.account}</td><td class="amount">${fm(t.amount)}</td></tr>`
+      ).join('');
+    }
+    function populateFilters() {
+      const cats = [...new Set(txData.map(t => t.category))].sort();
+      const accts = [...new Set(txData.map(t => t.account))].sort();
+      const catSel = document.getElementById('tx-category');
+      const acctSel = document.getElementById('tx-account');
+      cats.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; catSel.appendChild(o); });
+      accts.forEach(a => { const o = document.createElement('option'); o.value = a; o.textContent = a; acctSel.appendChild(o); });
+    }
+
+    document.querySelectorAll('#tx-table th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const k = th.getAttribute('data-sort');
+        if (sortKey === k) sortDesc = !sortDesc; else { sortKey = k; sortDesc = true; }
+        renderTable();
+      });
+    });
+    document.getElementById('tx-search').addEventListener('input', renderTable);
+    document.getElementById('tx-category').addEventListener('change', renderTable);
+    document.getElementById('tx-account').addEventListener('change', renderTable);
+
+    populateFilters();
+    drawCashflow();
+    drawCategory();
+    renderTable();
+  </script>
+</body>
+</html>

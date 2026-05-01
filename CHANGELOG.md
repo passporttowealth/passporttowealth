@@ -1,0 +1,29 @@
+# Changelog
+
+> **⚠ Prototype — pre-release.** Versions in the `0.x.y` range are pre-release. Treat any update as potentially breaking until the project reaches `1.0.0`.
+
+All notable changes to this repository will be documented here. The skill self-update flow reads from this file (and the matching GitHub Releases) to decide whether to prompt clients to update.
+
+Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions follow [SemVer](https://semver.org/).
+
+## [Unreleased]
+
+- Initial repository scaffold.
+- Planning docs: project overview, kickoff agenda, demo script, full skill spec, backlog, repo layout.
+- Stub installer (`installer/Welcome.command`) and landing page (`installer/index.html`) — not yet functional.
+- Stub skill structure (`skill/`) — not yet functional.
+- LICENSE: proprietary, all rights reserved, with a personal-use grant for clients of Passport to Wealth.
+- Anthropic data-terms consent gate added to `Welcome.command` (OP-13) — required before any install action runs.
+- Prototype-status disclosures added to README, installer landing page, `Welcome.command`, SECURITY.md, CHANGELOG, SKILL.md, spec, demo script, and backlog.
+- Cross-platform installer scaffolding: `installer/Welcome.bat` + `installer/Welcome.ps1` (Windows), OS-detecting landing page, SmartScreen workaround instructions for Windows mirroring the Gatekeeper instructions for Mac.
+- Real brand assets pulled from passporttowealth.com: `assets/brand/logo-blue.png`, `logo-white.png`, `favicon.png`. Single canonical location, symlinked from both `installer/assets/brand/` and `skill/templates/site/assets/brand/`. License remains Passport to Wealth's; see `assets/brand/README.md`.
+- Brand color corrected after pixel-sampling the real logo: deep navy `#0F1E33` (not the brighter blue inferred from the WebFetch summary). `DESIGN_TOKENS.md`, the chart palette, and `installer/index.html` updated accordingly.
+- Feedback channel: new `"I have feedback"` intent in the skill (spec §15.1) with triple-delivery (local save + mailto + optional HTTP POST). `feedback.endpoint_url` config field added to `config.example.yaml`. `docs/feedback-channel.md` documents a deploy-yourself Cloudflare Worker recipe that creates GitHub issues from the POSTs (advisor-side; clients never hold credentials).
+- `docs/advisor-onboarding.md`: playbook for sharing install links, pre-flight checklist, kickoff session walkthrough, post-install handoff.
+- `docs/troubleshooting.md`: per-error-code playbook (FCB-0001 through FCB-1102) with what-to-say-to-the-client phrasing for each code class.
+- Skill prompts written: `prompts/greeting.md`, `prompts/sanity_gate.md`, `prompts/refresh.md`, `prompts/user_facing_strings.md` (single source of truth for OP-8-clean copy).
+- `templates/rules-starter.yaml`: ~75 starter merchant rules covering common EU + US + UK merchants, derived from the existing custom-build categorize.py.
+- **Demo kit**: new `demo-kit/` at repo root with `build_demo.py` (deterministic generator) and `data/` containing 7 fully synthetic files: 12-month USD checking CSV (~400 transactions), small brokerage CSV with paired transfers, a Q3 duplicate to test the deduper, two text-layer PDFs (paystub, tax doc) that should trip OP-1 sensitive-content detection, an Amazon orders PDF (OK to read), and an image-only PDF that should land in `05_other/`. `demo-kit/README.md` walks the tester through dropping it into a fresh workspace inbox.
+- **Core pipeline scripts** functional end-to-end against the demo kit: `_lib.py` (shared utilities — workspace resolution, redacted logging, error envelopes, OP-1 sensitivity check, CSV reader handling quoted comments), `classify.py` (filename + content-aware sort with OP-1 enforcement), `dedupe.py` (SHA + content-overlap detection), `normalize.py` (currency / sign / date normalization), `fx_fetch.py` (Frankfurter primary with cache + fallback chain), `categorize.py` (rule engine + transfer detection), `sanity.py` (hard floors + interactive gate writing `sanity_confirmed.json`), `build_site.py` (template populator with sanity-gate enforcement).
+- **Orchestration scripts**: `refresh.sh` (full pipeline orchestration), `publish.sh` (race-safe two-step publish wired with stubs pending real here.now token), `feedback.sh` (triple-delivery feedback channel), `support-bundle.sh` (triple-path delivery: Desktop zip + optional upload + mailto/clipboard/Terminal).
+- **Site template populated**: `skill/templates/site/index.html` is now a real, brand-colored, mobile-responsive dashboard. KPI cards, hand-rolled canvas charts (cashflow + spend-by-category), filterable+sortable transactions table, downloads block, privacy footer. No external CDN dependencies. Uses brand assets via the `assets/brand/` symlink.
