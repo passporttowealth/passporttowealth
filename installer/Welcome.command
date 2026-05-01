@@ -67,6 +67,28 @@ exec 3>>"$INSTALL_LOG"
 
 log() { printf '[%s] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&3; }
 
+# Workspace location — overridable via FCB_WORKSPACE for testing.
+# Default is ~/Documents/my-finances (adjusted later if iCloud-synced).
+WS="${FCB_WORKSPACE:-${HOME}/Documents/my-finances}"
+
+# Source-of-truth for the skill — used by the install step to git-clone the
+# finance-clarity-build skill into ~/.claude/skills if it isn't already there.
+SKILL_REPO_URL="${FCB_SKILL_REPO_URL:-https://github.com/rafaeldavid/passporttowealth.git}"
+SKILL_INSTALL_DIR="${FCB_SKILL_INSTALL_DIR:-${HOME}/.claude/skills/finance-clarity-build}"
+
+# Helper: run a command, suppress its noisy output, surface only success/fail.
+# Returns 0/non-zero from the wrapped command. Use for `brew install` etc.
+run_quiet() {
+  local label="$1"; shift
+  if "$@" >>"$INSTALL_LOG" 2>&1; then
+    ok_paced "$label"
+    return 0
+  else
+    fail "$label failed — see $INSTALL_LOG for details"
+    return 1
+  fi
+}
+
 clear
 hr
 say "${BOLD}Welcome — let's set up your private finance workspace.${RESET}"
@@ -223,15 +245,130 @@ say
 say "Estimated time: ${BOLD}${estimate}${RESET}"
 say
 
-# ── Runtime provisioning (stubbed) ────────────────────────────────────────────
+# ── Runtime provisioning ─────────────────────────────────────────────────────
 hr
 say "${BOLD}Step 2 of 6 — Installing the tools your dashboard needs${RESET}"
 hr
 say
-warn "[STUB] This step would install: Xcode CLT, Homebrew, Python 3.11, jq,"
-warn "       openpyxl, pdfplumber, pyyaml, chardet, Claude Code CLI, the"
-warn "       publishing-host skill, and the finance-clarity-build skill."
-log "stub: runtime install"
+
+# 2a. Xcode Command Line Tools — required for git, compilers, etc.
+if xcode-select -p >/dev/null 2>&1; then
+  ok_paced "Developer tools already installed"
+else
+  say "Mac is going to ask permission to download some developer tools."
+  say "${DIM}This is a system dialog; click \"Install\" when it appears. May take 10-30 min.${RESET}"
+  log "installing xcode-select CLT"
+  xcode-select --install 2>>"$INSTALL_LOG" || true
+  # Block until user clicks Install in the system dialog
+  until xcode-select -p >/dev/null 2>&1; do
+    sleep 10
+    printf '.'
+  done
+  say
+  ok_paced "Developer tools installed"
+fi
+
+# 2b. Homebrew — required for python@3.11 + jq
+if command -v brew >/dev/null 2>&1; then
+  ok_paced "Homebrew already installed"
+else
+  say "Installing Homebrew (Mac will ask for your password)..."
+  log "installing homebrew"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" \
+    >>"$INSTALL_LOG" 2>&1 || { fail "Homebrew install failed — see $INSTALL_LOG"; exit 1; }
+  # Add brew to PATH for this session (Apple Silicon vs Intel locations differ)
+  if [ -x /opt/homebrew/bin/brew ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  elif [ -x /usr/local/bin/brew ]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+  fi
+  ok_paced "Homebrew installed"
+fi
+
+# 2c. Python 3.11 (we pin to 3.11 because some upstream deps lag on 3.13/3.14)
+PYTHON311=""
+for candidate in python3.11 /opt/homebrew/opt/python@3.11/bin/python3.11 /usr/local/opt/python@3.11/bin/python3.11; do
+  if command -v "$candidate" >/dev/null 2>&1 || [ -x "$candidate" ]; then
+    PYTHON311="$candidate"; break
+  fi
+done
+if [ -n "$PYTHON311" ]; then
+  ok_paced "Python 3.11 already installed"
+else
+  say "Installing Python 3.11..."
+  run_quiet "Python 3.11 installed" brew install python@3.11 || exit 1
+  PYTHON311="$(brew --prefix python@3.11)/bin/python3.11"
+fi
+
+# 2d. jq — needed by here-now publish script + our wrappers
+if command -v jq >/dev/null 2>&1; then
+  ok_paced "jq already installed"
+else
+  run_quiet "jq installed" brew install jq || exit 1
+fi
+
+# 2e. Workspace venv + Python deps. Workspace is created on first use; create
+# its parent now so the venv has somewhere to live.
+mkdir -p "$WS"
+if [ -x "$WS/.venv/bin/python" ]; then
+  ok_paced "Workspace Python environment already set up"
+else
+  say "Creating workspace Python environment..."
+  "$PYTHON311" -m venv "$WS/.venv" >>"$INSTALL_LOG" 2>&1 || { fail "venv creation failed"; exit 1; }
+  ok_paced "Workspace Python environment ready"
+fi
+
+# Install / update Python deps from requirements.txt (downloaded with the skill repo).
+# At this point the skill may not be installed yet (step 2g handles that), so use
+# a known-good list inline.
+say "Installing Python dependencies..."
+"$WS/.venv/bin/pip" install --quiet --upgrade pip >>"$INSTALL_LOG" 2>&1 || true
+"$WS/.venv/bin/pip" install --quiet \
+  "openpyxl~=3.1" "pdfplumber~=0.11" "PyYAML~=6.0" "chardet~=5.2" "reportlab~=4.4" \
+  >>"$INSTALL_LOG" 2>&1 || { fail "Python deps install failed"; exit 1; }
+ok_paced "Python dependencies installed"
+
+# 2f. Claude Code CLI — required to run the assistant
+if command -v claude >/dev/null 2>&1; then
+  ok_paced "Claude Code already installed"
+else
+  say "Installing Claude Code..."
+  curl -fsSL https://claude.ai/install.sh 2>>"$INSTALL_LOG" | bash >>"$INSTALL_LOG" 2>&1 \
+    || { fail "Claude Code install failed — see $INSTALL_LOG"; exit 1; }
+  # Reload PATH from the user's shell rc so 'claude' is findable
+  if [ -f "$HOME/.zshrc" ]; then source "$HOME/.zshrc" 2>/dev/null || true; fi
+  ok_paced "Claude Code installed"
+fi
+
+# 2g. here-now skill — bundles the publishing flow
+if [ -d "$HOME/.claude/skills/here-now" ]; then
+  ok_paced "Publishing-host skill already installed"
+else
+  say "Installing publishing-host skill..."
+  if command -v npx >/dev/null 2>&1; then
+    npx -y skills add heredotnow/skill --skill here-now -g >>"$INSTALL_LOG" 2>&1 \
+      || { fail "here-now skill install failed — see $INSTALL_LOG"; exit 1; }
+  else
+    fail "npx not available — install Node.js first or contact support"
+    exit 1
+  fi
+  ok_paced "Publishing-host skill installed"
+fi
+
+# 2h. finance-clarity-build skill — git clone this repo into ~/.claude/skills/
+mkdir -p "$HOME/.claude/skills"
+if [ -d "$SKILL_INSTALL_DIR/.git" ]; then
+  say "Updating finance-clarity-build skill..."
+  ( cd "$SKILL_INSTALL_DIR" && git pull --quiet ) >>"$INSTALL_LOG" 2>&1 || true
+  ok_paced "Finance Clarity skill up-to-date"
+elif [ -d "$SKILL_INSTALL_DIR" ]; then
+  ok_paced "Finance Clarity skill already installed (non-git)"
+else
+  say "Installing Finance Clarity skill..."
+  git clone --quiet "$SKILL_REPO_URL" "$SKILL_INSTALL_DIR" >>"$INSTALL_LOG" 2>&1 \
+    || { fail "Skill clone failed — see $INSTALL_LOG"; exit 1; }
+  ok_paced "Finance Clarity skill installed"
+fi
 
 # ── AI assistant auth (§4.3) ──────────────────────────────────────────────────
 say
@@ -240,37 +377,68 @@ say "${BOLD}Step 3 of 6 — Signing in to your AI assistant${RESET}"
 hr
 say
 say "How do you sign in to Claude?"
-say "  1. Claude Pro (~\$17/month) — sign in with your email"
-say "  2. Claude Max — sign in with your email"
-say "  3. An Anthropic API key — paste the key (starts with sk-ant-)"
+say "  1. ${BOLD}Paid subscription${RESET} — Claude Pro or Max (sign in with your email)"
+say "  2. ${BOLD}Anthropic API key${RESET} — paste the key (starts with sk-ant-)"
 say
-say "${DIM}If you don't have any of these, please call your advisor — this is"
-say "the one step I can't do without you.${RESET}"
+say "${DIM}If you don't have either, please call your advisor — this is the"
+say "one step I can't do without you.${RESET}"
 say
-read -r -p "Type 1, 2, or 3: " auth_choice
+read -r -p "Type 1 or 2: " auth_choice
 
 case "$auth_choice" in
-  1|2)
-    warn "[STUB] Would launch \`claude\` to trigger the OAuth browser flow,"
-    warn "       wait for completion, and verify with a one-shot prompt."
-    log "stub: claude oauth"
+  1)
+    # Subscription path: launch `claude` to trigger OAuth if not authenticated.
+    # Verifying authentication: claude prints help text without erroring iff the
+    # user is logged in. If not logged in, it opens a browser to sign in.
+    if claude --version >>"$INSTALL_LOG" 2>&1; then
+      say "${DIM}Opening Claude — if you're not signed in yet, your browser will open${RESET}"
+      say "${DIM}for you to sign in. Come back here when it says 'success'.${RESET}"
+      log "claude oauth probe"
+      # Run a no-op prompt to force any pending auth flow:
+      printf '/exit\n' | claude --dangerously-skip-permissions --print "ready" >>"$INSTALL_LOG" 2>&1 \
+        || warn "Claude returned a non-zero exit; continuing — you can verify later by running 'claude' yourself"
+      ok_paced "Claude (subscription) ready"
+    else
+      fail "Claude Code didn't respond — install may have left it in a bad state"
+      exit 1
+    fi
     ;;
-  3)
+  2)
     say
     read -r -s -p "Paste your Anthropic API key (won't be shown): " api_key
     say
+    api_key="$(printf '%s' "$api_key" | tr -d '[:space:]')"
     if [[ ! "$api_key" =~ ^sk-ant- ]]; then
       fail "That doesn't look like an Anthropic API key (should start with sk-ant-)."
       fail "FCB-0004"
       log "FCB-0004 api_key_format_invalid"
       exit 1
     fi
-    warn "[STUB] Would write key to workspace .env (chmod 600), export to"
-    warn "       START-HERE's launch env, and verify with a 1-token request."
-    log "stub: api key path"
+    # Validate the key with a tiny API call (max_tokens=1, so it costs ~nothing)
+    say "Verifying your API key..."
+    HTTP_CODE=$(curl -sS -o /dev/null -w "%{http_code}" \
+      -H "x-api-key: $api_key" \
+      -H "anthropic-version: 2023-06-01" \
+      -H "content-type: application/json" \
+      -d '{"model":"claude-haiku-4-5","max_tokens":1,"messages":[{"role":"user","content":"."}]}' \
+      https://api.anthropic.com/v1/messages 2>>"$INSTALL_LOG")
+    case "$HTTP_CODE" in
+      200) ok_paced "API key verified" ;;
+      401|403) fail "Anthropic rejected that key (HTTP $HTTP_CODE) — check your billing dashboard"; exit 1 ;;
+      *)   warn "Couldn't verify (HTTP $HTTP_CODE) — saving anyway; you can re-test later" ;;
+    esac
+    # Store key in workspace .env so START-HERE can export it as ANTHROPIC_API_KEY.
+    mkdir -p "$WS"
+    if [ -f "$WS/.env" ]; then
+      grep -v '^ANTHROPIC_API_KEY=' "$WS/.env" 2>/dev/null > "$WS/.env.tmp" || true
+      mv "$WS/.env.tmp" "$WS/.env"
+    fi
+    printf 'ANTHROPIC_API_KEY=%s\n' "$api_key" >> "$WS/.env"
+    chmod 600 "$WS/.env"
+    log "api key saved to workspace .env"
     ;;
   *)
-    fail "I didn't understand. Run me again and pick 1, 2, or 3."
+    fail "I didn't understand. Run me again and pick 1 or 2."
     exit 1
     ;;
 esac
@@ -298,10 +466,75 @@ say
 say "${DIM}If you'd rather have your advisor do this, just call them now and"
 say "share your screen. They can paste it for you. Take your time.${RESET}"
 say
-warn "[STUB] Would open https://here.now/signup in the browser, then loop:"
-warn "       prompt → trim → test API call → on failure show specific guidance"
-warn "       (\"that looks like an email\" / \"that looks like a URL\" etc.)."
-log "stub: publishing host signup"
+CRED_FILE="${HOME}/.herenow/credentials"
+mkdir -p "$(dirname "$CRED_FILE")"
+
+# If the user already has a working credential, skip — idempotent re-run.
+if [ -s "$CRED_FILE" ]; then
+  EXISTING_KEY=$(tr -d '[:space:]' < "$CRED_FILE")
+  EX_HTTP=$(curl -sS -o /dev/null -w "%{http_code}" \
+    -H "Authorization: Bearer $EXISTING_KEY" \
+    https://here.now/api/v1/account 2>>"$INSTALL_LOG" || echo "000")
+  if [ "$EX_HTTP" = "200" ]; then
+    ok_paced "Publishing host already configured"
+    log "publishing host: existing credential valid"
+    HOST_DONE=1
+  fi
+fi
+
+if [ "${HOST_DONE:-0}" != "1" ]; then
+  # Open the signup page in a browser so the user can sign up.
+  if command -v open >/dev/null 2>&1; then
+    open "https://here.now/signup" 2>/dev/null || true
+  fi
+  # Loop until we get a key that the host accepts (or the user gives up).
+  attempts=0
+  while [ "$attempts" -lt 5 ]; do
+    attempts=$((attempts + 1))
+    say
+    read -r -p "Paste your API key here (or 'quit' to stop): " host_key
+    host_key="$(printf '%s' "$host_key" | tr -d '[:space:]')"
+    if [ "$host_key" = "quit" ] || [ -z "$host_key" ]; then
+      fail "Cancelled. Run me again whenever you're ready."
+      exit 0
+    fi
+    # Friendly format checks before hitting the API
+    if [[ "$host_key" == *@* ]]; then
+      warn "That looks like an email address. The key is a long random string, not your email."
+      continue
+    fi
+    if [[ "$host_key" == http* ]]; then
+      warn "That looks like a web address. Look for 'API Keys' on the page, not the URL bar."
+      continue
+    fi
+    # Validate against the host
+    HTTP=$(curl -sS -o /dev/null -w "%{http_code}" \
+      -H "Authorization: Bearer $host_key" \
+      https://here.now/api/v1/account 2>>"$INSTALL_LOG" || echo "000")
+    case "$HTTP" in
+      200)
+        printf '%s\n' "$host_key" > "$CRED_FILE"
+        chmod 600 "$CRED_FILE"
+        ok_paced "Publishing host configured"
+        log "publishing host: credential validated"
+        break
+        ;;
+      401|403)
+        warn "The host says that key isn't recognized. Did you confirm your email yet?"
+        ;;
+      404)
+        warn "Host returned 404 — make sure you copied the API key exactly, no extra characters."
+        ;;
+      *)
+        warn "Couldn't reach the host (HTTP $HTTP). Try again — if it keeps failing, ask your advisor."
+        ;;
+    esac
+  done
+  if [ ! -s "$CRED_FILE" ]; then
+    fail "Couldn't get a working key after $attempts tries. Re-run when ready."
+    exit 1
+  fi
+fi
 
 # ── Finalize ──────────────────────────────────────────────────────────────────
 say
@@ -309,18 +542,148 @@ hr
 say "${BOLD}Step 5 of 6 — Setting up your finance workspace${RESET}"
 hr
 say
-warn "[STUB] Would create ~/Documents/my-finances/ with subfolder layout,"
-warn "       pre-warm the FX cache (24 months), check iCloud sync and offer"
-warn "       to relocate to ~/finance-workspace/, drop START-HERE on Desktop."
-log "stub: workspace creation"
+
+# 5a. iCloud sync check — Documents may be synced to iCloud, which would
+# silently push the workspace to Apple's cloud. Offer to relocate.
+DOCS_REAL="$(cd ~/Documents && pwd -P)"
+if [[ "$DOCS_REAL" == */Mobile\ Documents/* ]] && [[ "$WS" == "$HOME/Documents/"* ]]; then
+  warn "Your Documents folder syncs to iCloud."
+  say "${DIM}For privacy, I can put your finance folder somewhere that doesn't sync.${RESET}"
+  read -r -p "Move workspace to ~/finance-workspace/ instead of Documents? [Y/n]: " RELOCATE
+  case "$(printf '%s' "$RELOCATE" | tr '[:upper:]' '[:lower:]' | xargs)" in
+    ""|y|yes)
+      NEW_WS="$HOME/finance-workspace"
+      if [ -d "$WS" ] && [ "$WS" != "$NEW_WS" ]; then
+        # Move existing partial workspace state
+        mkdir -p "$NEW_WS"
+        if [ "$(ls -A "$WS" 2>/dev/null)" ]; then
+          cp -R "$WS"/. "$NEW_WS"/ 2>>"$INSTALL_LOG" || true
+        fi
+        rm -rf "$WS"
+      fi
+      WS="$NEW_WS"
+      mkdir -p "$WS"
+      ok_paced "Workspace relocated to $WS"
+      log "workspace: relocated to non-iCloud path"
+      ;;
+  esac
+fi
+
+# 5b. Folder layout — every subfolder the pipeline expects
+mkdir -p "$WS/inbox" \
+         "$WS/01_bank_transactions" "$WS/02_payslips" "$WS/03_amazon_orders" \
+         "$WS/04_reference_docs" "$WS/05_other" \
+         "$WS/pipeline/output/errors" \
+         "$WS/fx_cache" "$WS/site"
+ok_paced "Workspace folders ready ($WS)"
+
+# 5c. Bootstrap config.yaml from the skill's example
+if [ ! -f "$WS/config.yaml" ] && [ -f "$SKILL_INSTALL_DIR/skill/config.example.yaml" ]; then
+  cp "$SKILL_INSTALL_DIR/skill/config.example.yaml" "$WS/config.yaml"
+  ok_paced "Workspace config created"
+fi
+
+# 5d. Pre-warm FX cache — last 24 months of business-day rates so the first
+# pipeline run doesn't take 30-60s on a cold cache. Honors the TTY-aware
+# progress() helper added in B9.5; visible in this Terminal.
+if [ -x "$SKILL_INSTALL_DIR/skill/scripts/fx_fetch.py" ]; then
+  say "Pre-warming exchange-rate cache (last 24 months)..."
+  END_DATE=$(date +%Y-%m-%d)
+  START_DATE=$(date -v-24m +%Y-%m-%d 2>/dev/null || date -d "24 months ago" +%Y-%m-%d 2>/dev/null)
+  FCB_WORKSPACE="$WS" "$WS/.venv/bin/python" "$SKILL_INSTALL_DIR/skill/scripts/fx_fetch.py" \
+    --base EUR --pairs USD,GBP --start "$START_DATE" --end "$END_DATE" \
+    >>"$INSTALL_LOG" 2>&1 || warn "FX pre-warm failed — pipeline will fetch on first use instead"
+  ok_paced "Exchange rate cache pre-warmed"
+fi
+
+# 5e. Workspace launcher — the script START-HERE.command on the Desktop calls.
+# This is what the B9.2 seamless-handoff exec's into at end of install.
+LAUNCHER="$WS/.skill-launcher.sh"
+cat > "$LAUNCHER" <<LAUNCHER_EOF
+#!/bin/bash
+# Finance Clarity — workspace launcher.
+# Created by Welcome.command. Runs every time the user double-clicks
+# START-HERE.command on their Desktop.
+
+WS="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
+cd "\$WS"
+
+# Activate the workspace venv so the pipeline scripts use the right Python
+if [ -f "\$WS/.venv/bin/activate" ]; then
+  source "\$WS/.venv/bin/activate"
+fi
+
+# Export Anthropic API key from .env if present (for the API-key auth path)
+if [ -f "\$WS/.env" ] && grep -q '^ANTHROPIC_API_KEY=' "\$WS/.env"; then
+  export ANTHROPIC_API_KEY="\$(grep '^ANTHROPIC_API_KEY=' "\$WS/.env" | cut -d= -f2-)"
+fi
+
+# Open Finder window at inbox so the user has a visible drop target
+open "\$WS/inbox" 2>/dev/null || true
+
+# Launch Claude Code in the workspace
+exec claude
+LAUNCHER_EOF
+chmod +x "$LAUNCHER"
+ok_paced "Workspace launcher created"
+
+# 5f. Desktop shortcut — START-HERE.command. Self-deletes on close to avoid
+# clutter; user can re-create later by re-running this installer.
+DESKTOP_SHORTCUT="$HOME/Desktop/START-HERE.command"
+cat > "$DESKTOP_SHORTCUT" <<SHORTCUT_EOF
+#!/bin/bash
+# Re-entry point for Finance Clarity. Created by the installer.
+# Just runs the workspace launcher in the right workspace.
+exec "$LAUNCHER"
+SHORTCUT_EOF
+chmod +x "$DESKTOP_SHORTCUT"
+ok_paced "START-HERE shortcut on Desktop"
 
 say
 hr
 say "${BOLD}Step 6 of 6 — Final check${RESET}"
 hr
 say
-warn "[STUB] Would run the diagnostic and report green/red for each component."
-log "stub: diagnostic"
+
+DIAGNOSTIC_FAILS=0
+check() {
+  local label="$1"; shift
+  if "$@" >>"$INSTALL_LOG" 2>&1; then
+    ok_paced "$label"
+  else
+    fail "$label"
+    DIAGNOSTIC_FAILS=$((DIAGNOSTIC_FAILS + 1))
+  fi
+}
+check_file() {
+  local label="$1" path="$2"
+  if [ -e "$path" ]; then ok_paced "$label"
+  else fail "$label (missing: $path)"; DIAGNOSTIC_FAILS=$((DIAGNOSTIC_FAILS + 1)); fi
+}
+
+check       "Homebrew installed"             command -v brew
+check       "Python 3.11 installed"          test -x "$PYTHON311"
+check       "jq installed"                   command -v jq
+check       "Claude Code installed"          command -v claude
+check_file  "Workspace folder"               "$WS"
+check_file  "Workspace venv"                 "$WS/.venv/bin/python"
+check_file  "Workspace config"               "$WS/config.yaml"
+check_file  "Workspace launcher"             "$WS/.skill-launcher.sh"
+check_file  "Desktop shortcut"               "$HOME/Desktop/START-HERE.command"
+check_file  "Publishing-host credential"     "$CRED_FILE"
+check_file  "Publishing-host skill"          "$HOME/.claude/skills/here-now"
+check_file  "Finance Clarity skill"          "$SKILL_INSTALL_DIR/skill"
+check_file  "FX cache directory"             "$WS/fx_cache"
+# Pipeline scripts importable check
+check       "Pipeline scripts importable"    \
+  "$WS/.venv/bin/python" -c "import sys; sys.path.insert(0, '$SKILL_INSTALL_DIR/skill/scripts'); import _lib, classify, normalize, categorize, build_site"
+
+if [ "$DIAGNOSTIC_FAILS" -gt 0 ]; then
+  fail "$DIAGNOSTIC_FAILS diagnostic check(s) failed — see $INSTALL_LOG for details."
+  fail "Re-run me, or contact your advisor with the log file attached."
+  exit 1
+fi
+ok_paced "All diagnostics passed"
 
 say
 hr

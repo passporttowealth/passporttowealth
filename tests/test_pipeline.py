@@ -543,6 +543,62 @@ class TestPipelineHealth(unittest.TestCase):
             self.assertTrue(p.exists(), f"script missing: {name}")
             self.assertTrue(os.access(p, os.X_OK), f"script not executable: {name}")
 
+    def test_installer_no_more_stub_markers(self):
+        """The installer used to emit '[STUB]' lines for the actual install
+        actions (Homebrew, Python, Claude Code, workspace, etc). After
+        finishing the end-to-end implementation, none of those should remain."""
+        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        # Two specific stub lines we want to confirm are gone:
+        for banned in ("[STUB] This step would install",
+                       "[STUB] Would launch",
+                       "[STUB] Would write key",
+                       "[STUB] Would open https://here.now/signup",
+                       "[STUB] Would create",
+                       "[STUB] Would run the diagnostic"):
+            self.assertNotIn(banned, cmd, f"installer still has stub: {banned!r}")
+
+    def test_installer_auth_choice_is_two_options(self):
+        """User feedback: Claude Pro and Max are both subscriptions —
+        collapse the auth picker to 2 options (paid subscription vs API key)
+        instead of 3 (Pro vs Max vs API key)."""
+        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        # The simplified prompt
+        self.assertIn("Type 1 or 2:", cmd, "auth prompt should be 2-choice now")
+        self.assertNotIn("Type 1, 2, or 3:", cmd, "old 3-choice prompt should be gone")
+        # The new copy frames choice 1 as 'Paid subscription' (covers Pro AND Max)
+        self.assertIn("Paid subscription", cmd, "choice 1 should say 'Paid subscription'")
+        # The case dispatch should be on (1, 2) not (1, 2, 3)
+        self.assertNotIn("1|2)", cmd, "old Pro/Max combined branch should be gone")
+
+    def test_installer_creates_launcher_and_desktop_shortcut(self):
+        """Step 5 must write .skill-launcher.sh into the workspace (used by the
+        B9.2 seamless handoff) AND drop START-HERE.command on the Desktop."""
+        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        self.assertIn('LAUNCHER="$WS/.skill-launcher.sh"', cmd,
+            "Step 5 must write the workspace launcher")
+        self.assertIn('DESKTOP_SHORTCUT="$HOME/Desktop/START-HERE.command"', cmd,
+            "Step 5 must drop the Desktop shortcut")
+        self.assertIn('chmod +x "$LAUNCHER"', cmd, "launcher must be executable")
+        self.assertIn('chmod +x "$DESKTOP_SHORTCUT"', cmd, "shortcut must be executable")
+        # Launcher must activate the venv + export ANTHROPIC_API_KEY if set
+        self.assertIn('source "\\$WS/.venv/bin/activate"', cmd,
+            "launcher must source the workspace venv")
+        self.assertIn('ANTHROPIC_API_KEY=', cmd,
+            "launcher must export ANTHROPIC_API_KEY for the API-key auth path")
+
+    def test_installer_step6_diagnostic_replaces_stub(self):
+        """Step 6 used to be '[STUB] Would run the diagnostic'. Should now do
+        actual checks, count failures, and exit non-zero on any red."""
+        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        self.assertIn("DIAGNOSTIC_FAILS=0", cmd,
+            "Step 6 should track diagnostic failure count")
+        # At least 8 distinct diagnostic checks
+        self.assertGreaterEqual(cmd.count("check ") + cmd.count("check_file "), 8,
+            "Step 6 should run at least 8 diagnostic checks")
+        # And exit non-zero on red
+        self.assertIn("if [ \"$DIAGNOSTIC_FAILS\" -gt 0 ]", cmd,
+            "Step 6 should branch on diagnostic-fail count")
+
     def test_installer_offers_start_now_handoff(self):
         """B9.2 invariant: at end of install, ask 'Want to start now?'
         and exec/launch the workflow if user says yes — instead of forcing
