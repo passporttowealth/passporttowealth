@@ -179,6 +179,15 @@ The skill must refuse to push real content to an unprotected slug. No exceptions
 
 ---
 
+## Epic 7 — Browser-level regression testing
+
+### H7.1 — Headless browser test suite · **P1 · M**
+**Problem:** Tests in `tests/test_pipeline.py` are static HTML inspection. They can't catch behavioral bugs (scroll loops, broken interactions, chart rendering failures). One such bug — `scrollIntoView` inside an IntersectionObserver creating a feedback loop — shipped through green CI in commit `9a87c0f`.
+**Recommendation:** Add Playwright (Python flavor). New `tests/test_browser.py` runs the smoke checklist from `dev/SMOKE_CHECKS.md` headlessly: page scrolls, nav highlights as you scroll, charts hover, drawer opens, feedback submits. ~1 min total. Replaces the manual checklist for what can be automated.
+**Why not now:** adds ~150 MB to CI (Playwright + Chromium), needs iteration to stabilize against flakiness. Worth doing once the prototype settles.
+
+---
+
 ## Epic 6.5 — v2 hardening: zero-touch advisor onboarding (deferred from v1)
 
 Items pulled out of `finance-clarity-build-spec.md` v1 to keep the first ship simple. Together they remove the one remaining moment of third-party-service exposure (the publishing-host signup during install) and let the advisor diagnose failures without the user having to email a support bundle.

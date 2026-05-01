@@ -358,6 +358,63 @@ class TestBuildSite(PipelineTestBase):
         for k in ("income_avg_per_month", "spend_avg_per_month", "net_avg_per_month"):
             self.assertIn(k, d["kpis"])
 
+    def test_no_scrollintoview_in_observer_paths(self):
+        """REGRESSION: Element.scrollIntoView from inside an IntersectionObserver
+        callback (or any auto-scroll loop) caused a feedback loop where the
+        page kept fighting the user's scroll. Lock it out — use scrollLeft on
+        a specific element instead. See dev/SMOKE_CHECKS.md.
+
+        If you have a legitimate need for scrollIntoView (e.g. user-initiated
+        click handler), wrap it with a comment containing 'scrollIntoView OK'."""
+        html = (self.workspace / "site" / "index.html").read_text()
+        # Allow occurrences explicitly marked as audited; allow comment-only
+        # mentions (// or /* prefix). We only fail on actual function calls
+        # (.scrollIntoView( or scrollIntoView( with no comment prefix).
+        suspicious_lines = []
+        call_pattern = re.compile(r'\bscrollIntoView\s*\(')
+        for i, line in enumerate(html.splitlines(), 1):
+            stripped = line.strip()
+            # Skip lines whose meaningful content is just a comment
+            if stripped.startswith(("//", "*", "/*")):
+                continue
+            if "scrollIntoView OK" in line:
+                continue
+            if call_pattern.search(line):
+                suspicious_lines.append((i, stripped))
+        self.assertFalse(suspicious_lines,
+            f"scrollIntoView call(s) without 'scrollIntoView OK' marker — "
+            f"these caused the scroll-fighting bug. Lines: {suspicious_lines}")
+
+    def test_no_overflow_hidden_on_html_or_body(self):
+        """REGRESSION: an overflow:hidden on html/body fully disables scroll.
+        Lock it out — only descendants may use overflow."""
+        html = (self.workspace / "site" / "index.html").read_text()
+        # Allow occurrences in selectors targeting children (e.g. .table-card { overflow: hidden })
+        for pattern in (r"\bhtml\s*\{[^}]*overflow\s*:\s*hidden",
+                        r"\bbody\s*\{[^}]*overflow\s*:\s*hidden"):
+            self.assertIsNone(re.search(pattern, html),
+                f"found overflow:hidden on html/body — kills page scroll: pattern {pattern!r}")
+
+    def test_feedback_widget_framed_as_product_feedback(self):
+        """REGRESSION: feedback was reframed from 'send to your advisor' to
+        'help improve the product'. Lock in the new framing so future copy
+        edits don't slip back to advisor-communication framing."""
+        html = (self.workspace / "site" / "index.html").read_text()
+        # Required new framing
+        for required in ["Help improve this dashboard", "Help improve this",
+                         "What could be better", "team that builds"]:
+            self.assertIn(required, html, f"product-feedback framing missing: {required!r}")
+        # Phrases that signal the OLD framing (drawer copy only — not the
+        # privacy disclosure or footer where 'advisor' is still correct).
+        # We extract the drawer body specifically.
+        drawer = re.search(r'<aside[^>]*id="fb-drawer"[^>]*>(.+?)</aside>', html, re.DOTALL)
+        self.assertIsNotNone(drawer, "feedback drawer markup missing")
+        drawer_html = drawer.group(1)
+        for banned in ["your advisor will see", "Send feedback to your advisor",
+                       "send to your advisor"]:
+            self.assertNotIn(banned, drawer_html,
+                f"old advisor-communication framing snuck back into the drawer: {banned!r}")
+
     def test_section_nav_present_and_anchors_match_section_ids(self):
         """Every nav link must point to an actual section id on the page."""
         html = (self.workspace / "site" / "index.html").read_text()
