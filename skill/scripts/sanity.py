@@ -16,7 +16,7 @@ import hashlib
 import json
 import sys
 from collections import defaultdict
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -149,7 +149,7 @@ def hard_floors(summary: dict) -> list[dict]:
 def write_confirmed(summary: dict, ack_violations: list = None):
     """Write sanity_confirmed.json so build_site.py will run."""
     payload = {
-        "confirmed_at": datetime.utcnow().isoformat(),
+        "confirmed_at": datetime.now(timezone.utc).isoformat(),
         "totals_hash": hashlib.sha256(
             json.dumps(summary, sort_keys=True, default=str).encode()
         ).hexdigest(),

@@ -514,6 +514,16 @@ class TestPipelineHealth(unittest.TestCase):
             self.assertTrue(p.exists(), f"script missing: {name}")
             self.assertTrue(os.access(p, os.X_OK), f"script not executable: {name}")
 
+    def test_no_utcnow_in_pipeline_scripts(self):
+        """B9.6 regression: datetime.utcnow() is deprecated in Python 3.12+ and
+        prints a DeprecationWarning that confuses non-technical users running
+        the pipeline. Use datetime.now(timezone.utc) instead."""
+        for name in ("fx_fetch.py", "sanity.py", "build_site.py", "categorize.py",
+                     "normalize.py", "dedupe.py", "classify.py", "_lib.py"):
+            text = (SCRIPTS / name).read_text(encoding="utf-8")
+            self.assertNotIn(".utcnow(", text,
+                f"{name}: datetime.utcnow() is deprecated — use datetime.now(timezone.utc)")
+
 
 if __name__ == "__main__":
     # Pretty-print the run

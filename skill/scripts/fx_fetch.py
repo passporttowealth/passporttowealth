@@ -14,7 +14,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from urllib.error import URLError
 from urllib.request import urlopen, Request
@@ -96,7 +96,7 @@ def _fetch_frankfurter(d: date, base: str) -> dict | None:
         "base": data.get("base", base),
         "rates": data.get("rates", {}),
         "source": "frankfurter",
-        "fetched_at": datetime.utcnow().isoformat(),
+        "fetched_at": datetime.now(timezone.utc).isoformat(),
     }
 
 
