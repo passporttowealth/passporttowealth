@@ -289,9 +289,35 @@ Write-Hr
 Write-Host "  ✓ Your workspace is ready." -ForegroundColor Green
 Write-Hr
 Write-Say ""
-Write-Say "Double-click START-HERE on your Desktop whenever you want to use it."
-Write-Say "(In v0 the Desktop shortcut isn't created yet - see Epic 1 in the backlog.)"
-Write-Say ""
+
+# B9.2 — seamless first-run handoff. Don't make the user hunt for a Desktop
+# icon when momentum is highest. Ask, default-yes, launch straight into the
+# workflow if a launcher exists. Desktop shortcut is for re-entry next time.
+$WorkspaceRoot   = if ($env:FCB_WORKSPACE) { $env:FCB_WORKSPACE } else { Join-Path $env:USERPROFILE "Documents\my-finances" }
+$WorkspaceLauncher = Join-Path $WorkspaceRoot ".skill-launcher.cmd"
+
+if ($Global:AutoMode) {
+    Write-Say "Run START-HERE on your Desktop whenever you want to use it."
+    Write-Log "completed; auto-mode skipped start-now prompt"
+    exit 0
+}
+
+$startAnswer = (Read-Host "Want to start now? [Y/n]").Trim().ToLowerInvariant()
+if ($startAnswer -in @("", "y", "yes")) {
+    if (Test-Path $WorkspaceLauncher) {
+        Write-Log "completed; launching workspace"
+        Start-Process -FilePath $WorkspaceLauncher -Wait
+    } else {
+        Write-Say ""
+        Write-Host "  (v0 stub: workspace launcher isn't provisioned yet - would" -ForegroundColor DarkGray
+        Write-Host "   normally launch the AI assistant in your workspace folder here.)" -ForegroundColor DarkGray
+        Write-Say ""
+        Write-Say "Double-click START-HERE on your Desktop whenever you want to use it."
+    }
+} else {
+    Write-Say ""
+    Write-Say "Double-click START-HERE on your Desktop whenever you want to use it."
+}
 Write-Say "You can close this window now."
 Write-Log "install completed"
 Write-Say ""

@@ -514,6 +514,27 @@ class TestPipelineHealth(unittest.TestCase):
             self.assertTrue(p.exists(), f"script missing: {name}")
             self.assertTrue(os.access(p, os.X_OK), f"script not executable: {name}")
 
+    def test_installer_offers_start_now_handoff(self):
+        """B9.2 invariant: at end of install, ask 'Want to start now?'
+        and exec/launch the workflow if user says yes — instead of forcing
+        them to find and double-click START-HERE on the Desktop. Desktop
+        shortcut still exists for re-entry sessions 2+; just not the first-
+        run handoff."""
+        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        ps1 = (REPO / "installer" / "Welcome.ps1").read_text(encoding="utf-8")
+        self.assertIn("Want to start now?", cmd,
+            "Welcome.command must offer the seamless start-now prompt (B9.2)")
+        self.assertIn("Want to start now?", ps1,
+            "Welcome.ps1 must offer the seamless start-now prompt (B9.2)")
+        # Mac: must close fd 3 before exec to release the install-log handle
+        self.assertIn("exec 3>&-", cmd,
+            "Welcome.command must release log fd before exec to avoid leak")
+        self.assertIn('exec "$WORKSPACE_LAUNCHER"', cmd,
+            "Welcome.command must exec into the workspace launcher")
+        # Windows: must Start-Process the launcher
+        self.assertIn("Start-Process -FilePath $WorkspaceLauncher", ps1,
+            "Welcome.ps1 must Start-Process the workspace launcher")
+
     def test_installer_has_pause_gates_and_auto_flag(self):
         """B9.3 invariant: paced output + Press-Enter gates between sections.
         Without these, pre-flight ✓s flash by faster than humans can read.

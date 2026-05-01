@@ -327,9 +327,38 @@ hr
 say "${GREEN}${BOLD}✓ Your workspace is ready.${RESET}"
 hr
 say
-say "Double-click ${BOLD}START-HERE${RESET} on your Desktop whenever you want to use it."
-say "(In v0 the Desktop shortcut isn't created yet — see Epic 1 in the backlog.)"
-say
+
+# B9.2 — seamless first-run handoff. Don't make the user hunt for a Desktop
+# icon when momentum is highest. Ask, default-yes, exec straight into the
+# workflow if a launcher exists. Desktop shortcut is for re-entry next time.
+WORKSPACE_LAUNCHER="${WS:-${HOME}/Documents/my-finances}/.skill-launcher.sh"
+
+if [ "$AUTO_MODE" = "1" ] || [ ! -t 0 ]; then
+  say "Run START-HERE on your Desktop whenever you want to use it."
+  log "completed; auto-mode skipped start-now prompt"
+  exit 0
+fi
+
+read -r -p "$(printf 'Want to start now? %s[Y/n]%s ' "$BOLD" "$RESET")" START_ANSWER
+case "$(printf '%s' "$START_ANSWER" | tr '[:upper:]' '[:lower:]' | xargs)" in
+  ""|y|yes)
+    if [ -x "$WORKSPACE_LAUNCHER" ]; then
+      log "completed; launching workspace"
+      exec 3>&-                          # release the install-log fd before exec
+      exec "$WORKSPACE_LAUNCHER"
+    else
+      say
+      say "${DIM}(v0 stub: workspace launcher isn't provisioned yet — would normally${RESET}"
+      say "${DIM} exec into the AI assistant in your workspace folder here.)${RESET}"
+      say
+      say "Double-click ${BOLD}START-HERE${RESET} on your Desktop whenever you want to use it."
+    fi
+    ;;
+  *)
+    say
+    say "Double-click ${BOLD}START-HERE${RESET} on your Desktop whenever you want to use it."
+    ;;
+esac
 say "You can close this window now."
 say
 log "install completed"
