@@ -188,6 +188,109 @@ The skill must refuse to push real content to an unprotected slug. No exceptions
 
 ---
 
+## Epic 8 — Landing page polish (research + critique from dry-run)
+
+The `installer/index.html` landing page is the single most important page in the funnel — clients see it before they trust *anything* else about the product. It's currently functional but reads "engineer's prototype," not "polished product Arielle would proudly send to a client." Critique below is grounded in concrete comparable landing pages reviewed during the dry-run setup phase.
+
+### Comparables reviewed
+
+| Site | What's best-in-class | Gap vs. ours |
+|---|---|---|
+| **cursor.com** | Massive headline + interactive product mockup + named-individual social proof (Karpathy, Collison, Brockman) immediately above the fold. Footer has SOC 2 badge + 8-language selector. Trust comes from "look who already uses this," not from explanation. | We have no product visual above the fold and no social proof. Page is text-and-warning-heavy. |
+| **raycast.com** | Single confident "Download for Mac" CTA, system requirement note (`v1.104.15 macOS 13+`) right below — frictionless. Inter typography. Zero install-warning language. Animated product visual (their keyboard) is the centerpiece. | Our prototype banner is the *first thing* you see — defensive opener. Our Mac warning callout dominates the page visually. |
+| **(general best-practice patterns)** | Hero screenshot of the actual product. Inverted pyramid: most important first. Secondary trust signals (open-source badge, named maintainer, security policy). Sticky CTA on scroll. Single primary action per viewport. | We have many of the right ingredients but the **emphasis hierarchy is wrong**: warnings dominate, the actual product is invisible above the fold. |
+
+### What's good about the current page (preserve)
+
+- Brand color (`#0F1E33` navy) is right and matches the dashboard.
+- OS auto-detection + appropriate fallback when JS is off.
+- The Gatekeeper / SmartScreen workaround steps with SVG illustrations — these *exist* and that's better than 90% of indie installers. Just needs better placement.
+- Privacy-aware language is already in the prototype banner — needs to be promoted, not buried.
+- Single clear download CTA per platform.
+
+### What needs to change (concrete list)
+
+#### E8.1 — Lead with the product, not the warning · **P1 · M**
+Above the fold currently: **prototype banner → headline → download button → text "what this does" → big yellow Mac-warning block**. This is engineer-think — defensive disclaimers first, product last. Industry pattern is **screenshot + headline + CTA + social proof**, then everything else.
+**Recommendation:** Hero becomes a real screenshot of the populated dashboard (use the demo workspace render, lightly cropped). Headline + CTA sits beside or below it. Prototype banner moves to a smaller "About this prototype" strip after the hero, not blocking the first impression. Mac-warning block collapses behind a "Need help getting past Mac's warning?" expandable that opens after the user clicks Download (or stays open by default but visually de-emphasized — same yellow, half the size).
+
+#### E8.2 — Add trust signals (Arielle's identity) · **P1 · S**
+Currently the page says "Passport to Wealth" and shows the logo. That's a brand, not a person. Modern best-practice (Cursor with Karpathy, Linear with Anand, Raycast with Marques Brownlee) is to **put real names and faces** near the CTA so the visitor knows who's behind this.
+**Recommendation:** Below the hero: a small "From Arielle Tucker, Passport to Wealth" line with her headshot (already on passporttowealth.com — needs her permission to reuse). Plus one sentence in her voice about why she built this. Optional: a "Source code on GitHub" link as a tertiary trust signal for the technically curious.
+
+#### E8.3 — Visual "how it works" instead of the text block · **P1 · S**
+Current "What this does" section is a paragraph + bullet list. Modern landing pages use **3-step visual sequences** with tiny icons or screenshots: `[1. Install] → [2. Drop your files in] → [3. See your dashboard]`. Each step is a small card with one sentence, no paragraph. Faster to scan, more confidence.
+**Recommendation:** Replace the bullet list with a 3-card grid (mobile: vertical stack). Each card: number, mini-icon, one-line title, one-line description. Total: 9 lines of text instead of a paragraph.
+
+#### E8.4 — Promote privacy / data handling to its own section · **P1 · S**
+"Your data, on your laptop" is buried inside the prototype banner. For a financial tool, this is the #1 thing prospects care about. Should be its own section with **3-4 short bullets** under a clear heading like "Your data, your laptop, your control".
+**Recommendation:** New section between "How it works" and the OS-warning callout. Bullets: (1) files never leave your laptop except the rendered dashboard; (2) dashboard locked with a passcode you control; (3) sensitive docs (paystubs, tax) skipped by default; (4) Anthropic data terms link upfront. Each bullet: one line, no jargon.
+
+#### E8.5 — Rework the prototype banner · **P1 · S**
+The yellow box up top sets a "this might break" mood before the visitor knows what "this" is. Better pattern: a smaller "About this prototype" strip after the hero, with the same content but in a less alarming visual treatment. Or: a tasteful "Beta" badge on the download button itself, with the explanation in a hover/tap tooltip.
+**Recommendation:** Move the prototype banner down. Replace the yellow alarm-treatment with a calmer info box (light-navy tint instead of warning yellow). Keep the wording — just change where the eye lands first.
+
+#### E8.6 — Bundle Inter font on the landing page · **P0 · XS**
+Dashboard already bundles Inter (4 weights). Landing page relies on the system font stack — looks great on Mac, mediocre on Windows. Trivial port: copy the `@font-face` block + woff2 files. Closes a gratuitous cross-platform polish gap that prospects judge us on instantly.
+
+#### E8.7 — Sticky download CTA on scroll · **P2 · XS**
+Long landing pages (this one will be after E8.1-E8.5) lose the CTA when the user scrolls. Industry standard is a small "Download for Mac" button that sticks to the top right (or bottom on mobile) once the hero CTA scrolls out of view. ~30 lines of CSS + an IntersectionObserver.
+
+#### E8.8 — Footer enrichment · **P2 · S**
+Current footer: copyright + main site link. Industry norm has 3-5 columns: product, security, company, legal. We have legitimate things to put there: link to the GitHub repo (transparency), link to `docs/feedback-channel.md` summary or a "How feedback works" page (process transparency), security contact email (`SECURITY.md` reference), Anthropic terms link, the brand main site. Builds credibility without adding noise above the fold.
+
+#### E8.9 — Replace the "Watch a 30-second video" placeholder · **P2 · M**
+Modern best practice: a Loom or 30-sec MP4 above the fold showing the product in motion. We don't have one. Out-of-scope until v1 ships, but reserve a slot in the design so it can drop in.
+
+### Summary of design hierarchy change
+
+**Currently (top to bottom on first viewport):**
+1. Logo + brand
+2. ⚠ Yellow prototype banner (large)
+3. Headline + lede
+4. Download button (small text link)
+5. Description fineprint
+6. "What this does" text bullet list
+7. ⚠ Big yellow "Mac will warn you" block with screenshots
+
+**Target:**
+1. Logo + brand
+2. **Hero with dashboard screenshot + headline + confident CTA + system req note**
+3. **Trust strip**: "From Arielle Tucker / Passport to Wealth" + headshot + one-line why
+4. 3-step "How it works" visual cards
+5. "Your data, your laptop" privacy section
+6. Calmer prototype info strip (not a yellow alarm)
+7. Collapsible "Need help getting past Mac's warning?" — opens after download click
+8. Enriched footer
+
+**Total scope:** the content stays ~95% the same. The reorganization, hierarchy, and one new screenshot do the heavy lifting.
+
+---
+
+## Epic 9 — Bugs surfaced during the dry-run walkthrough
+
+### B9.1 — `Welcome.command` opens browser before user reads the consent text · **P1 · XS**
+**Found by:** dry-run, Phase 1 of `dev/SMOKE_CHECKS.md`-style walkthrough.
+**Symptom:** During the Anthropic data-terms consent gate, the script prints the explanatory text *and* calls `open https://privacy.anthropic.com/` in the same flow before prompting for `I accept` / `no`. The browser snaps focus, the user loses their place in the Terminal, doesn't know what to type next.
+**Root cause:** Lines in `installer/Welcome.command`:
+```bash
+say "If you do not accept Anthropic's terms, please ${BOLD}stop here${RESET}..."
+say
+# Open the privacy hub in the user's browser so it's one click away.
+if command -v open >/dev/null 2>&1; then
+  open "https://privacy.anthropic.com/" 2>/dev/null || true
+fi
+while true; do
+  read -r -p "..." consent
+```
+Browser opens between the info print and the prompt — focus shift kills the moment.
+**Fix:** Three options, in order of preference:
+  1. **Don't auto-open at all.** Print the URL, let the user click it (Terminal makes URLs clickable on Mac). Removes the focus-shift entirely.
+  2. **Ask first**: print info → prompt "Would you like me to open the privacy hub in your browser? (yes/skip)" → open if yes → then the accept/no prompt.
+  3. **Open AFTER prompt**: open only on `I accept` so the user reads the terms BEFORE the browser opens (less useful but easy).
+Recommend option 1 — least surprising, fewest moving parts.
+**Mirror in `Welcome.ps1`** — same bug exists there, same fix.
+
 ## Epic 6.5 — v2 hardening: zero-touch advisor onboarding (deferred from v1)
 
 Items pulled out of `finance-clarity-build-spec.md` v1 to keep the first ship simple. Together they remove the one remaining moment of third-party-service exposure (the publishing-host signup during install) and let the advisor diagnose failures without the user having to email a support bundle.
