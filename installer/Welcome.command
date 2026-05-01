@@ -447,25 +447,20 @@ ok_paced "AI assistant ready"
 pause_for_user  # B9.3 — gate before publishing-host signup
 
 # ── Publishing-host signup (§4.4) ─────────────────────────────────────────────
+# B9.7 — uses the in-agent email-code flow documented in the here-now skill:
+#   POST /api/auth/agent/request-code  { email }       → sends a code
+#   POST /api/auth/agent/verify-code   { email, code } → returns { apiKey }
+# Two user actions instead of six. Manual paste stays as an explicit
+# fallback for when the email-code flow fails (e.g. spam-filtered code).
 say
 hr
 say "${BOLD}Step 4 of 6 — Setting up your private dashboard host${RESET}"
 hr
 say
-say "I need a free account on the service that will host your private dashboard."
-say "I'll open it in your browser. Please:"
+say "Your dashboard needs a free account on the service that hosts it."
+say "I'll set it up using just your email — no clicking around in a browser."
 say
-say "  1. Sign up — just an email and password. (You'll only do this once.)"
-say "  2. ${BOLD}CHECK YOUR EMAIL${RESET} for a verification link if asked. Click it. Come back."
-say "  3. On the page that opens, look for a section called \"API Keys\""
-say "     (might be under Settings or Account). Click \"Create New Key\"."
-say "  4. Copy the long string of letters and numbers. It looks like:"
-say "        ${DIM}hn_live_aBcD1234efGh5678…${RESET}"
-say "  5. Paste it here, then press Enter."
-say
-say "${DIM}If you'd rather have your advisor do this, just call them now and"
-say "share your screen. They can paste it for you. Take your time.${RESET}"
-say
+
 CRED_FILE="${HOME}/.herenow/credentials"
 mkdir -p "$(dirname "$CRED_FILE")"
 
@@ -482,68 +477,135 @@ if [ -s "$CRED_FILE" ]; then
   fi
 fi
 
-if [ "${HOST_DONE:-0}" != "1" ]; then
-  # Tell the user where to go BEFORE opening the browser (B9.1 lesson —
-  # don't snap focus mid-instruction).
-  say "I'll open the publishing host's homepage in a moment."
-  say "Once it loads:"
-  say "  1. Click ${BOLD}Sign in${RESET} in the top-right corner."
-  say "  2. Sign up with your email (you'll only do this once)."
-  say "  3. ${BOLD}CHECK YOUR EMAIL${RESET} for a verification link if asked. Click it."
-  say "  4. On the dashboard, find your API key — copy the long random string."
-  say "  5. Come back here and paste it."
+# ----------------------------------------------------------------------------
+# Helper: manual-paste fallback. Used when the email-code flow fails or the
+# user opts out. Returns 0 if a working key is saved, 1 otherwise.
+# ----------------------------------------------------------------------------
+manual_paste_fallback() {
   say
-  read -r -p "$(printf '%sPress Enter when you'"'"'re ready to open the browser...%s ' "$DIM" "$RESET")" _
+  say "OK — let's do it the manual way:"
+  say "  1. I'll open the host's homepage in a moment."
+  say "  2. Click ${BOLD}Sign in${RESET} in the top-right and sign up with your email."
+  say "  3. Find your API key on the dashboard."
+  say "  4. Come back here and paste it."
+  say
+  read -r -p "$(printf '%sPress Enter to open the browser...%s ' "$DIM" "$RESET")" _
 
-  if command -v open >/dev/null 2>&1; then
-    open "https://here.now/" 2>/dev/null || true
-  fi
-  # Loop until we get a key that the host accepts (or the user gives up).
-  attempts=0
+  command -v open >/dev/null 2>&1 && open "https://here.now/" 2>/dev/null || true
+
+  local attempts=0
   while [ "$attempts" -lt 5 ]; do
     attempts=$((attempts + 1))
     say
     read -r -p "Paste your API key here (or 'quit' to stop): " host_key
     host_key="$(printf '%s' "$host_key" | tr -d '[:space:]')"
     if [ "$host_key" = "quit" ] || [ -z "$host_key" ]; then
-      fail "Cancelled. Run me again whenever you're ready."
-      exit 0
+      return 1
     fi
-    # Friendly format checks before hitting the API
-    if [[ "$host_key" == *@* ]]; then
-      warn "That looks like an email address. The key is a long random string, not your email."
-      continue
-    fi
-    if [[ "$host_key" == http* ]]; then
-      warn "That looks like a web address. Look for 'API Keys' on the page, not the URL bar."
-      continue
-    fi
-    # Validate against the host
+    [[ "$host_key" == *@* ]]   && { warn "That looks like an email — paste the API key, not your email."; continue; }
+    [[ "$host_key" == http* ]] && { warn "That looks like a web address — find the API key on the dashboard."; continue; }
     HTTP=$(curl -sS -o /dev/null -w "%{http_code}" \
       -H "Authorization: Bearer $host_key" \
       https://here.now/api/v1/account 2>>"$INSTALL_LOG" || echo "000")
     case "$HTTP" in
-      200)
-        printf '%s\n' "$host_key" > "$CRED_FILE"
-        chmod 600 "$CRED_FILE"
-        ok_paced "Publishing host configured"
-        log "publishing host: credential validated"
-        break
-        ;;
-      401|403)
-        warn "The host says that key isn't recognized. Did you confirm your email yet?"
-        ;;
-      404)
-        warn "Host returned 404 — make sure you copied the API key exactly, no extra characters."
-        ;;
-      *)
-        warn "Couldn't reach the host (HTTP $HTTP). Try again — if it keeps failing, ask your advisor."
-        ;;
+      200) printf '%s\n' "$host_key" > "$CRED_FILE"; chmod 600 "$CRED_FILE"; return 0 ;;
+      401|403) warn "Host rejected that key. Did you confirm your email?" ;;
+      404) warn "Host returned 404 — copy the key exactly, no extra characters." ;;
+      *)   warn "Couldn't reach the host (HTTP $HTTP). Check your connection." ;;
     esac
   done
-  if [ ! -s "$CRED_FILE" ]; then
-    fail "Couldn't get a working key after $attempts tries. Re-run when ready."
-    exit 1
+  return 1
+}
+
+if [ "${HOST_DONE:-0}" != "1" ]; then
+  # ── Try the email-code flow first ──────────────────────────────────────────
+  say "What email should I use to set up your account?"
+  say "${DIM}(You'll get a one-time code emailed to you. The code is the only thing"
+  say " you'll have to type — I handle the rest.)${RESET}"
+  say
+  read -r -p "Email: " host_email
+  host_email="$(printf '%s' "$host_email" | tr -d '[:space:]')"
+
+  # Basic sanity (not RFC-perfect, just catches the common typo)
+  if [[ ! "$host_email" =~ .+@.+\..+ ]]; then
+    warn "That doesn't look like an email address. Falling back to manual setup."
+    if manual_paste_fallback; then
+      ok_paced "Publishing host configured (manual paste)"
+    else
+      fail "Couldn't get a working key. Re-run when you're ready."; exit 1
+    fi
+  else
+    say
+    say "Sending a sign-in code to ${BOLD}$host_email${RESET}..."
+    REQ_RESP=$(curl -sS -X POST \
+      -H "Content-Type: application/json" \
+      -d "$(printf '{"email":"%s"}' "$host_email")" \
+      https://here.now/api/auth/agent/request-code 2>>"$INSTALL_LOG")
+    REQ_OK=$(printf '%s' "$REQ_RESP" | (command -v jq >/dev/null 2>&1 && jq -r '.success // false') || echo "")
+
+    if [ "$REQ_OK" != "true" ]; then
+      warn "Couldn't send the sign-in code (response: ${REQ_RESP:0:120})."
+      warn "Falling back to manual setup."
+      if manual_paste_fallback; then
+        ok_paced "Publishing host configured (manual paste fallback)"
+      else
+        fail "Couldn't get a working key. Re-run when you're ready."; exit 1
+      fi
+    else
+      say "${GREEN}✓${RESET} Code sent. Check your inbox (subject usually mentions 'here.now')."
+      say "${DIM}Codes typically look like ABCD-2345 and expire in a few minutes.${RESET}"
+      say
+
+      # Loop on the code (max 5 tries — each attempt is fast)
+      vcode_attempts=0
+      while [ "$vcode_attempts" -lt 5 ]; do
+        vcode_attempts=$((vcode_attempts + 1))
+        read -r -p "Code from email (or 'paste' to switch to manual API key paste): " host_code
+        host_code="$(printf '%s' "$host_code" | tr -d '[:space:]')"
+
+        if [ "$host_code" = "paste" ] || [ "$host_code" = "manual" ]; then
+          if manual_paste_fallback; then
+            ok_paced "Publishing host configured (manual paste)"; HOST_DONE=1
+          else
+            fail "Couldn't get a working key. Re-run when ready."; exit 1
+          fi
+          break
+        fi
+
+        if [ -z "$host_code" ]; then
+          warn "No code typed — try again, or type 'paste' to do it manually."
+          continue
+        fi
+
+        VER_RESP=$(curl -sS -X POST \
+          -H "Content-Type: application/json" \
+          -d "$(printf '{"email":"%s","code":"%s"}' "$host_email" "$host_code")" \
+          https://here.now/api/auth/agent/verify-code 2>>"$INSTALL_LOG")
+        VER_OK=$(printf '%s' "$VER_RESP" | (command -v jq >/dev/null 2>&1 && jq -r '.success // false') || echo "")
+        API_KEY=$(printf '%s' "$VER_RESP" | (command -v jq >/dev/null 2>&1 && jq -r '.apiKey // empty') || echo "")
+
+        if [ "$VER_OK" = "true" ] && [ -n "$API_KEY" ]; then
+          printf '%s\n' "$API_KEY" > "$CRED_FILE"
+          chmod 600 "$CRED_FILE"
+          ok_paced "Publishing host configured"
+          log "publishing host: email-code flow succeeded"
+          HOST_DONE=1
+          break
+        else
+          warn "That code didn't verify. ${DIM}(response: ${VER_RESP:0:120})${RESET}"
+          warn "Try again, or type 'paste' to do it manually."
+        fi
+      done
+
+      if [ "${HOST_DONE:-0}" != "1" ]; then
+        warn "Couldn't verify the code after $vcode_attempts tries."
+        if manual_paste_fallback; then
+          ok_paced "Publishing host configured (manual paste fallback)"
+        else
+          fail "Couldn't get a working key. Re-run when ready."; exit 1
+        fi
+      fi
+    fi
   fi
 fi
 

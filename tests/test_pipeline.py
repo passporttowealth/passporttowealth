@@ -649,6 +649,30 @@ class TestPipelineHealth(unittest.TestCase):
             "Welcome.ps1 must support -Auto / --auto flag")
         self.assertIn("AutoMode", ps1, "Welcome.ps1 must implement Auto bypass")
 
+    def test_installer_uses_in_agent_email_code_flow(self):
+        """B9.7 invariant: Step 4's primary path is the in-agent email-code
+        flow (POST /api/auth/agent/request-code → verify-code), with manual
+        paste explicitly available as a fallback. Replaces the old 6-action
+        manual-paste-only path."""
+        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        # Email-code endpoints — both must be wired
+        self.assertIn("/api/auth/agent/request-code", cmd,
+            "B9.7: installer must POST to request-code endpoint")
+        self.assertIn("/api/auth/agent/verify-code", cmd,
+            "B9.7: installer must POST to verify-code endpoint")
+        # Should ask for the email + the code
+        self.assertIn("read -r -p \"Email: \"", cmd,
+            "B9.7: should prompt for the user's email")
+        # Manual paste must remain reachable as a fallback
+        self.assertIn("manual_paste_fallback", cmd,
+            "B9.7: manual paste must remain available as a fallback function")
+        # User can switch from code-loop to manual paste mid-flow
+        self.assertIn("paste' to switch to manual", cmd,
+            "B9.7: 'paste' escape hatch should be available in the code-entry loop")
+        # Save behavior unchanged: write apiKey to ~/.herenow/credentials chmod 600
+        self.assertIn('printf \'%s\\n\' "$API_KEY" > "$CRED_FILE"', cmd,
+            "B9.7: API key from verify-code response must be saved to credentials file")
+
     def test_installer_uses_working_herenow_url(self):
         """B9.7 regression: here.now has no /signup path — that URL 404s.
         The signup is via the homepage's 'Sign in' button (which doubles as
