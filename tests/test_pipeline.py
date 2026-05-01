@@ -649,6 +649,21 @@ class TestPipelineHealth(unittest.TestCase):
             "Welcome.ps1 must support -Auto / --auto flag")
         self.assertIn("AutoMode", ps1, "Welcome.ps1 must implement Auto bypass")
 
+    def test_installer_uses_working_herenow_url(self):
+        """B9.7 regression: here.now has no /signup path — that URL 404s.
+        The signup is via the homepage's 'Sign in' button (which doubles as
+        sign-up). Don't direct users to a 404."""
+        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        self.assertNotIn("here.now/signup", cmd,
+            "https://here.now/signup is a 404 — link the homepage instead")
+        self.assertNotIn("here.now/sign-up", cmd,
+            "/sign-up also 404s")
+        self.assertNotIn("here.now/login", cmd,
+            "/login also 404s")
+        # The homepage IS valid (200)
+        self.assertIn('open "https://here.now/"', cmd,
+            "installer should open here.now/ (the working homepage)")
+
     def test_installer_does_not_auto_open_privacy_hub(self):
         """B9.1 regression: auto-opening privacy.anthropic.com in the browser
         mid-consent-gate snaps focus away from Terminal and confuses users.

@@ -483,9 +483,20 @@ if [ -s "$CRED_FILE" ]; then
 fi
 
 if [ "${HOST_DONE:-0}" != "1" ]; then
-  # Open the signup page in a browser so the user can sign up.
+  # Tell the user where to go BEFORE opening the browser (B9.1 lesson —
+  # don't snap focus mid-instruction).
+  say "I'll open the publishing host's homepage in a moment."
+  say "Once it loads:"
+  say "  1. Click ${BOLD}Sign in${RESET} in the top-right corner."
+  say "  2. Sign up with your email (you'll only do this once)."
+  say "  3. ${BOLD}CHECK YOUR EMAIL${RESET} for a verification link if asked. Click it."
+  say "  4. On the dashboard, find your API key — copy the long random string."
+  say "  5. Come back here and paste it."
+  say
+  read -r -p "$(printf '%sPress Enter when you'"'"'re ready to open the browser...%s ' "$DIM" "$RESET")" _
+
   if command -v open >/dev/null 2>&1; then
-    open "https://here.now/signup" 2>/dev/null || true
+    open "https://here.now/" 2>/dev/null || true
   fi
   # Loop until we get a key that the host accepts (or the user gives up).
   attempts=0

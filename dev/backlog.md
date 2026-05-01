@@ -440,6 +440,26 @@ deprecated and scheduled for removal in a future version. Use timezone-aware obj
 **Fallback fix (suppress, don't address):** Add `import warnings; warnings.filterwarnings("ignore", category=DeprecationWarning)` at the top of pipeline scripts. Hides the noise but masks future deprecations too. Not recommended.
 **Recommendation:** preferred fix. ~3 lines changed total. Run regression suite after.
 
+### B9.7 — Replace publishing-host signup with the in-agent email-code flow · **P1 · M**
+**Found by:** dry-run + investigation when the user reported the broken `here.now/signup` URL.
+**Surface complaint:** "the page https://here.now/signup doesn't exist... so user gets blocked."
+**Immediate fix (already shipped):** point at the homepage `https://here.now/` instead and walk the user through clicking "Sign in" → email signup → API key copy → paste back. Works, but requires 6+ user actions and a context switch into the browser.
+**Better path (this backlog item):** the here.now docs describe an **in-agent flow** at `POST /api/auth/agent/request-code` and `POST /api/auth/agent/verify-code` designed specifically for installer-style flows. Replaces 6 user actions with 2 (type your email, type the code from your inbox).
+**Proposed flow in `Welcome.command` Step 4:**
+```
+Email address (we'll send you a one-time code): _____
+  → POST /api/auth/agent/request-code  { "email": "..." }
+  → "Check your inbox for a 6-character code (subject: 'here.now sign-in')"
+  → block with read for the code:
+Code from email: ______
+  → POST /api/auth/agent/verify-code   { "email": "...", "code": "..." }
+  → response includes the API key
+  → save to ~/.herenow/credentials chmod 600
+```
+**Trade-off:** depends on the here.now in-agent endpoints staying stable. They're documented but new; could change shape. Mitigation: keep the manual paste flow as a fallback ("if the in-agent flow fails, paste your key here instead").
+**Bonus:** completely closes OP-8 for the publishing-host concern — the user never sees the brand "here.now" in any clickable surface.
+**Implementation:** ~50 lines in Welcome.command Step 4 + matching mirror in Welcome.ps1. New regression test asserting the email-code POST pattern is present.
+
 ## Epic 6.5 — v2 hardening: zero-touch advisor onboarding (deferred from v1)
 
 Items pulled out of `finance-clarity-build-spec.md` v1 to keep the first ship simple. Together they remove the one remaining moment of third-party-service exposure (the publishing-host signup during install) and let the advisor diagnose failures without the user having to email a support bundle.
