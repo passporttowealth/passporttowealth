@@ -140,19 +140,34 @@ def normalize_one(path: Path) -> tuple[list[dict], dict]:
     date_samples = [r[date_col] for r in rows[:20] if r.get(date_col)]
     date_fmt = _detect_date_format(date_samples)
 
-    # Detect sign convention by looking for a salary-shaped row
-    amounts = []
-    for r in rows[:60]:
-        try:
-            amounts.append(_parse_amount(r[amount_col]))
-        except (ValueError, KeyError):
-            continue
-    pos_count = sum(1 for a in amounts if a > 0)
-    neg_count = sum(1 for a in amounts if a < 0)
-    # Convention: in our canonical schema, debits are NEGATIVE.
-    # If most rows are positive (debits-positive convention), invert.
-    debits_positive = pos_count > neg_count * 1.3
-    sign_factor = -1.0 if debits_positive else 1.0
+    # Brokerage accounts behave differently from checking/credit:
+    #   - Most rows are positive (transfers in + dividends + interest).
+    #   - Negative rows are buys (already correctly signed: outflow).
+    # The "debits-positive" heuristic mis-flips them. Detect brokerage
+    # by account alias OR by the presence of an Action / Symbol column
+    # and skip the inversion.
+    is_brokerage = (
+        account.lower().startswith("broker")
+        or _find_col(hdr, ("action", "symbol", "quantity")) is not None
+    )
+
+    if is_brokerage:
+        sign_factor = 1.0
+        debits_positive = False  # already correctly signed; no inversion
+    else:
+        # Detect sign convention from amount distribution.
+        amounts = []
+        for r in rows[:60]:
+            try:
+                amounts.append(_parse_amount(r[amount_col]))
+            except (ValueError, KeyError):
+                continue
+        pos_count = sum(1 for a in amounts if a > 0)
+        neg_count = sum(1 for a in amounts if a < 0)
+        # In our canonical schema debits are NEGATIVE. If the source uses
+        # debits-positive convention (most rows positive), invert.
+        debits_positive = pos_count > neg_count * 1.3
+        sign_factor = -1.0 if debits_positive else 1.0
 
     out_rows = []
     for i, r in enumerate(rows, start=1):
