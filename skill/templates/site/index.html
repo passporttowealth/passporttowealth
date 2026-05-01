@@ -5,265 +5,666 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ DASHBOARD_TITLE }}</title>
   <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0F1E33">
   <link rel="icon" type="image/png" href="assets/brand/favicon.png">
   <style>
+    /* ============================================================
+       DESIGN TOKENS — see skill/references/DESIGN_TOKENS.md
+       ============================================================ */
     :root {
-      --color-bg: #FFFFFF;
-      --color-bg-warm: #FAF8F4;
-      --color-surface: #F7F6F3;
-      --color-border: #E5E3DE;
-      --color-text: #2D2D2D;
-      --color-text-muted: #6B6B6B;
-      --color-text-subtle: #9A9A9A;
-      --color-accent: #0F1E33;
-      --color-accent-soft: #E8ECF2;
-      --color-positive: #2E7D5C;
-      --color-negative: #B33A2A;
-      --color-chart-1: #0F1E33;
-      --color-chart-2: #2E7D5C;
-      --color-chart-3: #D9A300;
-      --color-chart-4: #B33A2A;
-      --color-chart-5: #6B4FA1;
-      --color-chart-6: #2D8E9E;
-      --color-chart-7: #C26B3F;
-      --color-chart-8: #5C7A8C;
-      --space-2: 8px; --space-3: 12px; --space-4: 16px;
-      --space-5: 24px; --space-6: 32px; --space-7: 48px;
-      --radius-md: 8px; --radius-lg: 16px;
-      --shadow-sm: 0 1px 2px rgba(20,20,20,0.04), 0 1px 3px rgba(20,20,20,0.04);
+      /* Colors */
+      --bg:            #FFFFFF;
+      --bg-warm:       #FAF8F4;
+      --surface:       #FBFAF7;
+      --surface-card:  #FFFFFF;
+      --border:        #E8E5DE;
+      --border-strong: #D4D0C7;
+      --text:          #1D2433;
+      --text-muted:    #5E6473;
+      --text-subtle:   #8A8E9A;
+      --accent:        #0F1E33;
+      --accent-soft:   #EAEEF5;
+      --accent-hover:  #1A2D48;
+      --positive:      #1F6B4A;
+      --negative:      #A8392A;
+      --warning:       #B07C00;
+      --warning-bg:    #FFF6DD;
+
+      /* Brand-aligned chart palette (8 colors, all AA on white) */
+      --c1: #0F1E33;  /* deep navy — anchor */
+      --c2: #2D6E7E;  /* deep teal — sibling to navy */
+      --c3: #C49A4D;  /* warm gold */
+      --c4: #3A6B52;  /* forest */
+      --c5: #A65A3D;  /* warm clay */
+      --c6: #6B4E80;  /* muted plum */
+      --c7: #5C7080;  /* slate */
+      --c8: #4A5E80;  /* pale navy */
+
+      /* Spacing */
+      --s1: 4px;  --s2: 8px;  --s3: 12px;  --s4: 16px;
+      --s5: 24px; --s6: 32px; --s7: 48px;  --s8: 64px; --s9: 96px;
+
+      /* Radii */
+      --r-sm: 4px; --r-md: 10px; --r-lg: 18px;
+
+      /* Shadows */
+      --sh-sm: 0 1px 2px rgba(20,24,40,0.04), 0 1px 3px rgba(20,24,40,0.04);
+      --sh-md: 0 2px 6px rgba(20,24,40,0.05), 0 8px 24px rgba(20,24,40,0.06);
+
+      /* Layout */
+      --maxw: 1120px;
+      --maxw-text: 680px;
     }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; }
+
+    /* ============================================================
+       RESET / BASE
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-      font-size: 16px; line-height: 1.6;
-      color: var(--color-text); background: var(--color-bg);
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+      font-size: 16px; line-height: 1.55;
+      color: var(--text);
+      background: var(--bg-warm);
       -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      font-variant-numeric: tabular-nums;
     }
-    a { color: var(--color-accent); }
+    h1, h2, h3, h4 { color: var(--text); font-weight: 600; letter-spacing: -0.01em; }
+    h1 { font-size: clamp(28px, 4vw, 36px); line-height: 1.15; margin: 0; }
+    h2 { font-size: 18px; line-height: 1.3; margin: 0 0 var(--s3); text-transform: uppercase;
+         letter-spacing: 0.06em; color: var(--text-muted); font-weight: 600; }
+    a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent;
+        transition: border-color 120ms ease; }
+    a:hover { border-color: currentColor; }
+
+    /* ============================================================
+       LAYOUT
+       ============================================================ */
+    main { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--s5) var(--s9); }
+    section { margin-top: var(--s8); }
+
+    /* ============================================================
+       HEADER (brand strip + dashboard title)
+       ============================================================ */
     header.brand {
-      text-align: center;
-      padding: var(--space-6) var(--space-4) var(--space-5);
-      background: var(--color-bg-warm);
-      border-bottom: 1px solid var(--color-border);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
     }
-    header.brand img { max-width: 140px; height: auto; }
-    header.brand .tagline {
-      color: var(--color-text-muted); font-size: 14px; margin-top: var(--space-3);
+    .brand-inner {
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: var(--s5) var(--s5);
+      display: flex; align-items: center; gap: var(--s4);
     }
-    main {
-      max-width: 1080px; margin: 0 auto; padding: var(--space-6) var(--space-4);
+    .brand-inner img { height: 56px; width: auto; }
+    .brand-meta {
+      flex: 1;
+      display: flex; align-items: baseline; gap: var(--s3);
+      font-size: 13px; color: var(--text-subtle);
     }
-    h1 {
-      font-size: 28px; line-height: 1.25; margin: 0 0 var(--space-3);
-      letter-spacing: -0.01em;
+    .brand-meta .dot { color: var(--text-subtle); }
+    .brand-meta a { color: var(--text-muted); }
+    @media (max-width: 600px) {
+      .brand-inner { flex-direction: column; align-items: flex-start; gap: var(--s2); }
+      .brand-inner img { height: 44px; }
     }
-    h2 { font-size: 20px; margin: var(--space-7) 0 var(--space-3); }
-    .meta { color: var(--color-text-muted); font-size: 14px; }
+
+    .hero {
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: var(--s7) var(--s5) var(--s5);
+    }
+    .hero .meta {
+      color: var(--text-muted); margin: var(--s3) 0 0; font-size: 14px;
+    }
+
+    /* ============================================================
+       KPI CARDS
+       ============================================================ */
     .kpi-grid {
-      display: grid; gap: var(--space-4);
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      margin: var(--space-5) 0;
+      display: grid; gap: var(--s4);
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      margin-top: var(--s5);
     }
-    .kpi-card {
-      background: var(--color-surface); border: 1px solid var(--color-border);
-      border-radius: var(--radius-md); padding: var(--space-4);
+    .kpi {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: var(--s5);
+      box-shadow: var(--sh-sm);
+      transition: transform 160ms ease, box-shadow 160ms ease;
     }
-    .kpi-card .label {
-      color: var(--color-text-muted); font-size: 13px;
-      text-transform: uppercase; letter-spacing: 0.04em;
+    .kpi:hover { transform: translateY(-1px); box-shadow: var(--sh-md); }
+    .kpi .label {
+      font-size: 12px; color: var(--text-subtle);
+      text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500;
     }
-    .kpi-card .value {
-      color: var(--color-accent); font-size: 28px; font-weight: 600;
-      margin-top: var(--space-2); letter-spacing: -0.01em;
+    .kpi .value {
+      font-size: clamp(24px, 3vw, 32px); font-weight: 600;
+      margin-top: var(--s2); letter-spacing: -0.02em;
+      color: var(--accent);
     }
-    .kpi-card.positive .value { color: var(--color-positive); }
-    .kpi-card.negative .value { color: var(--color-negative); }
+    .kpi .sub { font-size: 13px; color: var(--text-muted); margin-top: var(--s1); }
+    .kpi.positive .value { color: var(--positive); }
+    .kpi.negative .value { color: var(--negative); }
+
+    /* ============================================================
+       CHARTS
+       ============================================================ */
     .chart-card {
-      background: var(--color-surface); border: 1px solid var(--color-border);
-      border-radius: var(--radius-md); padding: var(--space-4);
-      margin: var(--space-4) 0;
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: var(--s5);
+      box-shadow: var(--sh-sm);
     }
-    .chart-card canvas { width: 100% !important; height: auto !important; display: block; }
-    table.tx {
-      width: 100%; border-collapse: collapse; font-size: 14px;
-      margin: var(--space-3) 0;
+    .chart-card .chart-head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: var(--s4); gap: var(--s3); flex-wrap: wrap;
     }
+    .chart-card .chart-title { font-size: 16px; font-weight: 600; color: var(--text); }
+    .chart-card .chart-sub { font-size: 13px; color: var(--text-subtle); }
+    .chart-wrap { position: relative; height: 320px; }
+    @media (max-width: 600px) { .chart-wrap { height: 260px; } }
+
+    /* ============================================================
+       INSIGHTS
+       ============================================================ */
+    .insights {
+      background: var(--accent-soft);
+      border-radius: var(--r-md);
+      padding: var(--s5) var(--s6);
+      border-left: 3px solid var(--accent);
+    }
+    .insights h2 { color: var(--accent); margin-bottom: var(--s4); }
+    .insights ul { margin: 0; padding: 0; list-style: none; }
+    .insights li {
+      padding: var(--s3) 0; border-top: 1px solid rgba(15,30,51,0.10);
+      font-size: 15px;
+    }
+    .insights li:first-child { border-top: 0; padding-top: 0; }
+    .insights li strong { color: var(--accent); font-weight: 600; }
+
+    /* ============================================================
+       TRANSACTIONS TABLE
+       ============================================================ */
+    .table-tools {
+      display: flex; gap: var(--s3); flex-wrap: wrap; margin-bottom: var(--s4);
+    }
+    .table-tools input, .table-tools select {
+      font: inherit; font-size: 14px;
+      padding: var(--s2) var(--s3);
+      background: var(--bg);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--r-sm);
+      color: var(--text);
+      transition: border-color 120ms ease, box-shadow 120ms ease;
+    }
+    .table-tools input { min-width: 220px; }
+    .table-tools input:focus, .table-tools select:focus {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15,30,51,0.10);
+    }
+    .table-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      box-shadow: var(--sh-sm);
+    }
+    table.tx { width: 100%; border-collapse: collapse; font-size: 14px; }
     table.tx th, table.tx td {
-      text-align: left; padding: var(--space-2) var(--space-3);
-      border-bottom: 1px solid var(--color-border);
+      text-align: left; padding: var(--s3) var(--s4);
+      border-bottom: 1px solid var(--border);
     }
+    table.tx tbody tr:last-child td { border-bottom: 0; }
     table.tx th {
-      font-weight: 600; color: var(--color-text-muted);
-      text-transform: uppercase; font-size: 12px; letter-spacing: 0.04em;
+      font-weight: 500; color: var(--text-subtle);
+      text-transform: uppercase; font-size: 11px; letter-spacing: 0.08em;
       cursor: pointer; user-select: none;
+      background: var(--surface);
     }
-    table.tx td.amount { text-align: right; font-variant-numeric: tabular-nums; }
-    table.tx tr:hover td { background: var(--color-bg-warm); }
-    .filter-bar {
-      display: flex; gap: var(--space-3); flex-wrap: wrap;
-      margin: var(--space-3) 0;
+    table.tx th:hover { color: var(--accent); }
+    table.tx th.sorted::after { content: ""; display: inline-block; margin-left: 6px; color: var(--accent); }
+    table.tx th.sorted.asc::after  { content: "▲"; }
+    table.tx th.sorted.desc::after { content: "▼"; }
+    table.tx td.amount { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    table.tx td.amount.neg { color: var(--negative); }
+    table.tx td.amount.pos { color: var(--positive); }
+    table.tx tbody tr { transition: background 100ms ease; }
+    table.tx tbody tr:hover td { background: var(--bg-warm); }
+    .tx-meta { padding: var(--s3) var(--s4); font-size: 12px; color: var(--text-subtle); border-top: 1px solid var(--border); background: var(--surface); }
+    .cat-pill {
+      display: inline-block; padding: 2px 10px; border-radius: 999px;
+      background: var(--accent-soft); color: var(--accent);
+      font-size: 12px; font-weight: 500;
     }
-    .filter-bar input, .filter-bar select {
-      padding: var(--space-2) var(--space-3); font-size: 14px;
-      border: 1px solid var(--color-border); border-radius: var(--radius-md);
-      background: var(--color-bg);
+
+    /* ============================================================
+       METHODOLOGY
+       ============================================================ */
+    details.methodology {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 0;
+      overflow: hidden;
     }
+    details.methodology > summary {
+      padding: var(--s4) var(--s5);
+      cursor: pointer; font-weight: 500;
+      list-style: none;
+      display: flex; align-items: center; justify-content: space-between;
+      color: var(--text);
+    }
+    details.methodology > summary::-webkit-details-marker { display: none; }
+    details.methodology > summary::after {
+      content: "+"; font-size: 22px; color: var(--text-muted);
+      transition: transform 200ms ease; line-height: 1;
+    }
+    details.methodology[open] > summary::after { transform: rotate(45deg); }
+    details.methodology[open] > summary { border-bottom: 1px solid var(--border); }
+    details.methodology .body {
+      padding: var(--s5) var(--s5) var(--s6);
+      max-width: var(--maxw-text); font-size: 14px; color: var(--text-muted);
+    }
+    details.methodology dl { display: grid; grid-template-columns: 200px 1fr; gap: var(--s3) var(--s5); margin: 0; }
+    details.methodology dt { color: var(--text); font-weight: 500; }
+    details.methodology dd { margin: 0; }
+    @media (max-width: 600px) { details.methodology dl { grid-template-columns: 1fr; gap: var(--s1) 0; }
+      details.methodology dt { margin-top: var(--s3); } details.methodology dt:first-child { margin-top: 0; } }
+
+    /* ============================================================
+       DOWNLOADS
+       ============================================================ */
     .downloads {
-      background: var(--color-accent-soft); border-radius: var(--radius-md);
-      padding: var(--space-4); margin: var(--space-5) 0;
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: var(--s5);
+      box-shadow: var(--sh-sm);
     }
-    .downloads ul { margin: var(--space-2) 0 0; padding-left: var(--space-5); }
-    .downloads li { margin: var(--space-2) 0; }
-    footer {
-      max-width: 1080px; margin: var(--space-7) auto 0; padding: var(--space-5) var(--space-4);
-      border-top: 1px solid var(--color-border); color: var(--color-text-muted);
-      font-size: 13px; text-align: center;
+    .downloads-grid {
+      display: grid; gap: var(--s3); margin-top: var(--s4);
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     }
-    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
-    @media print { .filter-bar, .no-print { display: none; } }
+    .downloads-grid a {
+      display: block; padding: var(--s4);
+      border: 1px solid var(--border); border-radius: var(--r-sm);
+      transition: border-color 120ms ease, background 120ms ease;
+    }
+    .downloads-grid a:hover { border-color: var(--accent); background: var(--accent-soft); }
+    .downloads-grid .name { font-weight: 500; color: var(--text); }
+    .downloads-grid .desc { font-size: 13px; color: var(--text-subtle); margin-top: 4px; }
+
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    footer.site-footer {
+      max-width: var(--maxw);
+      margin: var(--s9) auto 0;
+      padding: var(--s6) var(--s5);
+      border-top: 1px solid var(--border);
+      font-size: 13px; color: var(--text-muted);
+    }
+    footer .privacy {
+      max-width: var(--maxw-text); margin: 0 auto var(--s4);
+      text-align: center; line-height: 1.6;
+    }
+    footer .links {
+      display: flex; justify-content: center; gap: var(--s4); flex-wrap: wrap;
+      margin-bottom: var(--s3);
+    }
+    footer .meta {
+      text-align: center; color: var(--text-subtle); font-size: 12px;
+    }
+
+    /* ============================================================
+       PRINT
+       ============================================================ */
+    @media print {
+      .table-tools, footer.site-footer .links, .no-print { display: none; }
+      body { background: white; }
+      .chart-card, .kpi, .table-card, .downloads, details.methodology { box-shadow: none; break-inside: avoid; }
+      details.methodology { display: block; }
+      details.methodology .body { display: block !important; }
+    }
+
+    /* ============================================================
+       MOTION
+       ============================================================ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
   </style>
 </head>
 <body>
   <header class="brand">
-    <img src="assets/brand/logo-blue.png" alt="Passport to Wealth">
-    <div class="tagline">Your private finance dashboard</div>
+    <div class="brand-inner">
+      <img src="assets/brand/logo-blue.png" alt="Passport to Wealth" width="120" height="112">
+      <div class="brand-meta">
+        <span>Your private finance dashboard</span>
+        <span class="dot">·</span>
+        <span>Generated <time datetime="{{ GENERATED_AT_ISO }}">{{ GENERATED_AT_HUMAN }}</time></span>
+      </div>
+    </div>
   </header>
+
+  <section class="hero" style="margin-top: 0;">
+    <h1>{{ DASHBOARD_HEADLINE }}</h1>
+    <p class="meta">{{ N_MONTHS }} months · {{ DATE_FROM }} → {{ DATE_TO }} · {{ N_ACCOUNTS }} accounts</p>
+  </section>
+
   <main>
-    <h1>Your Finance Dashboard</h1>
-    <p class="meta">Generated <time>{{ GENERATED_AT }}</time> · {{ KPI_MONTHS }} months covered.</p>
 
-    <div class="kpi-grid">
-      <div class="kpi-card positive"><div class="label">Income</div><div class="value">{{ KPI_INCOME }}</div></div>
-      <div class="kpi-card negative"><div class="label">Spend</div><div class="value">{{ KPI_SPEND }}</div></div>
-      <div class="kpi-card"><div class="label">Net</div><div class="value">{{ KPI_NET }}</div></div>
-      <div class="kpi-card"><div class="label">Savings rate</div><div class="value">{{ KPI_SAVINGS_RATE }}</div></div>
-    </div>
+    <!-- KPI strip -->
+    <section style="margin-top: var(--s5);" aria-labelledby="kpi-h">
+      <h2 id="kpi-h" class="sr-only" style="position:absolute;left:-9999px;">Key totals</h2>
+      <div class="kpi-grid">
+        <div class="kpi positive">
+          <div class="label">Income</div>
+          <div class="value">{{ KPI_INCOME }}</div>
+          <div class="sub">{{ KPI_INCOME_AVG }} per month avg</div>
+        </div>
+        <div class="kpi negative">
+          <div class="label">Spend</div>
+          <div class="value">{{ KPI_SPEND }}</div>
+          <div class="sub">{{ KPI_SPEND_AVG }} per month avg</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Net</div>
+          <div class="value">{{ KPI_NET }}</div>
+          <div class="sub">{{ KPI_NET_AVG }} per month avg</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Savings rate</div>
+          <div class="value">{{ KPI_SAVINGS_RATE }}</div>
+          <div class="sub">net ÷ income, full period</div>
+        </div>
+      </div>
+    </section>
 
-    <h2>Monthly cashflow</h2>
-    <div class="chart-card"><canvas id="chart-cashflow" width="900" height="320"></canvas></div>
-
-    <h2>Spend by category</h2>
-    <div class="chart-card"><canvas id="chart-category" width="900" height="400"></canvas></div>
-
-    <h2>Recent transactions</h2>
-    <div class="filter-bar no-print">
-      <input id="tx-search" type="search" placeholder="Search description…" aria-label="Search transactions">
-      <select id="tx-category" aria-label="Filter by category">
-        <option value="">All categories</option>
-      </select>
-      <select id="tx-account" aria-label="Filter by account">
-        <option value="">All accounts</option>
-      </select>
-    </div>
-    <table class="tx" id="tx-table">
-      <thead>
-        <tr>
-          <th data-sort="date">Date</th>
-          <th data-sort="description">Description</th>
-          <th data-sort="category">Category</th>
-          <th data-sort="account">Account</th>
-          <th data-sort="amount" class="amount">Amount</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-
-    <div class="downloads">
-      <strong>Download your data</strong>
-      <ul>
-        <li><a href="downloads/transactions_tagged.csv">All transactions (CSV)</a> — every row, with categories</li>
-        <li><a href="downloads/monthly_actuals.csv">Monthly totals (CSV)</a> — month × category pivot</li>
-        <li><a href="downloads/rules.yaml">Categorization rules</a> — what mapped what</li>
+    <!-- Insights -->
+    <section class="insights" aria-labelledby="insights-h">
+      <h2 id="insights-h">What I'm seeing</h2>
+      <ul id="insights-list">
+        <!-- populated by client-side JS from data.insights -->
       </ul>
-    </div>
+      <p style="margin: var(--s4) 0 0; font-size: 12px; color: var(--text-muted);">Facts only. Your advisor at Passport to Wealth interprets and recommends — this dashboard does not.</p>
+    </section>
+
+    <!-- Cashflow -->
+    <section aria-labelledby="cashflow-h">
+      <h2 id="cashflow-h">Cashflow over time</h2>
+      <div class="chart-card">
+        <div class="chart-head">
+          <div>
+            <div class="chart-title">Monthly income, spend, and 3-month rolling net</div>
+            <div class="chart-sub">All values in {{ CURRENCY }}. Transfers between your own accounts excluded.</div>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-cashflow" aria-label="Monthly cashflow chart"></canvas></div>
+      </div>
+    </section>
+
+    <!-- Spend by category -->
+    <section aria-labelledby="cat-h">
+      <h2 id="cat-h">Spend by category</h2>
+      <div class="chart-card">
+        <div class="chart-head">
+          <div>
+            <div class="chart-title">Total spend per category, full period</div>
+            <div class="chart-sub">Hover any bar to see what % of total spend it represents.</div>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-category" aria-label="Spend by category chart"></canvas></div>
+      </div>
+    </section>
+
+    <!-- Monthly category stacked -->
+    <section aria-labelledby="monthly-h">
+      <h2 id="monthly-h">Monthly spend by category</h2>
+      <div class="chart-card">
+        <div class="chart-head">
+          <div>
+            <div class="chart-title">Top categories per month, stacked</div>
+            <div class="chart-sub">Top 7 categories shown by name. Smaller categories grouped as "Other".</div>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-monthly" aria-label="Monthly stacked category chart"></canvas></div>
+      </div>
+    </section>
+
+    <!-- Transactions -->
+    <section aria-labelledby="tx-h">
+      <h2 id="tx-h">Transactions</h2>
+      <div class="table-tools no-print">
+        <input id="tx-search" type="search" placeholder="Search description…" aria-label="Search transactions">
+        <select id="tx-category" aria-label="Filter by category"><option value="">All categories</option></select>
+        <select id="tx-account"  aria-label="Filter by account"><option value="">All accounts</option></select>
+      </div>
+      <div class="table-card">
+        <table class="tx" id="tx-table">
+          <thead>
+            <tr>
+              <th data-sort="date">Date</th>
+              <th data-sort="description">Description</th>
+              <th data-sort="category">Category</th>
+              <th data-sort="account">Account</th>
+              <th data-sort="amount" class="amount">Amount</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="tx-meta" id="tx-meta">—</div>
+      </div>
+    </section>
+
+    <!-- Methodology -->
+    <section aria-labelledby="meth-h">
+      <h2 id="meth-h">Methodology</h2>
+      <details class="methodology">
+        <summary>How was this dashboard built? — click to expand</summary>
+        <div class="body">
+          <p style="margin-top: 0;">Everything here came from files you put in your inbox. No bank-API connections, no third-party data. The pipeline ran locally on your laptop; only the rendered page was uploaded to the host.</p>
+          <dl id="methodology-dl">
+            <!-- populated by JS from data.methodology -->
+          </dl>
+          <p style="margin-bottom: 0;"><a href="https://github.com/rafaeldavid/passporttowealth" target="_blank" rel="noopener">Source code on GitHub</a> · Open the categorization rules in the Downloads section below to see exactly which merchants mapped to which categories.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- Downloads -->
+    <section aria-labelledby="dl-h">
+      <h2 id="dl-h">Download your data</h2>
+      <div class="downloads">
+        <p style="margin-top: 0; color: var(--text-muted); font-size: 14px;">Take everything with you. Hand to an accountant, archive, or examine row by row.</p>
+        <div class="downloads-grid">
+          <a href="downloads/transactions_tagged.csv" download>
+            <div class="name">All transactions (CSV)</div>
+            <div class="desc">Every row, with categories and source file</div>
+          </a>
+          <a href="downloads/monthly_actuals.csv" download>
+            <div class="name">Monthly totals (CSV)</div>
+            <div class="desc">Month × category pivot</div>
+          </a>
+          <a href="downloads/rules.yaml" download>
+            <div class="name">Categorization rules</div>
+            <div class="desc">The rule set used to map merchants to categories</div>
+          </a>
+        </div>
+      </div>
+    </section>
+
   </main>
-  <footer>
-    Hosted privately. Server only serves this page after the passcode is verified.
-    Source data lives on the laptop that produced this dashboard.<br>
-    © Passport to Wealth · <a href="https://www.passporttowealth.com/">passporttowealth.com</a>
+
+  <footer class="site-footer">
+    <div class="privacy">
+      Hosted privately. The host serves this page only after the passcode is verified.
+      Source data lives on the laptop that produced this dashboard — the host never received your transactions, only the rendered numbers.
+    </div>
+    <div class="links">
+      <a href="https://www.passporttowealth.com/" target="_blank" rel="noopener">passporttowealth.com</a>
+      <a href="https://github.com/rafaeldavid/passporttowealth" target="_blank" rel="noopener">Built with Finance Clarity</a>
+    </div>
+    <div class="meta">© Passport to Wealth · Generated <time datetime="{{ GENERATED_AT_ISO }}">{{ GENERATED_AT_HUMAN }}</time> · Data through {{ DATE_TO }}</div>
   </footer>
 
   <script id="dashboard-data" type="application/json">{{ DASHBOARD_DATA_JSON }}</script>
+  <script src="assets/js/chart.umd.min.js"></script>
   <script>
+  (function(){
     const data = JSON.parse(document.getElementById('dashboard-data').textContent);
-    const cur = data.currency || 'USD';
-    const fm = (v) => {
-      const sign = v < 0 ? '-' : '';
-      const sym = {USD:'$', EUR:'€', GBP:'£'}[cur] || (cur+' ');
-      return sign + sym + Math.abs(v).toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0});
-    };
-    const palette = ['#0F1E33','#2E7D5C','#D9A300','#B33A2A','#6B4FA1','#2D8E9E','#C26B3F','#5C7A8C'];
+    const cur  = data.currency || 'USD';
+    const SYM  = ({USD:'$', EUR:'€', GBP:'£'})[cur] || (cur+' ');
 
-    // ── Cashflow chart (canvas, hand-rolled — no chart library dependency) ───
-    function drawCashflow() {
-      const c = document.getElementById('chart-cashflow');
-      const ctx = c.getContext('2d');
-      const W = c.width, H = c.height;
-      const months = data.months;
-      const ins = data.by_month_in, outs = data.by_month_out;
-      const maxV = Math.max(...ins, ...outs, 1);
-      const padL = 60, padR = 16, padT = 16, padB = 36;
-      const innerW = W - padL - padR, innerH = H - padT - padB;
-      const bw = innerW / months.length / 2.5;
-      ctx.clearRect(0,0,W,H);
-      // Y-axis labels (3 ticks)
-      ctx.fillStyle = '#9A9A9A'; ctx.font = '11px -apple-system,sans-serif';
-      ctx.textAlign = 'right';
-      for (let i = 0; i <= 3; i++) {
-        const v = maxV * (1 - i/3);
-        const y = padT + innerH * (i/3);
-        ctx.fillText(fm(v), padL - 8, y + 3);
-        ctx.strokeStyle = '#E5E3DE'; ctx.beginPath();
-        ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+    // Brand chart palette pulled from CSS vars (single source of truth).
+    const css  = getComputedStyle(document.documentElement);
+    const PAL  = ['c1','c2','c3','c4','c5','c6','c7','c8'].map(n => css.getPropertyValue('--'+n).trim());
+    const POS  = css.getPropertyValue('--positive').trim();
+    const NEG  = css.getPropertyValue('--negative').trim();
+    const TEXT = css.getPropertyValue('--text').trim();
+    const MUTE = css.getPropertyValue('--text-muted').trim();
+    const SUBT = css.getPropertyValue('--text-subtle').trim();
+    const GRID = css.getPropertyValue('--border').trim();
+
+    const fm  = (v) => (v < 0 ? '-' : '') + SYM + Math.abs(Math.round(v)).toLocaleString();
+    const fm0 = (v) => (v < 0 ? '-' : '') + SYM + Math.abs(v).toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0});
+    const fm2 = (v) => (v < 0 ? '-' : '') + SYM + Math.abs(v).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+
+    // Chart.js global defaults — typography + colors aligned with the page
+    Chart.defaults.font.family = '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif';
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = MUTE;
+    Chart.defaults.borderColor = GRID;
+    Chart.defaults.plugins.legend.labels.color = TEXT;
+    Chart.defaults.plugins.legend.labels.boxWidth = 12;
+    Chart.defaults.plugins.legend.labels.boxHeight = 12;
+    Chart.defaults.plugins.legend.labels.padding = 16;
+    Chart.defaults.plugins.tooltip.backgroundColor = '#1D2433';
+    Chart.defaults.plugins.tooltip.titleColor = '#fff';
+    Chart.defaults.plugins.tooltip.bodyColor = '#fff';
+    Chart.defaults.plugins.tooltip.padding = 12;
+    Chart.defaults.plugins.tooltip.cornerRadius = 6;
+    Chart.defaults.plugins.tooltip.displayColors = true;
+    Chart.defaults.plugins.tooltip.boxPadding = 4;
+
+    // ==========================================================
+    // 1. Cashflow chart — bars (income/spend) + line (3-mo net avg)
+    // ==========================================================
+    new Chart(document.getElementById('chart-cashflow'), {
+      type: 'bar',
+      data: {
+        labels: data.months,
+        datasets: [
+          { label: 'Income', backgroundColor: POS, data: data.by_month_in,    borderRadius: 4, order: 2 },
+          { label: 'Spend',  backgroundColor: NEG, data: data.by_month_out.map(v => -v), borderRadius: 4, order: 2 },
+          { label: 'Net (3-month rolling avg)', type: 'line', data: data.cashflow_3mo_avg,
+            borderColor: PAL[0], backgroundColor: 'transparent',
+            borderWidth: 2, borderDash: [6,4], pointRadius: 3, pointBackgroundColor: PAL[0],
+            tension: 0.3, order: 1 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          x: { grid: { display: false }, ticks: { color: SUBT } },
+          y: { grid: { color: GRID, drawBorder: false }, ticks: { callback: (v) => fm(v), color: SUBT } }
+        },
+        plugins: {
+          legend: { position: 'top', align: 'end' },
+          tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${fm2(ctx.parsed.y)}` } }
+        }
       }
-      // Bars
-      months.forEach((m, i) => {
-        const x = padL + i * (innerW / months.length) + (innerW / months.length / 2);
-        const inH = (ins[i] / maxV) * innerH;
-        const outH = (outs[i] / maxV) * innerH;
-        ctx.fillStyle = palette[1];
-        ctx.fillRect(x - bw - 2, padT + innerH - inH, bw, inH);
-        ctx.fillStyle = palette[3];
-        ctx.fillRect(x + 2, padT + innerH - outH, bw, outH);
-        ctx.fillStyle = '#6B6B6B'; ctx.textAlign = 'center';
-        ctx.fillText(m.slice(5), x, H - 14);
-      });
-      // Legend
-      ctx.fillStyle = palette[1]; ctx.fillRect(padL, padT - 10, 10, 10);
-      ctx.fillStyle = '#2D2D2D'; ctx.textAlign = 'left'; ctx.fillText('Income', padL + 14, padT - 1);
-      ctx.fillStyle = palette[3]; ctx.fillRect(padL + 70, padT - 10, 10, 10);
-      ctx.fillStyle = '#2D2D2D'; ctx.fillText('Spend', padL + 84, padT - 1);
-    }
+    });
 
-    // ── Category bar chart (horizontal) ──────────────────────────────────────
-    function drawCategory() {
-      const c = document.getElementById('chart-category');
-      const ctx = c.getContext('2d');
-      const W = c.width, H = c.height;
-      const items = data.category_totals.slice(0, 12);
-      const maxV = Math.max(...items.map(x => x[1]), 1);
-      const padL = 140, padR = 80, padT = 8, padB = 8;
-      const innerW = W - padL - padR;
-      const rowH = (H - padT - padB) / Math.max(items.length, 1);
-      ctx.clearRect(0,0,W,H);
-      ctx.font = '13px -apple-system,sans-serif';
-      items.forEach(([cat, amt], i) => {
-        const y = padT + i * rowH;
-        const w = (amt / maxV) * innerW;
-        ctx.fillStyle = palette[i % palette.length];
-        ctx.fillRect(padL, y + 4, w, rowH - 8);
-        ctx.fillStyle = '#2D2D2D'; ctx.textAlign = 'right';
-        ctx.fillText(cat, padL - 8, y + rowH/2 + 4);
-        ctx.textAlign = 'left'; ctx.fillStyle = '#6B6B6B';
-        ctx.fillText(fm(amt), padL + w + 6, y + rowH/2 + 4);
-      });
-    }
+    // ==========================================================
+    // 2. Spend by category — horizontal bars, top 12
+    // ==========================================================
+    const cats = data.category_totals.slice(0, 12);
+    const catTotal = cats.reduce((s, [, v]) => s + v, 0) || 1;
+    new Chart(document.getElementById('chart-category'), {
+      type: 'bar',
+      data: {
+        labels: cats.map(([c]) => c),
+        datasets: [{
+          data: cats.map(([, v]) => v),
+          backgroundColor: cats.map((_, i) => PAL[i % PAL.length]),
+          borderRadius: 4, barThickness: 18,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          x: { grid: { color: GRID, drawBorder: false }, ticks: { callback: (v) => fm(v), color: SUBT } },
+          y: { grid: { display: false }, ticks: { color: TEXT, font: { size: 13 } } }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: {
+            label: (ctx) => `${fm2(ctx.parsed.x)} (${(ctx.parsed.x / catTotal * 100).toFixed(1)}% of spend)`
+          } }
+        }
+      }
+    });
 
-    // ── Transactions table with filter + sort ────────────────────────────────
+    // ==========================================================
+    // 3. Monthly stacked bar by category
+    // ==========================================================
+    const stacked = data.monthly_by_category;  // {month: {cat: amount}}
+    const topCats = data.top_categories_for_monthly || [];
+    const stackDatasets = topCats.map((cat, i) => ({
+      label: cat,
+      data: data.months.map(m => Math.abs((stacked[m] || {})[cat] || 0)),
+      backgroundColor: PAL[i % PAL.length],
+      borderRadius: 2, borderSkipped: false,
+    }));
+    new Chart(document.getElementById('chart-monthly'), {
+      type: 'bar',
+      data: { labels: data.months, datasets: stackDatasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          x: { stacked: true, grid: { display: false }, ticks: { color: SUBT } },
+          y: { stacked: true, grid: { color: GRID, drawBorder: false }, ticks: { callback: (v) => fm(v), color: SUBT } }
+        },
+        plugins: {
+          legend: { position: 'bottom', align: 'start' },
+          tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${fm2(ctx.parsed.y)}` } }
+        }
+      }
+    });
+
+    // ==========================================================
+    // INSIGHTS — render bullet list from data.insights
+    // ==========================================================
+    const ulI = document.getElementById('insights-list');
+    (data.insights || []).forEach(text => {
+      const li = document.createElement('li');
+      li.innerHTML = text;  // server-side built — already escaped, may include <strong>
+      ulI.appendChild(li);
+    });
+
+    // ==========================================================
+    // METHODOLOGY — render dl from data.methodology
+    // ==========================================================
+    const dl = document.getElementById('methodology-dl');
+    (data.methodology || []).forEach(([dt, dd]) => {
+      const dtEl = document.createElement('dt'); dtEl.textContent = dt; dl.appendChild(dtEl);
+      const ddEl = document.createElement('dd'); ddEl.textContent = dd; dl.appendChild(ddEl);
+    });
+
+    // ==========================================================
+    // TRANSACTIONS TABLE — filter, sort, render
+    // ==========================================================
     let txData = data.transactions.slice();
     let sortKey = 'date'; let sortDesc = true;
-    function renderTable() {
+    function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function render() {
       const search = document.getElementById('tx-search').value.toLowerCase();
       const cat = document.getElementById('tx-category').value;
       const acct = document.getElementById('tx-account').value;
@@ -277,36 +678,43 @@
         const cmp = (av < bv) ? -1 : (av > bv) ? 1 : 0;
         return sortDesc ? -cmp : cmp;
       });
+      const limit = 200;
       const tbody = document.querySelector('#tx-table tbody');
-      tbody.innerHTML = view.slice(0, 200).map(t =>
-        `<tr><td>${t.date}</td><td>${t.description}</td><td>${t.category}</td>` +
-        `<td>${t.account}</td><td class="amount">${fm(t.amount)}</td></tr>`
+      tbody.innerHTML = view.slice(0, limit).map(t =>
+        `<tr><td>${t.date}</td><td>${escapeHtml(t.description)}</td>` +
+        `<td><span class="cat-pill">${escapeHtml(t.category)}</span></td>` +
+        `<td>${escapeHtml(t.account)}</td>` +
+        `<td class="amount ${t.amount < 0 ? 'neg' : 'pos'}">${fm2(t.amount)}</td></tr>`
       ).join('');
+      document.getElementById('tx-meta').textContent =
+        `Showing ${Math.min(limit, view.length).toLocaleString()} of ${view.length.toLocaleString()} matching · ${txData.length.toLocaleString()} total`;
+      // Sort indicators
+      document.querySelectorAll('#tx-table th').forEach(th => {
+        th.classList.remove('sorted','asc','desc');
+        if (th.dataset.sort === sortKey) th.classList.add('sorted', sortDesc ? 'desc' : 'asc');
+      });
     }
     function populateFilters() {
-      const cats = [...new Set(txData.map(t => t.category))].sort();
+      const cats  = [...new Set(txData.map(t => t.category))].sort();
       const accts = [...new Set(txData.map(t => t.account))].sort();
-      const catSel = document.getElementById('tx-category');
-      const acctSel = document.getElementById('tx-account');
-      cats.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; catSel.appendChild(o); });
-      accts.forEach(a => { const o = document.createElement('option'); o.value = a; o.textContent = a; acctSel.appendChild(o); });
+      const cs = document.getElementById('tx-category');
+      const as = document.getElementById('tx-account');
+      cats.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; cs.appendChild(o); });
+      accts.forEach(a => { const o = document.createElement('option'); o.value = a; o.textContent = a; as.appendChild(o); });
     }
-
     document.querySelectorAll('#tx-table th[data-sort]').forEach(th => {
       th.addEventListener('click', () => {
-        const k = th.getAttribute('data-sort');
+        const k = th.dataset.sort;
         if (sortKey === k) sortDesc = !sortDesc; else { sortKey = k; sortDesc = true; }
-        renderTable();
+        render();
       });
     });
-    document.getElementById('tx-search').addEventListener('input', renderTable);
-    document.getElementById('tx-category').addEventListener('change', renderTable);
-    document.getElementById('tx-account').addEventListener('change', renderTable);
+    ['tx-search','tx-category','tx-account'].forEach(id =>
+      document.getElementById(id).addEventListener('input', render));
 
     populateFilters();
-    drawCashflow();
-    drawCategory();
-    renderTable();
+    render();
+  })();
   </script>
 </body>
 </html>

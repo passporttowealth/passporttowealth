@@ -299,16 +299,77 @@ class TestBuildSite(PipelineTestBase):
         """Lock in the dashboard structure so chart-library swaps don't break the build."""
         html = (self.workspace / "site" / "index.html").read_text()
         for marker in [
-            'class="brand"',           # branded header
-            'kpi-grid',                # KPI cards
-            'id="chart-cashflow"',     # cashflow chart container
-            'id="chart-category"',     # category chart container
-            'id="tx-table"',           # transactions table
-            'class="downloads"',       # downloads block
-            'rel="icon"',              # favicon
-            "Passport to Wealth",       # brand name
+            'class="brand"',                # branded header
+            'kpi-grid',                     # KPI cards
+            'id="chart-cashflow"',          # cashflow chart container
+            'id="chart-category"',          # category chart container
+            'id="chart-monthly"',           # monthly stacked chart
+            'id="tx-table"',                # transactions table
+            'class="downloads"',            # downloads block
+            'rel="icon"',                   # favicon
+            "Passport to Wealth",            # brand name
+            'aria-labelledby="insights-h"', # insights section
+            'class="methodology"',          # methodology section
+            'github.com/rafaeldavid/passporttowealth',  # GitHub footer link
+            'passporttowealth.com',         # main site footer link
         ]:
             self.assertIn(marker, html, f"required DOM marker missing: {marker!r}")
+
+    def test_chartjs_bundled_inline(self):
+        """Chart.js must be bundled, not referenced via CDN (OP — works offline)."""
+        html = (self.workspace / "site" / "index.html").read_text()
+        self.assertIn('src="assets/js/chart.umd.min.js"', html, "chart.js script src missing")
+        chart_js = self.workspace / "site" / "assets" / "js" / "chart.umd.min.js"
+        self.assertTrue(chart_js.exists(), "chart.umd.min.js must be copied to site/")
+        # Sanity-check it's actually Chart.js
+        head = chart_js.read_text(encoding="utf-8", errors="ignore")[:200]
+        self.assertIn("Chart.js", head, "expected Chart.js header in bundled file")
+
+    def test_no_external_cdn_references(self):
+        """Site must work offline — no external CSS/JS pulls."""
+        html = (self.workspace / "site" / "index.html").read_text()
+        # Scripts/links pointing to external hosts (excluding mailto:, the
+        # noopener external links in the footer, and inline data: URIs)
+        import re as r
+        srcs = r.findall(r'(?:src|href)="(https?://[^"]+)"', html)
+        # GitHub + passporttowealth.com footer links are intentional (external nav).
+        cdn_only = [u for u in srcs
+                    if not u.startswith(("https://github.com", "https://www.passporttowealth.com"))]
+        self.assertEqual(cdn_only, [], f"unexpected external resources: {cdn_only}")
+
+    def test_dashboard_data_includes_polish_fields(self):
+        """The new payload fields the polished template depends on."""
+        html = (self.workspace / "site" / "index.html").read_text()
+        m = re.search(r'<script id="dashboard-data"[^>]*>(.+?)</script>', html, re.DOTALL)
+        d = json.loads(m.group(1))
+        for k in ("cashflow_3mo_avg", "monthly_by_category", "top_categories_for_monthly",
+                  "insights", "methodology", "accounts"):
+            self.assertIn(k, d, f"polished dashboard JSON missing key {k!r}")
+        # Rolling avg has the same length as months
+        self.assertEqual(len(d["cashflow_3mo_avg"]), len(d["months"]))
+        # Insights is a list of HTML-safe strings
+        self.assertIsInstance(d["insights"], list)
+        self.assertGreater(len(d["insights"]), 2,
+            "expected at least 3 auto-generated insights from demo data")
+        # Methodology is a list of [label, value] pairs
+        self.assertIsInstance(d["methodology"], list)
+        self.assertGreater(len(d["methodology"]), 5)
+        # KPIs include per-month averages
+        for k in ("income_avg_per_month", "spend_avg_per_month", "net_avg_per_month"):
+            self.assertIn(k, d["kpis"])
+
+    def test_insights_are_factual_not_advisory(self):
+        """OP — insights section must never give advice. Catch common advisory phrasing."""
+        html = (self.workspace / "site" / "index.html").read_text()
+        m = re.search(r'<script id="dashboard-data"[^>]*>(.+?)</script>', html, re.DOTALL)
+        d = json.loads(m.group(1))
+        banned_phrases = ["you should", "you must", "you ought", "we recommend",
+                          "I recommend", "consider", "think about", "try to", "stop"]
+        for insight in d["insights"]:
+            lower = insight.lower()
+            for phrase in banned_phrases:
+                self.assertNotIn(phrase, lower,
+                    f"insight contains advisory phrasing {phrase!r}: {insight!r}")
 
 
 # ── 7. Total transactions across all the test classes ────────────────────────
