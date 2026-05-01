@@ -23,7 +23,7 @@ If anything's a no, don't send the install link. Resolve first.
 
 ## Sending the link
 
-The link is the same for every client (v1 — per-client signed links are v2; see `engagement/development/backlog.md` Epic 6.5):
+The link is the same for every client (v1 — per-client signed links are v2; see `dev/backlog.md` Epic 6.5):
 
 > `https://rafaeldavid.github.io/passporttowealth/`
 
@@ -75,9 +75,9 @@ If the client has installed already, walk through this together:
 1. **`START-HERE` is on their Desktop.** If not, the install didn't complete. Run them through `Welcome.command` again or check the install log.
 2. **Double-clicking `START-HERE` opens Terminal with a friendly greeting** + a Finder window pointing at the `inbox/` folder. If Terminal opens but no greeting appears, the AI assistant didn't authenticate — re-run install.
 3. **They have files to drop in.** Confirm they have at minimum: bank statements as CSV exports (check they can actually export from their bank — some banks make this hard). Paystubs and tax docs are optional and won't be read by default.
-4. **They've picked one calculator** (per `engagement/kickoff-agenda.md` §4) — or they're comfortable shipping with the placeholder card.
+4. **They've picked one calculator** (see `skill/references/CALCULATOR_INTERFACE.md`) — or they're comfortable shipping with the placeholder card.
 
-Then walk through the demo per `engagement/development/demo-script.md`.
+Then walk through the demo per `dev/demo-script.md`.
 
 ---
 
@@ -119,7 +119,7 @@ For now, each client gets the same install link. Their workspaces are independen
 - Keep a private spreadsheet or Notion page (advisor-side, not committed to the repo).
 - Each row: client name, install date, dashboard URL (you only learn it if they share), most recent support bundle, calculator picked, status.
 
-Per-client signed install links + an automated `advisor-onboard` registry are v2 (`engagement/development/backlog.md` Epic 6.5).
+Per-client signed install links + an automated `advisor-onboard` registry are v2 (`dev/backlog.md` Epic 6.5).
 
 ---
 

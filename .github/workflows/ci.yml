@@ -1,7 +1,7 @@
 name: CI
 
 # STUB — runs on every PR and push to main.
-# Currently inert (no fixtures yet, no real scripts). See engagement/development/backlog.md
+# Currently inert (no fixtures yet, no real scripts). See dev/backlog.md
 # Epic 1.4 + spec §18.3 for the real fixture-runner.
 
 on:

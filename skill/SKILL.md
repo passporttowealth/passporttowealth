@@ -17,10 +17,10 @@ version: 0.0.1-stub
 > **⚠ Prototype — pre-release skill.** Behavior, prompts, and on-disk layout will change. Pinned per-workspace via the bootstrap so individual clients aren't broken by upstream edits, but no API stability is guaranteed before `v1.0.0`.
 
 This is a v0 stub. The implementation lands per the epic order in
-[`engagement/development/backlog.md`](../engagement/development/backlog.md).
+[`dev/backlog.md`](../dev/backlog.md).
 
 The full behavior contract lives in
-[`engagement/development/finance-clarity-build-spec.md`](../engagement/development/finance-clarity-build-spec.md) —
+[`dev/finance-clarity-build-spec.md`](../dev/finance-clarity-build-spec.md) —
 this `SKILL.md` is a condensed pointer, not a duplicate.
 
 ## Hard rules (operating principles)

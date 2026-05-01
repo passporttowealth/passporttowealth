@@ -24,9 +24,10 @@ workspace:
   primary_currency: "USD"      # asked at first sanity gate if unset; defaults to most-frequent observed
   account_aliases: {}          # populated on first run, e.g. "Joint Checking", "Travel Card"
 
-# Calculator slot (kickoff decision — see engagement/kickoff-agenda.md §4)
+# Calculator slot (one of: placeholder | fire | fx-risk | retirement-projection
+# | emergency-fund | buy-vs-rent — see skill/references/CALCULATOR_INTERFACE.md)
 calculator:
-  type: "placeholder"          # one of: placeholder | fire | fx-risk | retirement-projection | emergency-fund | buy-vs-rent
+  type: "placeholder"
   config: {}                   # calculator-specific config
 
 # Telemetry

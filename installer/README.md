@@ -1,6 +1,6 @@
 # Installer
 
-> **⚠ Prototype.** Both Mac and Windows installers are v0 skeletons — they print the planned flow but the actual installs are stubbed. Track real implementation in `engagement/development/backlog.md` Epic 1.
+> **⚠ Prototype.** Both Mac and Windows installers are v0 skeletons — they print the planned flow but the actual installs are stubbed. Track real implementation in `dev/backlog.md` Epic 1.
 
 What the client downloads. Everything else in the repo (the skill, the templates, the docs) is provisioned silently by the installer once the user double-clicks it.
 
@@ -48,7 +48,7 @@ Bump `CHANGELOG.md` and tag a `v0.x.0` release on each meaningful update.
 
 ## Reference v1 vs full parity
 
-Per `engagement/development/finance-clarity-build-spec.md` and `engagement/development/backlog.md`:
+Per `dev/finance-clarity-build-spec.md` and `dev/backlog.md`:
 
 - **macOS is the v1 reference implementation.** Every behavior described in the spec is targeted at Mac first.
 - **Windows is a parallel target with the same behavior contract.** The PowerShell installer will reach feature parity per backlog item B1.3, ahead of v1.0.0 ship if possible, otherwise immediately after.

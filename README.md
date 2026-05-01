@@ -25,18 +25,18 @@ See [`docs/advisor-onboarding.md`](docs/advisor-onboarding.md) for how to send a
 | `installer/` | What the client downloads — `Welcome.command` and the GitHub Pages landing page that hosts it. |
 | `skill/` | The `finance-clarity-build` Claude Code skill: prompts, scripts, dashboard templates, error-code reference. |
 | `docs/` | Advisor-facing operational docs (onboarding, troubleshooting, design system, privacy notes). |
-| `engagement/` | Project planning — sprint scope, kickoff agenda, demo script, full skill spec, backlog, this repo's layout doc. |
+| `dev/` | Product / dev planning — demo script, full skill spec, backlog, this repo's layout doc. |
 | `.github/` | CI workflows (lint, fixture run, Pages deploy) and issue templates. |
 
 ## How it works (in one paragraph)
 
 The client downloads `Welcome.command`, double-clicks it, and the installer provisions everything silently — runtime, AI assistant, the dashboard skill, the publishing-host credentials, and the client's workspace folder. The client then drops their financial files into one inbox folder and says *"build my report"*. The skill sorts them, dedupes, normalizes currency and date formats, fetches FX rates, categorizes transactions, runs sanity floors, and shows the totals back for confirmation. Once confirmed, it builds a branded dashboard from a locked template and publishes it to a private URL behind a passcode the skill generates. Future updates are *"I added new files. Refresh."*
 
-For the full design see [`engagement/development/finance-clarity-build-spec.md`](engagement/development/finance-clarity-build-spec.md).
+For the full design see [`dev/finance-clarity-build-spec.md`](dev/finance-clarity-build-spec.md).
 
 ## Status
 
-Pre-v1. The structure exists; implementation is in progress per [`engagement/development/backlog.md`](engagement/development/backlog.md). Not ready for client distribution yet.
+Pre-v1. The structure exists; implementation is in progress per [`dev/backlog.md`](dev/backlog.md). Not ready for client distribution yet.
 
 ## License
 

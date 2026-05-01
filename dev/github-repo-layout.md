@@ -63,15 +63,11 @@ passporttowealth/
 │   ├── design-system.md               ← Brand pack reference once Arielle delivers it
 │   └── privacy-and-security.md        ← What's local, what's transmitted, what the passcode protects
 │
-├── engagement/                        ← Project / planning docs (the contents currently in finance_services/engagement/)
-│   ├── project-overview.md
-│   ├── kickoff-agenda.md
-│   ├── mnda-template.md
-│   └── development/
-│       ├── demo-script.md
-│       ├── finance-clarity-build-spec.md
-│       ├── backlog.md
-│       └── github-repo-layout.md      ← This file
+├── dev/                              ← Product / dev planning docs (no commercial / engagement details)
+│   ├── demo-script.md                ← User-journey walkthrough for the product
+│   ├── finance-clarity-build-spec.md ← Full implementation spec for the skill (source of truth)
+│   ├── backlog.md                    ← Prioritized work items / epic plan
+│   └── github-repo-layout.md         ← This file
 │
 ├── releases/                          ← Tagged versions; self-update flow reads from these
 │   └── (managed via GitHub Releases — not a real folder)
@@ -131,9 +127,9 @@ These never get committed:
 
 1. **Initialize the repo** with `README.md`, `LICENSE`, `SECURITY.md`, `.gitignore` (using the patterns above).
 2. **Enable GitHub Pages** on `main` branch, source `installer/` (or `/docs` if Pages prefers that) so the landing page goes live at `https://rafaeldavid.github.io/passporttowealth/`.
-3. **Buy + configure the brand domain** (`passporttowealth.studio` or whichever Arielle prefers per `kickoff-agenda.md`) and point a CNAME at the GitHub Pages URL.
+3. **Buy + configure the brand domain** (`passporttowealth.studio` or another brand-aligned subdomain) and point a CNAME at the GitHub Pages URL.
 4. **Stub the landing page** (`installer/index.html`) with placeholder copy + the Gatekeeper instructions block. Real screenshots can come once Arielle's brand pack is in.
-5. **Move the planning docs** from `finance_services/engagement/` into the repo's `engagement/` folder so everything lives in one place.
+5. **Move the planning docs** from `finance_services/dev/` into the repo's `dev/` folder so everything lives in one place.
 6. **Wire the CI workflows** (lint, fixture run) before any meaningful skill code lands — keeps the door closed on regressions from day one.
 
 After that, items in `backlog.md` Epic order: bootstrap installer (B1.x), then file ingestion (E2.x), and so on.

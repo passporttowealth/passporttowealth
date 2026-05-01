@@ -1,4 +1,4 @@
 #!/bin/bash
-# STUB — see engagement/development/finance-clarity-build-spec.md §15 (recovery: back up rules.yaml, restore starter)
+# STUB — see dev/finance-clarity-build-spec.md §15 (recovery: back up rules.yaml, restore starter)
 echo "not implemented yet — see backlog Epic 2/3/5/6 for sequencing" >&2
 exit 1

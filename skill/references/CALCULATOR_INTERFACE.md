@@ -1,8 +1,8 @@
 # Calculator Interface
 
-> **⚠ Prototype.** Calculator choice itself is a kickoff decision (per `engagement/kickoff-agenda.md` §4). Until picked, the slot renders a placeholder card.
+> **⚠ Prototype.** Calculator choice is configured in `config.yaml` per workspace. Until picked, the slot renders a placeholder card.
 
-The dashboard has one **Calculator slot**. Only one calculator ships in v1 — the Sprint 1 scope per `engagement/project-overview.md`. Anything else moves to Sprint 2.
+The dashboard has one **Calculator slot**. Only one calculator ships per workspace in v1 — anything more moves to a future sprint.
 
 ## Plug-in contract
 
@@ -19,9 +19,9 @@ calculator/
 
 `build_site.py` reads `manifest.yaml`, validates the required inputs against the user's data (e.g. "needs ≥12 months of transactions"), and either renders the calculator or shows a "needs more data" card explaining what's missing.
 
-## Candidates from kickoff
+## Candidate calculators
 
-Per `engagement/kickoff-agenda.md` §4, candidates are:
+The current shortlist:
 
 - **FIRE number** — savings × multiplier vs. inputs (annual spend, retirement age).
 - **FX risk** — exposure breakdown across currencies, what-if shocks.
@@ -29,7 +29,7 @@ Per `engagement/kickoff-agenda.md` §4, candidates are:
 - **Emergency fund** — months of expenses covered, gap-to-target.
 - **Buy-vs-rent** — break-even comparison given rent, price, rates, taxes.
 
-Decision criteria: useful for cross-border audience, demoable to ~35 advisors, fits local-first / privacy-first architecture.
+Decision criteria: useful for the target cross-border audience, demoable in a short live session, fits the local-first / privacy-first architecture.
 
 ## Default until kickoff decision
 

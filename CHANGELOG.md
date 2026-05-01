@@ -8,8 +8,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Version
 
 ## [Unreleased]
 
+- Restructured: removed commercial / engagement-level docs (`project-overview`, `kickoff-agenda`, `mnda-template`) from the repo. Renamed `engagement/development/` → `dev/`. Repo now contains only product, skill, docs, and dev-planning artifacts.
 - Initial repository scaffold.
-- Planning docs: project overview, kickoff agenda, demo script, full skill spec, backlog, repo layout.
+- Product / dev planning docs: demo script, full skill spec, backlog, repo layout.
 - Stub installer (`installer/Welcome.command`) and landing page (`installer/index.html`) — not yet functional.
 - Stub skill structure (`skill/`) — not yet functional.
 - LICENSE: proprietary, all rights reserved, with a personal-use grant for clients of Passport to Wealth.

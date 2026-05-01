@@ -140,7 +140,7 @@ Claude's job is to populate the template, not invent the design.
 
 ### E4.6 — Visual calculator slot · **P0 · M**
 **Problem:** The sprint commits to "one visual calculator" (FIRE, FX risk, etc.) but there's no slot for it in the current site structure.
-**Recommendation:** Template has a dedicated "Calculators" section with a plug-in pattern. Whichever calculator is picked at kickoff (per `kickoff-agenda.md` §4) drops into that slot without changing the rest of the site.
+**Recommendation:** Template has a dedicated "Calculators" section with a plug-in pattern. Whichever calculator is picked at kickoff (see `skill/references/CALCULATOR_INTERFACE.md`) drops into that slot without changing the rest of the site.
 
 ---
 

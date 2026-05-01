@@ -1,6 +1,6 @@
 ---
 name: Feature / backlog item (internal)
-about: For Rafa / dev only. Track against the epic structure in engagement/development/backlog.md.
+about: For Rafa / dev only. Track against the epic structure in dev/backlog.md.
 title: "[feature] "
 labels: enhancement
 assignees: rafaeldavid

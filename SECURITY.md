@@ -21,10 +21,10 @@ We aim to acknowledge reports within 5 business days.
 
 - It does not transmit raw transaction data, payslips, or tax documents anywhere.
 - It does not store any credentials in plaintext that aren't permission-locked (`chmod 600`) on the client's laptop.
-- It does not phone home with telemetry in v1. (v2 plans an opt-in error-reporting channel — see `engagement/development/backlog.md`.)
+- It does not phone home with telemetry in v1. (v2 plans an opt-in error-reporting channel — see `dev/backlog.md`.)
 
 ## Operating principles
 
-The skill enforces twelve hard operating rules covering privacy, sensitive-data gating, publish-flow safety, secret handling, and pre-flight environmental checks. Full list in [`engagement/development/finance-clarity-build-spec.md`](engagement/development/finance-clarity-build-spec.md) §2.
+The skill enforces twelve hard operating rules covering privacy, sensitive-data gating, publish-flow safety, secret handling, and pre-flight environmental checks. Full list in [`dev/finance-clarity-build-spec.md`](dev/finance-clarity-build-spec.md) §2.
 
 If a vulnerability would cause any of those operating rules to be violated, treat it as high-severity and report it via the contact above.
