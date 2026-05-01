@@ -379,6 +379,67 @@ spin() {
   - **Status quo Desktop shortcut**: lowest-tech, most visible, requires zero packaging work. Not glamorous but works.
 **Recommendation:** keep the Desktop shortcut for v1 (it works, costs nothing). Promote it from "the only way to start" to "the re-entry shortcut after the first run." Revisit when v1 ships if a real signed app is on the table.
 
+### B9.5 — Pipeline operations need ongoing-progress signals (FX fetch is the worst offender) · **P1 · S**
+**Found by:** dry-run user-interview phase. "Output felt like it got stuck when it was fetching the exchange rate."
+**Symptom (the surface complaint):** During step 4/7 of the pipeline, the user sees:
+```
+▸ 4/7 Fetching exchange rates for 2025-01-01 → 2025-12-31
+                                                                    ← long silent gap (~30-60s)
+FX cache warmed: 261 fetched, 0 already cached, 0 failed
+```
+~261 sequential HTTP requests to Frankfurter, no intermediate output, no signal of life. Looks frozen.
+**The deeper need (what user-interview surfaced):** This is the **same principle as B9.3** (the user wants to feel like the pilot, not the passenger) but on the Python skill side, not the bash installer side. The previous fix targets the installer; this one targets the pipeline scripts.
+**Where this hurts in the current skill:**
+  - **`fx_fetch.py`** — the worst case. Hundreds of HTTP requests, single line at start, single line at end, nothing in between. ← bit the user.
+  - **`build_site.py`** — silent until "✓ Site built". Asset copies (Inter font woff2 × 4, Chart.js bundle, brand assets, downloads) could lag for a half-second; user sees nothing.
+  - **`publish.sh`** — already has stepped output (▸ Setting passcode → ✓ passwordProtected → etc), pacing is fine.
+  - **`categorize.py`, `normalize.py`, `dedupe.py`, `classify.py`, `sanity.py`** — all print summaries at the end. Fast enough on demo data that users don't notice silence. Could become a problem at 10× scale.
+**How best-in-class Python CLI tools handle this:**
+  - **`tqdm`**: industry standard for batch-progress bars. Wrap any iterable: `for d in tqdm(dates, desc="FX rates")`. Free progress bar, ETA, rate. ~50 KB dep.
+  - **`rich`** (library): full TUI with `Progress`, `Spinner`, `Status`, `Live`. Beautiful but ~10 MB transitive dep — heavy for our needs.
+  - **`click` + `click-spinner`**: simple integration if we used click for CLI parsing. We don't.
+  - **Stdlib-only**: `sys.stderr.write("\r" + msg); flush()` to update one line in place. No deps, ~30 lines for a reusable helper. Less polished than tqdm but works fine for a non-technical audience that just wants to see something moving.
+**Recommendation: stdlib helper, not a new dep.**
+Add to `skill/scripts/_lib.py`:
+```python
+def progress(label: str, current: int, total: int, width: int = 24) -> None:
+    """Print a single-line progress bar that updates in place. Goes to
+    stderr (non-disruptive to JSON-on-stdout consumers). Newline auto-printed
+    when current >= total so subsequent output appears below."""
+    pct = current * 100 // total if total else 0
+    filled = width * current // total if total else 0
+    bar = "█" * filled + "·" * (width - filled)
+    sys.stderr.write(f"\r  {label}: {bar} {current:>4}/{total} ({pct:>3}%)")
+    sys.stderr.flush()
+    if current >= total:
+        sys.stderr.write("\n")
+```
+Then in `fx_fetch.py:warm_cache()`:
+```python
+from _lib import progress
+total = sum(1 for i in range((end - start).days + 1)
+            if (start + timedelta(days=i)).weekday() < 5)
+done = 0
+# ...inside the loop, after each business-day iteration...
+done += 1
+progress("FX rates", done, total)
+```
+Same pattern in `build_site.py` for the asset copy loop. Skip `categorize`/`normalize`/etc. for now — they're fast enough on demo data; revisit at scale.
+**Trade-off:** None worth speaking of. Stdlib-only, no dep weight, ~30 lines added across the skill, pure UX improvement. Could later upgrade to `tqdm` if we want polish (single-line change at each call site).
+**Bonus:** the `progress()` helper writes to stderr, which means our `--json` output paths (used by tests) keep emitting clean JSON to stdout. Tests don't break.
+
+### B9.6 — Suppress `DeprecationWarning` noise in user-facing pipeline output · **P2 · XS**
+**Found by:** dry-run user-interview phase. The output during the FX fetch included this:
+```
+/path/to/skill/scripts/fx_fetch.py:99: DeprecationWarning: datetime.datetime.utcnow() is
+deprecated and scheduled for removal in a future version. Use timezone-aware objects ...
+```
+**Symptom:** Non-technical users may read "DeprecationWarning" as an error or a bug — undermines confidence in the tool.
+**Root cause:** Two places use `datetime.utcnow()` (deprecated in Python 3.12+, hard error in some future Python). `fx_fetch.py:99` and `sanity.py:152`.
+**Fix (preferred — addresses the warning at source):** Replace with `datetime.now(timezone.utc)`. One-line edit per occurrence; no behavior change. Already imported `timezone` in `_lib.py`; trivial to do same in the two scripts.
+**Fallback fix (suppress, don't address):** Add `import warnings; warnings.filterwarnings("ignore", category=DeprecationWarning)` at the top of pipeline scripts. Hides the noise but masks future deprecations too. Not recommended.
+**Recommendation:** preferred fix. ~3 lines changed total. Run regression suite after.
+
 ## Epic 6.5 — v2 hardening: zero-touch advisor onboarding (deferred from v1)
 
 Items pulled out of `finance-clarity-build-spec.md` v1 to keep the first ship simple. Together they remove the one remaining moment of third-party-service exposure (the publishing-host signup during install) and let the advisor diagnose failures without the user having to email a support bundle.
