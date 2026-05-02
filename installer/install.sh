@@ -333,13 +333,14 @@ else
   ok_paced "Developer tools installed"
 fi
 
-# 2b. Homebrew — only needed for jq (one binary, no Python dep). Skipped
-# entirely if both brew and jq are already present. uv (next step) replaces
-# Homebrew's role for Python provisioning.
+# 2b. Homebrew — needed for jq + Node.js. Skipped entirely if all three of
+# {brew, jq, node} are already present. uv (next step) replaces Homebrew's
+# role for Python provisioning.
 NEED_BREW=0
-if ! command -v jq >/dev/null 2>&1; then NEED_BREW=1; fi
+if ! command -v jq   >/dev/null 2>&1; then NEED_BREW=1; fi
+if ! command -v node >/dev/null 2>&1; then NEED_BREW=1; fi
 if [ "$NEED_BREW" = "1" ] && ! command -v brew >/dev/null 2>&1; then
-  say "Installing Homebrew (Mac will ask for your password) — needed to fetch jq..."
+  say "Installing Homebrew (Mac will ask for your password). Needed to fetch jq + Node.js..."
   log "installing homebrew"
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" \
     >>"$INSTALL_LOG" 2>&1 || { fail "Homebrew install failed — see $INSTALL_LOG"; exit 1; }
@@ -389,12 +390,22 @@ if [ -z "$PYTHON311" ] || [ ! -x "$PYTHON311" ]; then
 fi
 ok_paced "Python 3.11 ready ($PYTHON311)"
 
-# 2e. jq — needed by here-now publish script + our wrappers. Tiny, no Python
-# dep. Only reason we still need Homebrew (see 2b above).
+# 2e. jq + Node.js — both via Homebrew (the only tools we need brew for).
+#   jq:   used by the here-now publish script + our wrapper scripts.
+#   node: provides `npx`, which Steps 2g + 2h use to install the here-now
+#         and finance-clarity-build skills via `npx skills add`. Without
+#         this, `npx: command not found` would dead-end every fresh-Mac
+#         install (Apple doesn't ship Node).
 if command -v jq >/dev/null 2>&1; then
   ok_paced "jq already installed"
 else
   run_quiet "jq installed" brew install jq || exit 1
+fi
+if command -v node >/dev/null 2>&1; then
+  ok_paced "Node.js already installed (provides npx for skill installs)"
+else
+  say "Installing Node.js (~10s, gives us npx for the next steps)..."
+  run_quiet "Node.js installed" brew install node || exit 1
 fi
 
 # 2f. Workspace venv + Python deps. uv handles both in one operation per call.
@@ -439,7 +450,9 @@ mkdir -p "$HOME/.claude/skills"
 if [ -d "$HOME/.claude/skills/here-now" ]; then
   ok_paced "Publishing-host skill already installed"
 elif ! command -v npx >/dev/null 2>&1; then
-  fail "npx not available — install Node.js first or contact support"
+  # Defensive: Step 2e brew-installs Node, so this branch should be unreachable.
+  # If it fires, something went wrong with the brew step — point at the log.
+  fail "npx not available even after Step 2e — see $INSTALL_LOG and contact your advisor"
   exit 1
 else
   say "Installing publishing-host skill..."
@@ -674,6 +687,7 @@ check_file() {
 check       "uv installed"                   test -x "$UV_BIN"
 check       "Python 3.11 installed"          test -x "$PYTHON311"
 check       "jq installed"                   command -v jq
+check       "Node.js installed (npx)"        command -v npx
 check       "Claude Code installed"          command -v claude
 check_file  "Workspace folder"               "$WS"
 check_file  "Workspace venv"                 "$WS/.venv/bin/python"

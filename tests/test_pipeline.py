@@ -1041,6 +1041,28 @@ class TestPipelineHealth(unittest.TestCase):
             self.assertFalse(f.exists(),
                 f"installer/{fname} must be moved to installer/legacy/")
 
+    def test_installer_brew_installs_node_for_npx(self):
+        """B9.11 — install.sh has to brew-install Node.js because Apple
+        doesn't ship it. Steps 2g/2h need `npx skills add` to fetch the
+        here-now and finance-clarity-build skills; without Node, the
+        install dead-ended on every fresh Mac.
+
+        Fix: Step 2e now installs `node` alongside `jq` via Homebrew.
+        Both are gated on `command -v` presence checks. The Step 5
+        diagnostic verifies npx is available."""
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
+        # Step 2e installs Node if missing
+        self.assertIn('if command -v node >/dev/null 2>&1; then', cmd,
+            "Step 2e should check for an existing node before installing")
+        self.assertIn('run_quiet "Node.js installed" brew install node', cmd,
+            "Step 2e should brew-install Node.js if missing")
+        # The "installing Node" message tells the user what's happening
+        self.assertIn("Installing Node.js", cmd,
+            "should announce Node install (per pacing principle)")
+        # Step 5 diagnostic checks npx is available (proves Node install worked)
+        self.assertIn('check       "Node.js installed (npx)"        command -v npx', cmd,
+            "Step 5 diagnostic must verify npx is on PATH")
+
     def test_installer_uses_uv_for_python_provisioning(self):
         """Strategic #1 — replace `brew install python@3.11 + venv + pip
         install` with uv (one binary, one toolchain). uv handles managed
@@ -1065,14 +1087,16 @@ class TestPipelineHealth(unittest.TestCase):
             "should NOT create venv via `python -m venv` anymore")
         self.assertNotIn('"$WS/.venv/bin/pip" install', cmd,
             "should NOT install deps via the venv's pip anymore")
-        # Homebrew is now lazy — only if jq is missing
+        # Homebrew is lazy — only triggers if jq OR node is missing
         self.assertIn("NEED_BREW=0", cmd,
-            "Homebrew install should be gated on whether jq is needed")
-        self.assertIn('if ! command -v jq >/dev/null 2>&1; then NEED_BREW=1; fi', cmd,
-            "should only need brew when jq is missing")
-        # Step 6 diagnostic checks uv (mandatory) instead of brew
+            "Homebrew install should be gated on whether brew tools are needed")
+        self.assertIn('if ! command -v jq   >/dev/null 2>&1; then NEED_BREW=1; fi', cmd,
+            "should mark brew needed when jq is missing")
+        self.assertIn('if ! command -v node >/dev/null 2>&1; then NEED_BREW=1; fi', cmd,
+            "should mark brew needed when node is missing")
+        # Step 5 diagnostic checks uv (mandatory) instead of brew
         self.assertIn('check       "uv installed"                   test -x "$UV_BIN"', cmd,
-            "Step 6 must check uv, not Homebrew")
+            "Step 5 must check uv, not Homebrew")
 
     def test_installer_fx_prewarm_streams_progress_to_tty(self):
         """Dry-run regression: 'Pre-warming exchange-rate cache (last 24

@@ -103,8 +103,9 @@ Violating any of these is a skill defect. The skill should fail loudly rather th
 | Python 3.11+ | `uv python install 3.11` (managed install in `~/.local/share/uv/python/`) | Pipeline runtime | Yes |
 | `openpyxl`, `pdfplumber`, `pyyaml`, `chardet`, `reportlab` | venv inside `my-finances/.venv/`, populated via `uv pip install --python` | Pipeline libraries | Yes |
 | Claude Code | per official installer | The CLI the user interacts with | Yes |
-| `jq` | `brew install jq` (Homebrew is the only remaining brew dep — invoked lazily, only if jq is missing) | Required by `here-now` publish script | Yes |
-| Homebrew | `/opt/homebrew` (Apple Silicon) or `/usr/local` (Intel) | Only needed to fetch jq if it's not already present. Skipped entirely if `command -v jq` succeeds. | Conditional |
+| `jq` | `brew install jq` (lazy — only if missing) | Required by `here-now` publish script | Yes |
+| Node.js (provides `npx`) | `brew install node` (lazy — only if missing) | Required by Steps 2g + 2h to install the here-now + finance-clarity-build skills via `npx skills add`. Apple doesn't ship Node, so a fresh-Mac install would dead-end here without it. | Yes |
+| Homebrew | `/opt/homebrew` (Apple Silicon) or `/usr/local` (Intel) | Only needed to fetch jq + Node if they're not already present. Skipped entirely if both `command -v jq` and `command -v node` succeed. | Conditional |
 | `here-now` skill | Auto-installed via `npx skills add heredotnow/skill --skill here-now -g` | Publishing | Yes |
 | `~/.herenow/credentials` | `chmod 600` | here.now API key | Yes |
 
