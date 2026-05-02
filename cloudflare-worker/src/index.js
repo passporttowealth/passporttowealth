@@ -107,10 +107,12 @@ export default {
 // ── helpers ──────────────────────────────────────────────────────────────────
 
 function buildCorsHeaders(origin, env) {
-  // Allow any *.here.now origin (the dashboards live there) plus the GitHub
-  // Pages landing if it ever wants to POST. Reject everything else by NOT
-  // setting Access-Control-Allow-Origin → browsers will block.
+  // Allow any *.here.now origin (the dashboards live there) + the
+  // passporttowealth.app landing page (so the on-site feedback form can POST).
+  // Reject everything else by NOT setting Access-Control-Allow-Origin →
+  // browsers will block.
   const allowedSuffix = env.ALLOWED_ORIGIN_SUFFIX || ".here.now";
+  const allowedHosts = ["passporttowealth.app", "www.passporttowealth.app"];
   const headers = {
     "Vary": "Origin",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -121,7 +123,8 @@ function buildCorsHeaders(origin, env) {
   try { originHost = new URL(origin).host; } catch { originHost = ""; }
   const isHereNow = originHost.endsWith(allowedSuffix);
   const isLocal = originHost === "localhost" || originHost.startsWith("localhost:") || originHost.startsWith("127.0.0.1");
-  if (isHereNow || isLocal) {
+  const isAllowedHost = allowedHosts.includes(originHost);
+  if (isHereNow || isLocal || isAllowedHost) {
     headers["Access-Control-Allow-Origin"] = origin;
   }
   return headers;

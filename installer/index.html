@@ -44,29 +44,30 @@
 
     /* ── Crossborder watermark ────────────────────────────────────────────
        Robinson-projection world map (Wikimedia Commons, CC0 public domain).
-       The water/ocean group was stripped so only country outlines render.
-       SVG has fill="#0F1E33" baked in at the root. Rendered as a background-
-       image, sized large + low opacity so it reads as a watermark behind
-       the hero. Hidden in print. */
+       The water/ocean group was stripped so only country shapes render.
+       SVG has fill="#0F1E33" baked in at the root.
+       position: fixed so it stays in place behind the page as the user
+       scrolls (the world doesn't scroll past you — you scroll past content
+       overlaid on top of it). Hidden in print. */
     .watermark {
-      position: absolute;
-      top: 40px;
+      position: fixed;
+      top: 50%;
       left: 50%;
-      transform: translateX(-50%);
-      width: 1600px;
-      max-width: 200vw;
-      aspect-ratio: 2.04 / 1;        /* matches the SVG viewBox 360 × 182.6 */
+      transform: translate(-50%, -50%);
+      width: 1500px;
+      max-width: 220vw;
+      aspect-ratio: 2.04 / 1;
       pointer-events: none;
       z-index: 0;
-      opacity: 0.10;
+      opacity: 0.13;
       background-image: url('assets/world-map.svg');
       background-repeat: no-repeat;
-      background-position: center top;
+      background-position: center center;
       background-size: contain;
     }
     main { position: relative; z-index: 1; }
     @media (max-width: 700px) {
-      .watermark { width: 220vw; opacity: 0.12; top: 24px; }
+      .watermark { width: 240vw; opacity: 0.15; }
     }
     @media print {
       .watermark { display: none; }
@@ -156,10 +157,11 @@
       display: block;
       font-size: 11px;
       font-weight: 600;
-      letter-spacing: 0.10em;
-      text-transform: uppercase;
+      letter-spacing: 0.06em;
       color: var(--color-code-dim);
       margin-bottom: 14px;
+      /* No text-transform: uppercase — destroys canonical brand caps like
+         macOS / iOS. Instead use small + bold + letter-spaced for emphasis. */
     }
     .install-block code {
       font-family: var(--font-mono);
@@ -533,6 +535,68 @@
       transition: background 0.15s ease;
     }
     .modal button:hover { background: var(--color-accent-hover); }
+    .modal button.secondary {
+      background: transparent;
+      color: var(--color-text-muted);
+      border: 1px solid var(--color-border-strong);
+    }
+    .modal button.secondary:hover {
+      background: var(--color-surface);
+      color: var(--color-text);
+    }
+
+    /* Feedback form fields */
+    .modal label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text);
+      margin: 16px 0 6px;
+    }
+    .modal label .optional {
+      font-weight: 400;
+      color: var(--color-text-faint);
+      font-size: 12px;
+    }
+    .modal input[type="email"],
+    .modal select,
+    .modal textarea {
+      width: 100%;
+      font-family: inherit;
+      font-size: 14px;
+      padding: 10px 12px;
+      border: 1px solid var(--color-border-strong);
+      border-radius: var(--radius-sm);
+      background: var(--color-bg);
+      color: var(--color-text);
+      transition: border-color 0.15s ease;
+    }
+    .modal input[type="email"]:focus,
+    .modal select:focus,
+    .modal textarea:focus {
+      outline: none;
+      border-color: var(--color-accent);
+    }
+    .modal textarea { min-height: 100px; resize: vertical; line-height: 1.5; }
+    .modal .feedback-status {
+      margin: 16px 0 0;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      display: none;
+    }
+    .modal .feedback-status.success {
+      display: block;
+      background: #e6f3ea;
+      color: #1f5132;
+      border: 1px solid #b6d8c1;
+    }
+    .modal .feedback-status.error {
+      display: block;
+      background: #fdeded;
+      color: #6b1f1f;
+      border: 1px solid #e6a9a9;
+    }
 
     /* ── Responsive ───────────────────────────────────────────────────────── */
     @media (max-width: 700px) {
@@ -565,7 +629,7 @@
 
     <header class="hero">
       <h1>Your crossborder finances without the hassle.</h1>
-      <p class="lede">Drop your bank exports, paystubs, and tax docs in one folder. Get a categorized dashboard that handles your currencies, accounts, and countries — without uploading anything to anyone.</p>
+      <p class="lede">An AI assistant on your laptop reads your bank exports, paystubs, and tax docs and builds you a clear dashboard. Multi-currency, multi-account, multi-country. Nothing leaves your computer unless you choose to share it.</p>
     </header>
 
     <div class="platform-toggle" role="tablist" aria-label="Choose your operating system">
@@ -574,15 +638,15 @@
     </div>
 
     <div class="install-block" id="install-mac" role="tabpanel" aria-labelledby="tab-mac">
-      <span class="label">macOS — paste in Terminal</span>
+      <span class="label">macOS · paste in Terminal</span>
       <code id="cmd-mac">curl -fsSL https://passporttowealth.app/install | bash</code>
       <button class="copy-btn" data-target="cmd-mac" aria-label="Copy install command">Copy</button>
     </div>
     <div class="install-block" id="install-win" role="tabpanel" aria-labelledby="tab-win" hidden>
-      <span class="label" style="color: #e6c068;">⚠ Windows — coming soon</span>
+      <span class="label" style="color: #e6c068;">⚠ Windows · coming soon</span>
       <code id="cmd-win" style="opacity: 0.55;">irm https://passporttowealth.app/install.ps1 | iex</code>
       <p style="color: rgba(245,243,238,0.65); font-size: 13px; margin: 14px 0 0; padding-right: 80px; line-height: 1.5;">
-        The Windows installer is in active development. Mac is the supported platform today — open this page on a Mac, or contact your advisor for access timelines.
+        The Windows installer is in active development. Mac is the supported platform today. Open this page on a Mac, or contact your advisor for access timelines.
       </p>
       <button class="copy-btn" data-target="cmd-win" aria-label="Copy install command" disabled>Copy</button>
     </div>
@@ -597,7 +661,7 @@
     <!-- ── 01 — Drop your files ────────────────────────────────────────── -->
     <section>
       <h2><span class="num">01</span>Drop your files</h2>
-      <p class="section-lede">Whatever your bank gives you. CSVs, PDFs, multi-currency, multiple accounts. Don't sort, don't rename, don't dedupe — that's the assistant's job.</p>
+      <p class="section-lede">Whatever your bank gives you. CSVs, PDFs, multi-currency, multiple accounts. Don't sort, don't rename, don't dedupe. That's the assistant's job.</p>
       <pre class="term"><span class="you">build my report</span>
 <span class="ai">Found 47 files in your inbox.</span>
 <span class="ai">Sorted them: 18 bank exports, 12 paystubs <span class="ai-strong">(skipped — privacy)</span>,</span>
@@ -611,11 +675,11 @@
     <!-- ── 02 — See your numbers ───────────────────────────────────────── -->
     <section>
       <h2><span class="num">02</span>See your numbers</h2>
-      <p class="section-lede">Opens locally in your browser. Your laptop's lock screen is the only thing protecting it — no third-party server, no passcode to invent.</p>
+      <p class="section-lede">Opens locally in your browser. No third-party server, no passcode to invent.</p>
       <div class="dash-preview" aria-label="Dashboard preview">
         <div class="dash-header">
           <div class="dash-title">Your Finance Dashboard</div>
-          <div class="dash-period">JAN 2024 — DEC 2024</div>
+          <div class="dash-period">LAST 12 MONTHS</div>
         </div>
         <div class="kpis">
           <div class="kpi">
@@ -665,7 +729,7 @@
     <!-- ── 03 — Share if you want ──────────────────────────────────────── -->
     <section>
       <h2><span class="num">03</span>Share if you want</h2>
-      <p class="section-lede">Want your advisor to see it? Or read it on your phone? One sentence puts it on a private URL behind a passcode the assistant generates for you. Most clients never need this.</p>
+      <p class="section-lede">Want your advisor to see it? Or read it on your phone? One sentence puts it on a private URL behind a passcode the assistant generates for you.</p>
       <pre class="term"><span class="you">share my dashboard</span>
 <span class="ai">Quick setup since this is your first share — what email should I use?</span>
 <span class="blank"></span>
@@ -686,11 +750,11 @@
       <ul>
         <li>
           <strong>Local first.</strong>
-          Your <code>~/Documents/my-finances/</code> folder is the source of truth. No cloud sync unless you put the folder in iCloud or Dropbox yourself (the installer warns and offers to relocate if it detects this).
+          Your <code>~/Documents/my-finances/</code> folder is the source of truth. No cloud sync unless you put the folder in iCloud or Dropbox yourself.
         </li>
         <li>
           <strong>Sharing is opt-in.</strong>
-          No third-party host is contacted unless you explicitly choose to publish. Most clients never sign up for anything.
+          No third-party host is contacted unless you explicitly choose to publish.
         </li>
         <li>
           <strong>Sensitive files are skipped.</strong>
@@ -698,7 +762,7 @@
         </li>
         <li>
           <strong>Always your originals.</strong>
-          The dashboard is a view. It never edits or deletes your bank exports — keep your originals as the system of record.
+          The dashboard is a view. It never edits or deletes your bank exports. Keep your originals as the system of record.
         </li>
       </ul>
     </section>
@@ -708,16 +772,16 @@
       <h2>Ready when you are.</h2>
       <p>A clear view of your finances in under an hour.</p>
       <div class="install-block">
-        <span class="label">macOS — paste in Terminal</span>
+        <span class="label">macOS · paste in Terminal</span>
         <code id="cmd-final">curl -fsSL https://passporttowealth.app/install | bash</code>
         <button class="copy-btn" data-target="cmd-final" aria-label="Copy install command">Copy</button>
       </div>
     </div>
 
     <footer>
-      <span>© 2026 Passport to Wealth · <button class="pill-link" data-open-prototype-modal style="background: none; border: none; color: var(--color-text-muted); padding: 0; cursor: pointer; font: inherit; text-decoration: underline; text-underline-offset: 2px;">Prototype</button></span>
+      <span>© 2026 Passport to Wealth · <button class="pill-link" data-open-prototype-modal style="background: none; border: none; color: var(--color-text-muted); padding: 0; cursor: pointer; font: inherit; text-decoration: underline; text-underline-offset: 2px;">Prototype</button> · Updated <time datetime="{{BUILD_DATE_ISO}}">{{BUILD_DATE_HUMAN}}</time></span>
       <span>
-        <a href="https://github.com/passporttowealth/passporttowealth" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/passporttowealth/passporttowealth" target="_blank" rel="noopener">Read the code ↗</a>
         ·
         <a href="https://www.passporttowealth.com/" target="_blank" rel="noopener">passporttowealth.com</a>
       </span>
@@ -727,19 +791,54 @@
   <!-- Floating prototype pill (Option C) -->
   <button class="pill floating-pill" data-open-prototype-modal aria-label="Learn more about this prototype">Prototype</button>
 
-  <!-- Modal -->
+  <!-- Prototype awareness modal -->
   <div class="modal-backdrop" id="proto-modal" role="dialog" aria-modal="true" aria-labelledby="proto-modal-title">
     <div class="modal">
       <h3 id="proto-modal-title">About this prototype</h3>
       <ul>
         <li><strong>Pre-release software.</strong> Active development by Passport to Wealth. Expect bugs and incomplete features.</li>
         <li><strong>Always keep your originals.</strong> The dashboard is a view, not a system of record. Don't delete bank exports based on what it shows.</li>
-        <li><strong>Tell your advisor if something looks wrong.</strong> Don't assume the dashboard is correct — flag anything that doesn't match your records.</li>
+        <li><strong>Tell your advisor if something looks wrong.</strong> Don't assume the dashboard is correct. Flag anything that doesn't match your records.</li>
         <li><strong>Privacy intact.</strong> Files stay on your laptop by default. See the <a href="#privacy">Privacy section</a> above for details.</li>
       </ul>
       <div class="modal-actions">
+        <button class="secondary" data-open-feedback-modal>Leave feedback</button>
         <button data-close-modal>Got it</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Feedback modal — POSTs to the same Cloudflare Worker the in-skill
+       feedback flow uses. Token is anti-abuse only; the real defense is
+       the GitHub PAT being server-side. -->
+  <div class="modal-backdrop" id="feedback-modal" role="dialog" aria-modal="true" aria-labelledby="feedback-modal-title">
+    <div class="modal">
+      <h3 id="feedback-modal-title">Leave feedback</h3>
+      <p style="color: var(--color-text-muted); font-size: 14px; margin: 0 0 4px;">Telling us what's confusing, broken, or missing helps the prototype get better. Goes straight to the team.</p>
+
+      <form id="feedback-form" novalidate>
+        <label for="fb-category">What's this about?</label>
+        <select id="fb-category" name="category" required>
+          <option value="general">General feedback</option>
+          <option value="bug">Something looks broken</option>
+          <option value="confusing">Something on this page is confusing</option>
+          <option value="install">Install instructions</option>
+          <option value="feature">A feature I'd like to see</option>
+        </select>
+
+        <label for="fb-message">Your feedback</label>
+        <textarea id="fb-message" name="message" required maxlength="9500" placeholder="What's on your mind?"></textarea>
+
+        <label for="fb-email">Email <span class="optional">(optional, only if you want a reply)</span></label>
+        <input type="email" id="fb-email" name="email" placeholder="you@example.com" autocomplete="email">
+
+        <div class="feedback-status" id="fb-status" role="status"></div>
+
+        <div class="modal-actions" style="margin-top: 24px;">
+          <button type="button" class="secondary" data-close-feedback-modal>Cancel</button>
+          <button type="submit" id="fb-submit">Send feedback</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -782,21 +881,114 @@
       });
     });
 
-    // ── Prototype modal ──────────────────────────────────────────────────
-    var modal = document.getElementById('proto-modal');
-    function openModal() { modal.classList.add('open'); document.body.style.overflow = 'hidden'; }
-    function closeModal() { modal.classList.remove('open'); document.body.style.overflow = ''; }
+    // ── Modals (prototype + feedback share open/close behavior) ──────────
+    var protoModal = document.getElementById('proto-modal');
+    var feedbackModal = document.getElementById('feedback-modal');
+    function openModalEl(el) { el.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeModalEl(el) { el.classList.remove('open'); document.body.style.overflow = ''; }
+    function openProto() { openModalEl(protoModal); }
+    function closeProto() { closeModalEl(protoModal); }
+    function openFeedback() { closeProto(); openModalEl(feedbackModal); }
+    function closeFeedback() { closeModalEl(feedbackModal); resetFeedbackForm(); }
+
     document.querySelectorAll('[data-open-prototype-modal]').forEach(function(el) {
-      el.addEventListener('click', function(e) { e.preventDefault(); openModal(); });
+      el.addEventListener('click', function(e) { e.preventDefault(); openProto(); });
+    });
+    document.querySelectorAll('[data-open-feedback-modal]').forEach(function(el) {
+      el.addEventListener('click', function(e) { e.preventDefault(); openFeedback(); });
     });
     document.querySelectorAll('[data-close-modal]').forEach(function(el) {
-      el.addEventListener('click', closeModal);
+      el.addEventListener('click', closeProto);
     });
-    modal.addEventListener('click', function(e) {
-      if (e.target === modal) closeModal();
+    document.querySelectorAll('[data-close-feedback-modal]').forEach(function(el) {
+      el.addEventListener('click', closeFeedback);
+    });
+    protoModal.addEventListener('click', function(e) {
+      if (e.target === protoModal) closeProto();
+    });
+    feedbackModal.addEventListener('click', function(e) {
+      if (e.target === feedbackModal) closeFeedback();
     });
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+      if (e.key === 'Escape') {
+        if (feedbackModal.classList.contains('open')) closeFeedback();
+        else if (protoModal.classList.contains('open')) closeProto();
+      }
+    });
+
+    // ── Feedback form submit ─────────────────────────────────────────────
+    // POSTs to the same Cloudflare Worker the in-skill feedback flow uses.
+    // On success → GitHub issue is created server-side under the
+    // passporttowealth/passporttowealth repo with the "client-feedback" label.
+    var FEEDBACK_ENDPOINT = 'https://passport-feedback.rafaeldf2.workers.dev';
+    var FEEDBACK_TOKEN = 'n7fQfh_1IYS7pDqsD8O2x0EqMU6l9Mmqu0ZCJWGuqx8';
+    var fbForm = document.getElementById('feedback-form');
+    var fbStatus = document.getElementById('fb-status');
+    var fbSubmit = document.getElementById('fb-submit');
+
+    function resetFeedbackForm() {
+      fbForm.reset();
+      fbStatus.className = 'feedback-status';
+      fbStatus.textContent = '';
+      fbSubmit.disabled = false;
+      fbSubmit.textContent = 'Send feedback';
+    }
+    function showFbStatus(kind, text) {
+      fbStatus.className = 'feedback-status ' + kind;
+      fbStatus.textContent = text;
+    }
+
+    fbForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var category = document.getElementById('fb-category').value;
+      var message = document.getElementById('fb-message').value.trim();
+      var email = document.getElementById('fb-email').value.trim();
+
+      if (!message) {
+        showFbStatus('error', 'Please write a message before sending.');
+        return;
+      }
+
+      fbSubmit.disabled = true;
+      fbSubmit.textContent = 'Sending…';
+      showFbStatus('', '');
+
+      // Build the envelope. The Worker's schema requires v=1, advisor_id,
+      // and message. site_url + user_agent + viewport are useful context.
+      var fullMessage = message;
+      if (email) fullMessage += '\n\n— from: ' + email;
+
+      var payload = {
+        v: 1,
+        advisor_id: 'passporttowealth',
+        client_handle: 'landing-page-visitor',
+        site_url: window.location.href,
+        category: category,
+        message: fullMessage,
+        user_agent: navigator.userAgent || '',
+        viewport: window.innerWidth + 'x' + window.innerHeight
+      };
+
+      fetch(FEEDBACK_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + FEEDBACK_TOKEN
+        },
+        body: JSON.stringify(payload)
+      }).then(function(r) {
+        if (r.ok) return r.json();
+        return r.json().then(function(j) { throw new Error(j.error || ('HTTP ' + r.status)); });
+      }).then(function(_data) {
+        showFbStatus('success', '✓ Thanks. Your feedback is in. The team reads every one.');
+        fbSubmit.textContent = 'Sent';
+        // Auto-close after 2.5s
+        setTimeout(function() { closeFeedback(); }, 2500);
+      }).catch(function(err) {
+        showFbStatus('error', 'Couldn\'t send right now (' + err.message + '). Try again, or email your advisor instead.');
+        fbSubmit.disabled = false;
+        fbSubmit.textContent = 'Try again';
+      });
     });
   </script>
 </body>
