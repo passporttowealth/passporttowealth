@@ -615,11 +615,22 @@
       color: var(--color-text-faint);
       display: flex;
       justify-content: space-between;
-      flex-wrap: wrap;
+      align-items: baseline;
       gap: 16px;
     }
+    /* Don't let the copyright string break mid-element ("© 2026" hanging on
+       its own line). Wrap each logical chunk so words stay together. */
+    .footer-copy { line-height: 1.7; }
+    .footer-copy a { white-space: nowrap; }
     footer a { color: var(--color-text-muted); text-decoration: none; }
     footer a:hover { color: var(--color-accent); text-decoration: underline; }
+    @media (max-width: 700px) {
+      footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+    }
 
     /* ── Modal ────────────────────────────────────────────────────────────── */
     .modal-backdrop {
@@ -1008,11 +1019,9 @@
     </div>
 
     <footer>
-      <span>© 2026 Passport to Wealth · <button class="pill-link" data-open-prototype-modal style="background: none; border: none; color: var(--color-text-muted); padding: 0; cursor: pointer; font: inherit; text-decoration: underline; text-underline-offset: 2px;">Prototype</button> · Updated <time datetime="{{BUILD_DATE_ISO}}">{{BUILD_DATE_HUMAN}}</time></span>
-      <span>
+      <span class="footer-copy">© 2026 <a href="https://www.passporttowealth.com/" target="_blank" rel="noopener">Passport to Wealth</a> · <button class="pill-link" data-open-prototype-modal style="background: none; border: none; color: var(--color-text-muted); padding: 0; cursor: pointer; font: inherit; text-decoration: underline; text-underline-offset: 2px;">Prototype</button> · Updated <time datetime="{{BUILD_DATE_ISO}}">{{BUILD_DATE_HUMAN}}</time></span>
+      <span class="footer-links">
         <a href="https://github.com/passporttowealth/passporttowealth" target="_blank" rel="noopener">Read the code ↗</a>
-        ·
-        <a href="https://www.passporttowealth.com/" target="_blank" rel="noopener">passporttowealth.com</a>
       </span>
     </footer>
   </main>
