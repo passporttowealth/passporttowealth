@@ -128,7 +128,7 @@ These are the advisor's job (not the installer's job to fix). The advisor's pre-
 
 ### 4.1 Distribution
 
-Source of truth: **GitHub — `github.com/rafaeldavid/passporttowealth`**.
+Source of truth: **GitHub — `github.com/passporttowealth/passporttowealth`** (public).
 
 The repo holds the skill, the installer, the templates, and the docs. The user-facing artifacts (the things the client touches) are:
 

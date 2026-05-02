@@ -460,23 +460,31 @@ Code from email: ______
 **Bonus:** completely closes OP-8 for the publishing-host concern — the user never sees the brand "here.now" in any clickable surface.
 **Implementation:** ~50 lines in Welcome.command Step 4 + matching mirror in Welcome.ps1. New regression test asserting the email-code POST pattern is present.
 
-### B9.8 — Migrate skill distribution from `git clone` to `npx skills add` · **P2 · S**
-**Found by:** Strategic-recommendation #3 spike — investigated what `npx skills add heredotnow/skill --skill here-now -g` (the same pattern Welcome.command uses to install the here-now skill in Step 2g) actually does, to see if our own `finance-clarity-build` skill should be distributed the same way.
-**Spike findings:**
-- The `skills` CLI is an [npm package by vercel-labs](https://github.com/vercel-labs/skills). MIT-style open distribution. No registry account needed.
-- `heredotnow/skill` is a **GitHub `owner/repo` shorthand**, not an npm scope. The CLI clones the repo, walks for `SKILL.md`, installs them. No `package.json`, no npm publish, no proprietary backend.
-- Required to publish: a public GitHub repo with `skills/<skill-name>/SKILL.md` layout. That's it.
-- Updates: `npx skills update <name>` (re-pulls from `main`, no semver).
-- Privacy: public-repo only as a first-class flow. Private repos work via SSH-auth git clone but undocumented.
-**Today's mechanism (works):** Welcome.command's Step 2h does `git clone $SKILL_REPO_URL` to install `finance-clarity-build`. Functional.
-**Why migrate later:** the `npx skills add` flow is shorter and matches the pattern users already see for `here-now`. Single command instead of clone + symlink. Cleaner for users who go look at the install log.
-**Why not migrate now:** the canonical install string would be `npx skills add passporttowealth/finance-clarity-build --skill finance-clarity-build -g`, which requires a `passporttowealth` GitHub org (currently the repo is `rafaeldavid/passporttowealth`). Creating the org is a person-side action. Without it, the install string would have to be `rafaeldavid/passporttowealth` which is awkward branding. Also: shipping breaking changes to all users on every push to `main` is a real risk once we have real customers.
-**Recommended sequencing:**
-1. Defer until v1 ships (real customers exist + the skill is stable enough that breaking-on-main is rare).
-2. When ready: create `passporttowealth` GitHub org. Either move `rafaeldavid/passporttowealth` there, or fork the skill subtree into a clean `passporttowealth/finance-clarity-build` repo with the layout `skills/finance-clarity-build/SKILL.md`.
-3. Update Welcome.command Step 2h to `npx -y skills add passporttowealth/finance-clarity-build --skill finance-clarity-build -g`. Remove the git clone branch.
-4. Add a release-tagging discipline (or document explicitly that `main` is the release channel, no semver).
-**Estimated work when picked up:** ~30 lines deleted, ~5 lines added in Welcome.command. Org creation + repo restructure dominates.
+### B9.8 — Migrate skill distribution from `git clone` to `npx skills add` · ✅ **DONE**
+**Shipped together with the curl-pipe-bash bypass (B9.9). Both depended on the repo being public + on the `passporttowealth` GitHub org existing.**
+**What changed:**
+- `installer/install.sh` Step 2h now runs `npx -y skills add passporttowealth/passporttowealth --skill finance-clarity-build --agent claude-code -g -y` instead of `git clone $SKILL_REPO_URL`.
+- All in-script `$SKILL_INSTALL_DIR/skill/...` paths flattened to `$SKILL_INSTALL_DIR/...` because npx-installed skills land with the SKILL.md at the top level (vs the git-clone path which dropped the entire repo as a working tree under `~/.claude/skills/finance-clarity-build/`).
+- The `skill` CLI walks the repo for any `SKILL.md` and matches by the `name:` frontmatter field — so our existing `skill/SKILL.md` layout works without restructuring.
+- `--agent claude-code -g -y` flags make the install non-interactive (without them, the CLI prompts for which agent platform to install to, which would hang in a piped-from-curl context).
+**Spike findings (kept for the record):**
+- `skills` is an npm package by vercel-labs. MIT-style open distribution. No registry account needed.
+- `heredotnow/skill` is a **GitHub `owner/repo` shorthand**. The CLI clones the repo, walks for `SKILL.md`, installs them. No `package.json`, no npm publish, no proprietary backend.
+- Updates: `npx skills update <name>` re-pulls from `main` (no semver discipline yet on our side — track if this becomes a problem).
+- Privacy: public-repo only as a first-class flow. We made the repo public as part of the org migration.
+
+### B9.9 — Curl-pipe-bash install bypass + repo migration to `passporttowealth` org · ✅ **DONE**
+**Shipped together with B9.8.**
+**What changed:**
+- Repo migrated from `rafaeldavid/passporttowealth` (private) → `passporttowealth/passporttowealth` (public). GitHub auto-redirects the old URL for ~6 months so anything inflight survives the move.
+- New `installer/install.sh` is the canonical install path. Streamed via `curl -fsSL https://raw.githubusercontent.com/passporttowealth/passporttowealth/main/installer/install.sh | bash` — no file lands in `~/Downloads`, so macOS Gatekeeper never intervenes. Removes the #1 dry-run abandonment surface (Gatekeeper warning + right-click → Open dance).
+- `installer/Welcome.command`, `Welcome.bat`, `Welcome.ps1` archived to `installer/legacy/` with an explanatory README. Kept (not deleted) as a fallback for users who genuinely won't open Terminal — sunset after 2-3 successful curl-path onboardings.
+- All in-repo URL references updated (`cloudflare-worker/README.md`, `skill/templates/site/index.html`, `tests/test_pipeline.py`, `docs/feedback-channel.md`, `dev/github-repo-layout.md`, `dev/finance-clarity-build-spec.md`).
+- New regression tests pin the npx-skills-add invocations + the absence of `git clone $SKILL_REPO_URL` in `install.sh`.
+**Follow-up (still TODO):**
+- Landing page (`installer/index.html`) needs the redesign to lead with the curl one-liner instead of download buttons (egregore-style; B9.10).
+- The Cloudflare Worker's GitHub PAT was scoped to `rafaeldavid/passporttowealth`. Fine-grained PATs are scoped by repo ID not URL, so the existing PAT continues to work after the transfer. After the GitHub auto-redirect window (~6 months from the migration), revisit.
+- README.md still describes the old download-and-double-click flow; rewrite as part of B9.10.
 
 ## Epic 6.5 — v2 hardening: zero-touch advisor onboarding (deferred from v1)
 

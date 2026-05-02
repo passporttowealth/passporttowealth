@@ -310,7 +310,7 @@ class TestBuildSite(PipelineTestBase):
             "Passport to Wealth",            # brand name
             'aria-labelledby="insights-h"', # insights section
             'class="methodology"',          # methodology section
-            'github.com/rafaeldavid/passporttowealth',  # GitHub footer link
+            'github.com/passporttowealth/passporttowealth',  # GitHub footer link
             'passporttowealth.com',         # main site footer link
         ]:
             self.assertIn(marker, html, f"required DOM marker missing: {marker!r}")
@@ -547,7 +547,7 @@ class TestPipelineHealth(unittest.TestCase):
         """The macOS installer used to emit '[STUB]' lines for actual install
         actions (Homebrew, Python, Claude Code, workspace, etc). After
         finishing the end-to-end implementation, none of those should remain
-        in Welcome.command. Welcome.ps1 (Windows) still has its [STUB]
+        in install.sh. Welcome.ps1 (Windows) still has its [STUB]
         markers — the Windows real-install port is tracked separately;
         this test will be tightened once that lands.
 
@@ -555,8 +555,8 @@ class TestPipelineHealth(unittest.TestCase):
         when these files were stubs are banned in BOTH platforms — dry-run
         reported users seeing those lines and asking whether the installer
         was real."""
-        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
-        ps1 = (REPO / "installer" / "Welcome.ps1").read_text(encoding="utf-8")
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
+        ps1 = (REPO / "installer" / "legacy" / "Welcome.ps1").read_text(encoding="utf-8")
         # macOS: no [STUB] markers, no cosmetic skeleton/dev-path leftovers
         for banned in ("[STUB] This step would install",
                        "[STUB] Would launch",
@@ -566,7 +566,7 @@ class TestPipelineHealth(unittest.TestCase):
                        "[STUB] Would run the diagnostic",
                        "v0 skeleton", "v0 SKELETON", "v0 stub",
                        "engagement/development/"):
-            self.assertNotIn(banned, cmd, f"Welcome.command still has: {banned!r}")
+            self.assertNotIn(banned, cmd, f"install.sh still has: {banned!r}")
         # Windows: cosmetic-only enforcement until the real-install port lands
         for banned in ("v0 skeleton", "v0 SKELETON", "v0 stub",
                        "engagement/development/"):
@@ -576,7 +576,7 @@ class TestPipelineHealth(unittest.TestCase):
         """User feedback: Claude Pro and Max are both subscriptions —
         collapse the auth picker to 2 options (paid subscription vs API key)
         instead of 3 (Pro vs Max vs API key)."""
-        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
         # The simplified prompt
         self.assertIn("Type 1 or 2:", cmd, "auth prompt should be 2-choice now")
         self.assertNotIn("Type 1, 2, or 3:", cmd, "old 3-choice prompt should be gone")
@@ -588,7 +588,7 @@ class TestPipelineHealth(unittest.TestCase):
     def test_installer_creates_launcher_and_desktop_shortcut(self):
         """Step 5 must write .skill-launcher.sh into the workspace (used by the
         B9.2 seamless handoff) AND drop START-HERE.command on the Desktop."""
-        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
         self.assertIn('LAUNCHER="$WS/.skill-launcher.sh"', cmd,
             "Step 5 must write the workspace launcher")
         self.assertIn('DESKTOP_SHORTCUT="$HOME/Desktop/START-HERE.command"', cmd,
@@ -604,7 +604,7 @@ class TestPipelineHealth(unittest.TestCase):
     def test_installer_step6_diagnostic_replaces_stub(self):
         """Step 6 used to be '[STUB] Would run the diagnostic'. Should now do
         actual checks, count failures, and exit non-zero on any red."""
-        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
         self.assertIn("DIAGNOSTIC_FAILS=0", cmd,
             "Step 6 should track diagnostic failure count")
         # At least 8 distinct diagnostic checks
@@ -620,17 +620,17 @@ class TestPipelineHealth(unittest.TestCase):
         them to find and double-click START-HERE on the Desktop. Desktop
         shortcut still exists for re-entry sessions 2+; just not the first-
         run handoff."""
-        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
-        ps1 = (REPO / "installer" / "Welcome.ps1").read_text(encoding="utf-8")
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
+        ps1 = (REPO / "installer" / "legacy" / "Welcome.ps1").read_text(encoding="utf-8")
         self.assertIn("Want to start now?", cmd,
-            "Welcome.command must offer the seamless start-now prompt (B9.2)")
+            "install.sh must offer the seamless start-now prompt (B9.2)")
         self.assertIn("Want to start now?", ps1,
             "Welcome.ps1 must offer the seamless start-now prompt (B9.2)")
         # Mac: must close fd 3 before exec to release the install-log handle
         self.assertIn("exec 3>&-", cmd,
-            "Welcome.command must release log fd before exec to avoid leak")
+            "install.sh must release log fd before exec to avoid leak")
         self.assertIn('exec "$WORKSPACE_LAUNCHER"', cmd,
-            "Welcome.command must exec into the workspace launcher")
+            "install.sh must exec into the workspace launcher")
         # Windows: must Start-Process the launcher
         self.assertIn("Start-Process -FilePath $WorkspaceLauncher", ps1,
             "Welcome.ps1 must Start-Process the workspace launcher")
@@ -643,17 +643,17 @@ class TestPipelineHealth(unittest.TestCase):
         - define a pause helper that's TTY-guarded
         - support an --auto / -Auto flag to skip pacing for CI
         - actually CALL the pause helper at least 2× between major sections."""
-        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
-        ps1 = (REPO / "installer" / "Welcome.ps1").read_text(encoding="utf-8")
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
+        ps1 = (REPO / "installer" / "legacy" / "Welcome.ps1").read_text(encoding="utf-8")
 
         # Mac: helpers + gates + --auto
-        self.assertIn("ok_paced()", cmd, "Welcome.command missing ok_paced helper")
-        self.assertIn("pause_for_user()", cmd, "Welcome.command missing pause_for_user helper")
+        self.assertIn("ok_paced()", cmd, "install.sh missing ok_paced helper")
+        self.assertIn("pause_for_user()", cmd, "install.sh missing pause_for_user helper")
         self.assertGreaterEqual(cmd.count("pause_for_user"), 4,
-            "Welcome.command should INVOKE pause_for_user at ≥2 transition points "
+            "install.sh should INVOKE pause_for_user at ≥2 transition points "
             "(plus the function definition + check, that's ≥4 occurrences)")
-        self.assertIn("--auto", cmd, "Welcome.command must support --auto flag")
-        self.assertIn("AUTO_MODE", cmd, "Welcome.command must implement --auto bypass")
+        self.assertIn("--auto", cmd, "install.sh must support --auto flag")
+        self.assertIn("AUTO_MODE", cmd, "install.sh must implement --auto bypass")
 
         # Windows: helpers + gates + -Auto
         self.assertIn("Write-OkPaced", ps1, "Welcome.ps1 missing Write-OkPaced helper")
@@ -672,12 +672,12 @@ class TestPipelineHealth(unittest.TestCase):
 
         Also enforces that CURRENT_STEP is updated at each step heading
         (not stuck at 'pre-consent' for the whole install)."""
-        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
         # The trap is wired
         self.assertIn("trap on_interrupt INT TERM", cmd,
-            "Welcome.command must trap INT and TERM")
+            "install.sh must trap INT and TERM")
         self.assertIn("on_interrupt()", cmd,
-            "Welcome.command must define the trap handler")
+            "install.sh must define the trap handler")
         # The handler logs + emits a re-run nudge
         self.assertIn('log "user_interrupt at step=', cmd,
             "trap handler must log which step was interrupted")
@@ -699,7 +699,7 @@ class TestPipelineHealth(unittest.TestCase):
         for no reason. Now: if the workspace launcher is in place + executable,
         diagnostic failures are demoted to a warning and the seamless handoff
         continues. Only a missing/non-executable launcher blocks."""
-        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
         # The new gating: branches on launcher presence, not on count alone
         self.assertIn('if [ -x "$WS/.skill-launcher.sh" ]; then', cmd,
             "diagnostic-fail handling must branch on launcher presence")
@@ -722,7 +722,7 @@ class TestPipelineHealth(unittest.TestCase):
         that as broken. Now the script counts down + osascript-closes the
         window so the exit feels intentional. Apple_Terminal only — leaves
         iTerm/Alacritty/Warp alone."""
-        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
         self.assertIn("close_terminal_window_after_countdown()", cmd,
             "must define the auto-close helper")
         # Apple_Terminal detection — don't try to close iTerm/Warp/etc
@@ -751,8 +751,8 @@ class TestPipelineHealth(unittest.TestCase):
         (vs. the older test which just counted total invocations across
         the whole script).
         """
-        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
-        ps1 = (REPO / "installer" / "Welcome.ps1").read_text(encoding="utf-8")
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
+        ps1 = (REPO / "installer" / "legacy" / "Welcome.ps1").read_text(encoding="utf-8")
 
         # Mac: count pause_for_user calls BEFORE the consent read prompt.
         consent_idx = cmd.find("Type %sI accept%s to continue")
@@ -761,7 +761,7 @@ class TestPipelineHealth(unittest.TestCase):
         # Subtract function definition (1) + auto-mode check inside the fn (1)
         invocations = pre_consent.count("pause_for_user") - 2
         self.assertGreaterEqual(invocations, 3,
-            f"Welcome.command should pause ≥3 times before consent gate "
+            f"install.sh should pause ≥3 times before consent gate "
             f"(found {invocations} after subtracting fn-def + internal check)")
 
         # Windows: count Pause-ForUser calls before the consent Read-Host.
@@ -783,11 +783,11 @@ class TestPipelineHealth(unittest.TestCase):
 
     def test_installer_does_not_signup_for_publishing_host(self):
         """Strategic #2 — local-first. The publishing-host signup that used
-        to live in Welcome.command Step 4 has moved to publish.sh and runs
+        to live in install.sh Step 4 has moved to publish.sh and runs
         only when the user explicitly chooses to share. The installer must
         no longer reference any here.now signup endpoints, and Step 4 must
         no longer exist (steps are now 1-of-5)."""
-        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
         # Email-code endpoints must be GONE from the installer
         self.assertNotIn("/api/auth/agent/request-code", cmd,
             "request-code must move to publish.sh, not stay in installer")
@@ -863,9 +863,9 @@ class TestPipelineHealth(unittest.TestCase):
         The signup logic moved from the installer to publish.sh in the
         local-first refactor (Strategic #2), but the same rule applies:
         link the homepage, not /signup."""
-        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
         publish = (REPO / "skill" / "scripts" / "publish.sh").read_text(encoding="utf-8")
-        for haystack, name in [(cmd, "Welcome.command"), (publish, "publish.sh")]:
+        for haystack, name in [(cmd, "install.sh"), (publish, "publish.sh")]:
             self.assertNotIn("here.now/signup", haystack,
                 f"{name}: https://here.now/signup is a 404 — link the homepage instead")
             self.assertNotIn("here.now/sign-up", haystack,
@@ -884,7 +884,7 @@ class TestPipelineHealth(unittest.TestCase):
         PYTHON311 is set from `uv python find 3.11` which always returns
         an absolute path inside uv's managed install dir. The Step 6
         `test -x "$PYTHON311"` diagnostic stays valid as a result."""
-        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
         # PYTHON311 is set from uv python find, which returns an absolute path
         self.assertIn('"$UV_BIN" python find 3.11', cmd,
             "Step 2d should resolve PYTHON311 via `uv python find 3.11`")
@@ -895,13 +895,83 @@ class TestPipelineHealth(unittest.TestCase):
         self.assertIn('if [ -z "$PYTHON311" ] || [ ! -x "$PYTHON311" ]; then', cmd,
             "Step 2d must validate PYTHON311 is non-empty and executable")
 
+    def test_installer_fetches_skill_via_npx_skills_add(self):
+        """B9.8 — finance-clarity-build skill is fetched via `npx skills add`
+        (same pattern as the here-now skill in Step 2g) instead of `git clone`.
+        Required non-interactive flags: --agent claude-code -g -y (without
+        these the CLI prompts for agent picker, which would hang in a
+        piped-from-curl context). The CLI installs the skill subdir contents
+        directly to ~/.claude/skills/finance-clarity-build/ — so internal
+        paths must NOT include the `/skill/` prefix that the old git-clone
+        layout had."""
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
+        # The npx invocation for finance-clarity-build
+        self.assertIn(
+            'npx -y skills add "$SKILL_REPO_REF" --skill finance-clarity-build --agent claude-code -g -y',
+            cmd,
+            "Step 2h must use npx skills add with non-interactive flags")
+        # SKILL_REPO_REF defaults to the canonical repo
+        self.assertIn(
+            'SKILL_REPO_REF="${FCB_SKILL_REPO_REF:-passporttowealth/passporttowealth}"',
+            cmd,
+            "SKILL_REPO_REF should default to passporttowealth/passporttowealth")
+        # The here-now skill install also gets the non-interactive flags
+        self.assertIn(
+            "npx -y skills add heredotnow/skill --skill here-now --agent claude-code -g -y",
+            cmd,
+            "Step 2g should pass --agent claude-code -g -y to keep curl-piped install non-interactive")
+        # The old git-clone path is gone
+        self.assertNotIn("git clone", cmd,
+            "install.sh should NOT use git clone — switched to npx skills add (B9.8)")
+        # No more $SKILL_INSTALL_DIR/skill/ paths — npx-installed skills land
+        # with SKILL.md at the top level, not nested under skill/
+        self.assertNotIn("$SKILL_INSTALL_DIR/skill/", cmd,
+            "All $SKILL_INSTALL_DIR refs must drop the /skill/ prefix — npx layout is flat")
+        # Diagnostic checks the new flat layout
+        self.assertIn('"$SKILL_INSTALL_DIR/SKILL.md"', cmd,
+            "Step 6 diagnostic should check for SKILL.md at the top of the install dir")
+
+    def test_install_sh_is_curl_pipe_friendly(self):
+        """B9.9 — install.sh is designed to be piped from curl, not double-
+        clicked from Finder. Two things from the legacy Welcome.command must
+        be absent: the Finder-launched re-exec block (which would relaunch
+        Terminal — pointless and broken inside a pipe), and the title /
+        description should not say `Welcome.command`."""
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
+        # No Finder re-exec — we're already in Terminal when piped from curl
+        self.assertNotIn("REEXEC_TTY=1 open -a Terminal", cmd,
+            "install.sh should not re-exec into Terminal — it's already there")
+        # Header comment names install.sh, not Welcome.command
+        self.assertIn("install.sh — Passport to Wealth", cmd[:500],
+            "header should name install.sh as the canonical installer")
+        # The canonical curl URL is documented in the header for posterity
+        self.assertIn(
+            "https://raw.githubusercontent.com/passporttowealth/passporttowealth/main/installer/install.sh",
+            cmd,
+            "header should document the canonical curl install URL")
+
+    def test_legacy_installers_archived_with_readme(self):
+        """B9.9 — Welcome.command, Welcome.bat, Welcome.ps1 moved to
+        installer/legacy/ as a fallback for users who can't open Terminal.
+        Not deleted. installer/legacy/README.md explains what they are."""
+        legacy_dir = REPO / "installer" / "legacy"
+        self.assertTrue(legacy_dir.is_dir(), "installer/legacy/ must exist")
+        for fname in ("Welcome.command", "Welcome.bat", "Welcome.ps1", "README.md"):
+            f = legacy_dir / fname
+            self.assertTrue(f.exists(), f"installer/legacy/{fname} must exist")
+        # Welcome.command/.bat/.ps1 must NOT be in installer/ root anymore
+        for fname in ("Welcome.command", "Welcome.bat", "Welcome.ps1"):
+            f = REPO / "installer" / fname
+            self.assertFalse(f.exists(),
+                f"installer/{fname} must be moved to installer/legacy/")
+
     def test_installer_uses_uv_for_python_provisioning(self):
         """Strategic #1 — replace `brew install python@3.11 + venv + pip
         install` with uv (one binary, one toolchain). uv handles managed
         Python install, venv creation, and dep resolution. Removes the
         Homebrew dependency for Python entirely; brew is now only invoked
         if jq is missing."""
-        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
         # uv installer is fetched from astral.sh
         self.assertIn("https://astral.sh/uv/install.sh", cmd,
             "must install uv from astral.sh/uv/install.sh")
@@ -937,7 +1007,7 @@ class TestPipelineHealth(unittest.TestCase):
 
         Fix: stdout → install log (silent), stderr → /dev/tty so the
         progress bar reaches the user even though we're inside redirects."""
-        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
         # Find the FX prewarm invocation
         fx_block_start = cmd.find("Pre-warming exchange-rate cache")
         self.assertGreater(fx_block_start, 0, "FX prewarm block must exist")
@@ -954,12 +1024,12 @@ class TestPipelineHealth(unittest.TestCase):
         mid-consent-gate snaps focus away from Terminal and confuses users.
         Terminal/Windows-Terminal linkify URLs — let the user click if they
         want to read first."""
-        cmd_path = REPO / "installer" / "Welcome.command"
-        ps1_path = REPO / "installer" / "Welcome.ps1"
+        cmd_path = REPO / "installer" / "install.sh"
+        ps1_path = REPO / "installer" / "legacy" / "Welcome.ps1"
         cmd = cmd_path.read_text(encoding="utf-8")
         ps1 = ps1_path.read_text(encoding="utf-8")
         self.assertNotIn('open "https://privacy.anthropic.com', cmd,
-            "Welcome.command must not auto-open the privacy hub (B9.1)")
+            "install.sh must not auto-open the privacy hub (B9.1)")
         self.assertNotIn('Start-Process "https://privacy.anthropic.com', ps1,
             "Welcome.ps1 must not auto-open the privacy hub (B9.1)")
         # Both files must still mention the URL so users know where to look:

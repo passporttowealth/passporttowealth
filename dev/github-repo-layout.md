@@ -1,6 +1,6 @@
 # `passporttowealth` — Repo Layout
 
-Proposed structure for `github.com/rafaeldavid/passporttowealth`. Everything in `installer/` and `skill/` is what the client touches (directly or indirectly); everything else is for the advisor and the build process.
+Proposed structure for `github.com/passporttowealth/passporttowealth`. Everything in `installer/` and `skill/` is what the client touches (directly or indirectly); everything else is for the advisor and the build process.
 
 ```
 passporttowealth/
@@ -111,7 +111,7 @@ cp installer/Welcome.command installer/Welcome.bat installer/Welcome.ps1 "$STAGE
 At install time, `Welcome.command` `git clone`s the repo (or `curl`s a tarball of the latest release) into `~/Documents/my-finances/.skill/`, then symlinks the skill into the right Claude Code skills directory. This way the workspace contains its own pinned copy of the skill and self-update is just a `git fetch && git checkout {new-tag}`. The skill code itself stays in GitHub (auditable, versioned); only the landing page + installer launchers are mirrored to here.now for the brand-friendly download URL.
 
 ### Self-update
-On every START-HERE launch, the skill checks `https://api.github.com/repos/rafaeldavid/passporttowealth/releases/latest` against the local pinned version. If newer, prompts the user once: "I have an update. Install now? (~30 seconds)". Updates only run on consent.
+On every START-HERE launch, the skill checks `https://api.github.com/repos/passporttowealth/passporttowealth/releases/latest` against the local pinned version. If newer, prompts the user once: "I have an update. Install now? (~30 seconds)". Updates only run on consent.
 
 ---
 

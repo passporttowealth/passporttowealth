@@ -190,7 +190,7 @@ feedback:
   endpoint_token: "the-FEEDBACK_BEARER_TOKEN-you-generated-above"
 ```
 
-That's it. Next time a client says *"I have feedback"*, an issue lands in `github.com/rafaeldavid/passporttowealth/issues` labelled `client-feedback`.
+That's it. Next time a client says *"I have feedback"*, an issue lands in `github.com/passporttowealth/passporttowealth/issues` labelled `client-feedback`.
 
 ## Costs
 

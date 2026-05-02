@@ -1,6 +1,6 @@
 # `passport-feedback` — Cloudflare Worker
 
-Receives product-feedback POSTs from published Finance Clarity dashboards and opens a GitHub issue under `rafaeldavid/passporttowealth`. **One Worker deployment serves all clients** — they each post to the same URL using the same bearer token (which is shipped in `skill/config.example.yaml`).
+Receives product-feedback POSTs from published Finance Clarity dashboards and opens a GitHub issue under `passporttowealth/passporttowealth`. **One Worker deployment serves all clients** — they each post to the same URL using the same bearer token (which is shipped in `skill/config.example.yaml`).
 
 ## Architecture
 
@@ -13,14 +13,14 @@ Cloudflare Worker (this code)
     │   Holds GITHUB_TOKEN as a Worker secret (clients never see it)
     ▼
 GitHub Issues API
-    └─▶ New issue under rafaeldavid/passporttowealth labelled `client-feedback`
+    └─▶ New issue under passporttowealth/passporttowealth labelled `client-feedback`
 ```
 
 ## Deploying
 
 Prereqs:
 - `wrangler` installed (`npm install -g wrangler`) and authenticated (`wrangler login`).
-- A GitHub fine-grained PAT scoped to **only** `rafaeldavid/passporttowealth` with `Issues: Read and write`.
+- A GitHub fine-grained PAT scoped to **only** `passporttowealth/passporttowealth` with `Issues: Read and write`.
 
 From this directory:
 

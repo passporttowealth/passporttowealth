@@ -5,7 +5,7 @@ compatibility_date = "2026-01-01"
 # Non-secret config. Secrets (GITHUB_TOKEN, FEEDBACK_BEARER_TOKEN) are
 # managed via `wrangler secret put` — never commit them here.
 [vars]
-GITHUB_OWNER = "rafaeldavid"
+GITHUB_OWNER = "passporttowealth"
 GITHUB_REPO = "passporttowealth"
 ALLOWED_ADVISOR_ID = "passporttowealth"
 ISSUE_LABEL = "client-feedback"

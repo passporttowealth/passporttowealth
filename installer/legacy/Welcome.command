@@ -115,7 +115,7 @@ WS="${FCB_WORKSPACE:-${HOME}/Documents/my-finances}"
 
 # Source-of-truth for the skill — used by the install step to git-clone the
 # finance-clarity-build skill into ~/.claude/skills if it isn't already there.
-SKILL_REPO_URL="${FCB_SKILL_REPO_URL:-https://github.com/rafaeldavid/passporttowealth.git}"
+SKILL_REPO_URL="${FCB_SKILL_REPO_URL:-https://github.com/passporttowealth/passporttowealth.git}"
 SKILL_INSTALL_DIR="${FCB_SKILL_INSTALL_DIR:-${HOME}/.claude/skills/finance-clarity-build}"
 
 # Helper: run a command, suppress its noisy output, surface only success/fail.
