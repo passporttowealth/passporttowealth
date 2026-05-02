@@ -1176,6 +1176,51 @@ class TestPipelineHealth(unittest.TestCase):
         self.assertIn("env.GITHUB_TOKEN", stats_handler,
             "/install/stats must require GITHUB_TOKEN as bearer (admin gate)")
 
+    def test_landing_page_assets_resolve_in_publish_bundle(self):
+        """Every asset path referenced in installer/index.html must resolve
+        to a regular file inside installer/ — NOT a symlink, NOT missing.
+
+        Reason: here-now's publish.sh walks files with `find -type f`, which
+        silently skips symlinks. We previously had `installer/assets/brand`
+        as a symlink to `assets/brand/`, and the live landing page 404'd on
+        the logo + favicon because the PNGs never made it into the publish
+        bundle. This test catches that class of failure pre-publish."""
+        import re as _re
+        installer_dir = REPO / "installer"
+        html = (installer_dir / "index.html").read_text(encoding="utf-8")
+
+        # Pull every relative href / src that points inside the bundle. We
+        # ignore absolute URLs (http/https/mailto/data:) and in-page anchors.
+        candidates = set()
+        for m in _re.finditer(r'(?:href|src)="([^"#?][^"#?]*)"', html):
+            ref = m.group(1)
+            if ref.startswith(("http://", "https://", "mailto:", "data:", "//", "#", "/")):
+                continue
+            # Strip query strings / fragments just in case.
+            ref = ref.split("?", 1)[0].split("#", 1)[0]
+            if ref:
+                candidates.add(ref)
+
+        # Sanity — we should have caught at least the brand logo + favicon
+        # (otherwise the regex broke and the test is useless).
+        self.assertTrue(any("brand" in c for c in candidates),
+            "regex failed to find any brand assets — test is broken, not the bundle")
+
+        for ref in sorted(candidates):
+            target = installer_dir / ref
+            self.assertTrue(target.exists(),
+                f"installer/index.html references '{ref}' but installer/{ref} does not exist")
+            # The here-now publish script uses `find -type f` which does NOT
+            # follow symlinks. Reject symlinks anywhere in the resolved path
+            # under installer/ so the bundle ships real files.
+            cur = target
+            while cur != installer_dir and cur.parent != cur:
+                self.assertFalse(cur.is_symlink(),
+                    f"installer/{ref} resolves through a symlink at {cur} — "
+                    f"here-now publish.sh skips symlinks and the live site will 404. "
+                    f"Replace with a real file/directory copy.")
+                cur = cur.parent
+
     def test_install_ps1_exists_with_winget_provisioning(self):
         """B9.16 — first version of the Windows installer. Same UX patterns
         as install.sh (Anthropic terms gate, paced sections, visible
