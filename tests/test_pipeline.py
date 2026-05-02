@@ -683,10 +683,12 @@ class TestPipelineHealth(unittest.TestCase):
             "trap handler must log which step was interrupted")
         self.assertIn("exit 130", cmd,
             "trap handler must exit with conventional Ctrl-C exit code")
-        # CURRENT_STEP is updated at each Step heading (1-6) so the log line is useful
-        for step_label in ("1/6 pre-flight", "2/6 installing tools",
-                           "3/6 Claude sign-in", "4/6 publishing-host",
-                           "5/6 workspace setup", "6/6 final diagnostics"):
+        # CURRENT_STEP is updated at each Step heading. Strategic #2 dropped
+        # the "publishing-host signup" step (moved to publish.sh), so steps
+        # are now 1-of-5 instead of 1-of-6.
+        for step_label in ("1/5 pre-flight", "2/5 installing tools",
+                           "3/5 Claude sign-in",
+                           "4/5 workspace setup", "5/5 final diagnostics"):
             self.assertIn(f'CURRENT_STEP="{step_label}', cmd,
                 f"CURRENT_STEP should be set to '{step_label}…' at that step")
 
@@ -779,44 +781,102 @@ class TestPipelineHealth(unittest.TestCase):
         self.assertIn('Write-SayPaced "  1. Allow Windows', ps1,
             "Section 1 numbered preview steps should use Write-SayPaced")
 
-    def test_installer_uses_in_agent_email_code_flow(self):
-        """B9.7 invariant: Step 4's primary path is the in-agent email-code
-        flow (POST /api/auth/agent/request-code → verify-code), with manual
-        paste explicitly available as a fallback. Replaces the old 6-action
-        manual-paste-only path."""
+    def test_installer_does_not_signup_for_publishing_host(self):
+        """Strategic #2 — local-first. The publishing-host signup that used
+        to live in Welcome.command Step 4 has moved to publish.sh and runs
+        only when the user explicitly chooses to share. The installer must
+        no longer reference any here.now signup endpoints, and Step 4 must
+        no longer exist (steps are now 1-of-5)."""
         cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
-        # Email-code endpoints — both must be wired
-        self.assertIn("/api/auth/agent/request-code", cmd,
-            "B9.7: installer must POST to request-code endpoint")
-        self.assertIn("/api/auth/agent/verify-code", cmd,
-            "B9.7: installer must POST to verify-code endpoint")
-        # Should ask for the email + the code
-        self.assertIn("read -r -p \"Email: \"", cmd,
-            "B9.7: should prompt for the user's email")
-        # Manual paste must remain reachable as a fallback
-        self.assertIn("manual_paste_fallback", cmd,
-            "B9.7: manual paste must remain available as a fallback function")
-        # User can switch from code-loop to manual paste mid-flow
-        self.assertIn("paste' to switch to manual", cmd,
-            "B9.7: 'paste' escape hatch should be available in the code-entry loop")
-        # Save behavior unchanged: write apiKey to ~/.herenow/credentials chmod 600
-        self.assertIn('printf \'%s\\n\' "$API_KEY" > "$CRED_FILE"', cmd,
-            "B9.7: API key from verify-code response must be saved to credentials file")
+        # Email-code endpoints must be GONE from the installer
+        self.assertNotIn("/api/auth/agent/request-code", cmd,
+            "request-code must move to publish.sh, not stay in installer")
+        self.assertNotIn("/api/auth/agent/verify-code", cmd,
+            "verify-code must move to publish.sh, not stay in installer")
+        # And no more email prompt during install
+        self.assertNotIn('read -r -p "Email: "', cmd,
+            "installer must not ask for email — that happens on first share now")
+        # Step numbering reflects the removal: 1-of-5, not 1-of-6
+        self.assertIn("Step 1 of 5", cmd, "Step 1 should now read 'of 5'")
+        self.assertNotIn("Step 1 of 6", cmd, "old 'of 6' numbering should be gone")
+        # Step 4 still exists — it's now "workspace setup" (was Step 5 of 6).
+        # What's gone is the "Setting up your private dashboard host" heading.
+        self.assertNotIn("Setting up your private dashboard host", cmd,
+            "the publishing-host-signup step heading should be removed")
+        self.assertIn("Step 4 of 5 — Setting up your finance workspace", cmd,
+            "Step 4 should now be the workspace-setup step (renumbered from 5/6)")
+
+    def test_publish_sh_runs_email_code_flow_when_no_credentials(self):
+        """Strategic #2 — the email-code signup logic has been MOVED from
+        the installer to publish.sh. publish.sh detects missing credentials
+        and runs the inline signup before publishing. After signup, future
+        publishes are silent."""
+        publish = (REPO / "skill" / "scripts" / "publish.sh").read_text(encoding="utf-8")
+        # The email-code endpoints now live here
+        self.assertIn("/api/auth/agent/request-code", publish,
+            "publish.sh must POST to request-code on first publish")
+        self.assertIn("/api/auth/agent/verify-code", publish,
+            "publish.sh must POST to verify-code on first publish")
+        # Detect missing credentials → trigger signup
+        self.assertIn("SIGNUP_NEEDED=1", publish,
+            "publish.sh must gate signup on missing/invalid credentials")
+        # Manual paste fallback survives
+        self.assertIn("manual_paste_fallback()", publish,
+            "manual paste must remain reachable as a fallback")
+        # The previous hard-fail-if-missing-creds path is gone
+        self.assertNotIn('credential missing at $CRED_FILE — re-run install', publish,
+            "publish.sh should NOT hard-fail on missing creds — it should run signup instead")
+
+    def test_view_local_script_exists_and_opens_dashboard(self):
+        """Strategic #2 — view-local.sh opens $WS/site/index.html in the
+        user's browser via file://. This is the local-first default path
+        invoked at the end of refresh.sh."""
+        view_local = REPO / "skill" / "scripts" / "view-local.sh"
+        self.assertTrue(view_local.exists(),
+            "view-local.sh must exist at skill/scripts/view-local.sh")
+        self.assertTrue(os.access(view_local, os.X_OK),
+            "view-local.sh must be executable")
+        body = view_local.read_text(encoding="utf-8")
+        # Reads from the workspace's site/ folder
+        self.assertIn("$WS/site", body,
+            "view-local.sh must target the workspace's site/ folder")
+        # Uses file:// (local), not http://
+        self.assertIn('URL="file://', body,
+            "view-local.sh must serve from file:// (local), not http://")
+        # Cross-platform open
+        for opener in ("open", "xdg-open", "start"):
+            self.assertIn(opener, body,
+                f"view-local.sh should support {opener} for cross-platform open")
+
+    def test_refresh_sh_invokes_local_view_after_build(self):
+        """Strategic #2 — refresh.sh ends with view-local.sh by default
+        (opens dashboard in browser). --no-open bypasses for CI / scripted
+        runs."""
+        refresh = (REPO / "skill" / "scripts" / "refresh.sh").read_text(encoding="utf-8")
+        self.assertIn("view-local.sh", refresh,
+            "refresh.sh must invoke view-local.sh after building")
+        self.assertIn("--no-open", refresh,
+            "refresh.sh must support --no-open to skip auto-open in CI")
 
     def test_installer_uses_working_herenow_url(self):
         """B9.7 regression: here.now has no /signup path — that URL 404s.
-        The signup is via the homepage's 'Sign in' button (which doubles as
-        sign-up). Don't direct users to a 404."""
+        The signup logic moved from the installer to publish.sh in the
+        local-first refactor (Strategic #2), but the same rule applies:
+        link the homepage, not /signup."""
         cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
-        self.assertNotIn("here.now/signup", cmd,
-            "https://here.now/signup is a 404 — link the homepage instead")
-        self.assertNotIn("here.now/sign-up", cmd,
-            "/sign-up also 404s")
-        self.assertNotIn("here.now/login", cmd,
-            "/login also 404s")
-        # The homepage IS valid (200)
-        self.assertIn('open "https://here.now/"', cmd,
-            "installer should open here.now/ (the working homepage)")
+        publish = (REPO / "skill" / "scripts" / "publish.sh").read_text(encoding="utf-8")
+        for haystack, name in [(cmd, "Welcome.command"), (publish, "publish.sh")]:
+            self.assertNotIn("here.now/signup", haystack,
+                f"{name}: https://here.now/signup is a 404 — link the homepage instead")
+            self.assertNotIn("here.now/sign-up", haystack,
+                f"{name}: /sign-up also 404s")
+            self.assertNotIn("here.now/login", haystack,
+                f"{name}: /login also 404s")
+        # The homepage IS valid (200) — and that's what the manual-paste
+        # fallback in publish.sh opens. (Installer no longer opens it because
+        # the signup flow moved to publish.sh.)
+        self.assertIn('open "https://here.now/"', publish,
+            "publish.sh manual-paste fallback should open here.now/ (working homepage)")
 
     def test_installer_python311_resolved_to_absolute_path(self):
         """Dry-run regression: 'Python 3.11 installed' diagnostic returned

@@ -10,8 +10,8 @@ A first-time, non-technical client with a folder of their own financial files (b
 
 ## What the user will have at the end
 
-1. A categorized view of their spending and income, populated into a branded site that looks the same for every client.
-2. A private URL at `{slug}.here.now`, gated by a server-side passcode they chose. Content is never served until the passcode is verified.
+1. A categorized view of their spending and income, populated into a branded site that looks the same for every client. **Opens locally in their browser by default** — lives only on their laptop, no third-party servers, no signup required.
+2. **(Optional, opt-in)** A private URL at `{slug}.here.now`, gated by a server-side passcode they chose. Triggered only when the user explicitly chooses to share with their advisor or family. Content is never served until the passcode is verified.
 3. A `Download your data` block on the site with the underlying CSV, Excel summary, and rule file — portable to any accountant.
 4. A monthly refresh path that takes one drop-in and one sentence.
 
@@ -86,29 +86,38 @@ Watchpoints:
 
 ---
 
-## Phase 3 — Build the site (5 min)
+## Phase 3 — Build the site, view locally (5 min)
 
-Once the user confirms the totals, Claude builds the site from the skill's locked template — same brand, same layout, same components for every client.
+Once the user confirms the totals, Claude builds the site from the skill's locked template — same brand, same layout, same components for every client — and **opens it in their default browser via `file://`**. No third-party server, no signup, no passcode. The dashboard lives only on their laptop, gated by the laptop's lock screen.
 
-> **Claude says:** Your site is ready locally. Opening it in your browser now.
+> **Claude says:** Done. Your dashboard is open in your browser. It lives only on your laptop — no third-party server, no passcode needed (your laptop's lock screen already protects it).
 
 The user sees the branded dashboard: KPI cards across the top, spend-by-category and monthly cashflow charts, sortable transactions table, the Download your data block, and the visual calculator slot (whichever calculator was picked at kickoff — FIRE, FX risk, etc.).
 
 Iteration here is light: rename a category, hide a calculator, swap the order of the charts. The template constrains what can change so the result stays brand-consistent.
 
+**Most clients stop here.** If they only want the dashboard for themselves, the install + build + view loop is the whole story. The publish step in Phase 4 is opt-in — only triggered when the user explicitly wants to share with someone.
+
 ---
 
-## Phase 4 — Publish privately (5 min)
+## Phase 4 — Share it (optional, 5 min)
 
-> **User says:** Publish it.
+Skipped entirely if the user doesn't want to share. Surfaced by Claude after Phase 3:
+
+> **Claude asks:** Want to share it with anyone (advisor, family)? I can put it on a private URL with a passcode — that's also how you'd see it on your phone. Just say "share my dashboard" and I'll set it up.
+
+If the user says yes:
+
+> **User says:** Share my dashboard.
 
 The skill runs the safe publish flow:
 
-1. Publishes a placeholder page → a live URL exists but contains no data.
-2. **Generates a phone-friendly passcode** (4-word lowercase passphrase, e.g. `paper-orchid-stove-vine` — the user is never asked to invent one) and saves it to `.env` in their workspace.
-3. Sets the passcode on the host. Confirms it took.
-4. Pushes the real site content to the now-protected slug.
-5. Verifies in a fresh session that the passcode prompt appears before any content loads.
+1. **(First time only)** Runs the in-agent email-code signup with here.now: prompts for the user's email, sends a one-time code, verifies it, saves the API key to `~/.herenow/credentials`. Two user actions — email + code. After that it's silent on subsequent shares.
+2. Publishes a placeholder page → a live URL exists but contains no data.
+3. **Generates a phone-friendly passcode** (4-word lowercase passphrase, e.g. `paper-orchid-stove-vine` — the user is never asked to invent one) and saves it to `.env` in their workspace.
+4. Sets the passcode on the host. Confirms it took.
+5. Pushes the real site content to the now-protected slug.
+6. Verifies in a fresh session that the passcode prompt appears before any content loads.
 
 **Race condition closed by design.** The skill refuses to push real content to an unprotected slug.
 
@@ -132,7 +141,7 @@ Same one-sentence loop, every month.
 
 > **User says next month:** I dropped new files in. Refresh.
 
-The skill auto-sorts the new files into the existing structure, dedupes against what's already there, re-runs the pipeline incrementally, asks about any new uncategorized merchants, rebuilds the site, and republishes to the **same slug** with the **same passcode** read from `.passcode`. Reports what changed: "added 47 transactions, 3 new merchants categorized, totals now run through {month}."
+The skill auto-sorts the new files into the existing structure, dedupes against what's already there, re-runs the pipeline incrementally, asks about any new uncategorized merchants, rebuilds the site, and **opens the rebuilt site locally** in their browser. If the user previously shared (credentials present), it also republishes to the **same slug** with the **same passcode** so the URL their advisor bookmarked stays current. If they never shared, refresh stops at the local view. Reports what changed: "added 47 transactions, 3 new merchants categorized, totals now run through {month}."
 
 The user never thinks about the slug, the passcode, the folder structure, or which command to run.
 

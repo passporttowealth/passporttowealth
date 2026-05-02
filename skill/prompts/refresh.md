@@ -9,7 +9,13 @@ The agent runs `refresh.sh` which:
 4. Fetches missing FX dates + today's snapshot rate.
 5. Incrementally categorizes only new rows; surfaces new uncategorized merchants.
 6. Runs sanity gate with month-over-month deltas.
-7. Rebuilds + republishes to the same slug with the same passcode.
+7. Rebuilds the dashboard at `$WS/site/`.
+
+After refresh.sh completes, the agent **opens the rebuilt dashboard locally**
+(`view-local.sh` → `file://$WS/site/index.html`) by default. **Republishing
+to a shared URL only happens if the user has previously published** — i.e.
+`$HOME/.herenow/credentials` exists. New users see the local view and are
+asked once whether they want to share.
 
 The user types one sentence; the agent does everything else.
 
@@ -35,12 +41,35 @@ what changed.
 {conditional: "→ Asking you about {n_new_merchants} new merchants..."}
 ✓ Sanity check passed
 ✓ Dashboard rebuilt
-✓ Published to your existing URL
+{conditional, only if credentials present: "✓ Published to your existing URL"}
 ```
 
 ---
 
-## Completion summary
+## Completion summary — first build (no credentials yet)
+
+```
+=== Done ===
+
+Your dashboard is open in your browser. It lives only on your laptop —
+no third-party server, no passcode needed (your laptop's lock screen
+already protects it).
+
+  • {n_transactions} transactions
+  • Through {latest_transaction_date}
+  • Net cashflow this period: {primary_currency_symbol}{net_change}
+
+Want to share it with anyone (advisor, family)? I can put it on a
+private URL with a passcode — that's also how you'd see it on your
+phone. Just say "share my dashboard" and I'll set it up.
+
+Otherwise, refresh any time by dropping new files in your inbox and
+saying "refresh".
+```
+
+---
+
+## Completion summary — incremental refresh, already shared
 
 ```
 === Done ===
@@ -54,8 +83,8 @@ Compared to your last refresh on {previous_refresh_date}:
 Your dashboard is at the same URL with the same passcode:
   {url}
 
-Open it on any device to see the new data. Want to share with someone?
-Just say "share my dashboard with {name}" and I'll handle it.
+Open it on any device to see the new data. Want to share with someone
+new? Just say "share my dashboard with {name}" and I'll handle it.
 ```
 
 ---

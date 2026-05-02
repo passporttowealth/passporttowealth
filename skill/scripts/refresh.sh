@@ -71,5 +71,18 @@ $PY "$SCRIPT_DIR/sanity.py" $AUTO_CONFIRM
 step "7/7 Building dashboard"
 $PY "$SCRIPT_DIR/build_site.py"
 
-printf '\n\033[32m\033[1m✓ Done.\033[0m Open site/index.html in your browser to review.\n'
-printf '   When ready, run publish.sh to put it online behind a passcode.\n\n'
+# Local-first default (Strategic #2): open the dashboard in the user's
+# browser as soon as the build succeeds. Sharing via here.now is opt-in
+# (run publish.sh when the user explicitly says "share with my advisor").
+# Unless --no-open was passed (CI / scripted runs).
+NO_OPEN=0
+for arg in "$@"; do case "$arg" in --no-open) NO_OPEN=1 ;; esac; done
+
+printf '\n\033[32m\033[1m✓ Done.\033[0m\n'
+if [ "$NO_OPEN" = "0" ]; then
+  "$SCRIPT_DIR/view-local.sh"
+else
+  printf '   Open %s/site/index.html in your browser to review.\n' "$WS"
+fi
+printf '\n   To share with your advisor or family (puts it online behind a passcode):\n'
+printf '       %s/publish.sh\n\n' "$SCRIPT_DIR"
