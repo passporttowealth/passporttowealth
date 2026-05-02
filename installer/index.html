@@ -499,12 +499,24 @@
     .section-nav a.active .num { color: var(--color-gold); }
 
     /* ── Floating prototype pill ──────────────────────────────────────────── */
+    /* Hidden by default. The header pill is visible on top of the page, so
+       no point duplicating it. JS adds .visible once the header pill scrolls
+       out of the viewport (IntersectionObserver). Hidden on small screens. */
     .floating-pill {
       position: fixed;
       bottom: 24px;
       right: 24px;
       z-index: 20;
       box-shadow: 0 4px 12px rgba(15, 30, 51, 0.20);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .floating-pill.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
     }
     @media (max-width: 640px) {
       .floating-pill { display: none; }
@@ -694,7 +706,7 @@
     <div class="brand">
       <img src="assets/brand/logo-blue.png" alt="Passport to Wealth" width="36" height="36">
       <span class="brand-text">PASSPORT TO WEALTH · FINANCE CLARITY</span>
-      <button class="pill" data-open-prototype-modal aria-label="Learn more about this prototype">Prototype</button>
+      <button id="header-pill" class="pill" data-open-prototype-modal aria-label="Learn more about this prototype">Prototype</button>
     </div>
 
     <header class="hero">
@@ -1068,6 +1080,19 @@
     var navLinks = nav ? nav.querySelectorAll('a[data-target]') : [];
     var heroEl = document.querySelector('.hero');
     var trackedSections = document.querySelectorAll('section[id]');
+
+    // ── Floating pill: only show after the header pill scrolls out ───────
+    var headerPill = document.getElementById('header-pill');
+    var floatingPill = document.querySelector('.floating-pill');
+    if (headerPill && floatingPill && 'IntersectionObserver' in window) {
+      var pillObs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+          // Show the floating pill only when the header pill is NOT in view
+          floatingPill.classList.toggle('visible', !e.isIntersecting);
+        });
+      }, { threshold: 0 });
+      pillObs.observe(headerPill);
+    }
 
     if (nav && heroEl && 'IntersectionObserver' in window) {
       // Show nav once the hero has scrolled out of view

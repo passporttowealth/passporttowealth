@@ -718,10 +718,12 @@ class TestPipelineHealth(unittest.TestCase):
             "success path should still confirm")
 
     def test_installer_curl_pipe_safe(self):
-        """B9.10 — install.sh must rebind stdin to /dev/tty early, otherwise
-        curl-pipe-bash invocations can't read user input (bash drained the
-        pipe to load the script body). Without this fix, the consent gate
-        auto-fires empty and the install silently cancels."""
+        """B9.10 + B9.12 — install.sh must rebind stdin to /dev/tty early
+        AND capture the result into an INTERACTIVE flag (instead of
+        re-testing `-t 0` later). Bash 3.2 (Apple's default) sometimes
+        returns the pre-redirect tty state from `[ -t 0 ]` even after a
+        successful redirect, which previously caused pause_for_user to
+        silently skip every pause + the consent gate to auto-cancel."""
         cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
         # The TTY rebind must happen before any read prompt
         self.assertIn("exec </dev/tty", cmd,
@@ -734,6 +736,47 @@ class TestPipelineHealth(unittest.TestCase):
         consent_idx = cmd.find("Type %sI accept%s")
         self.assertLess(rebind_idx, consent_idx,
             "stdin rebind must happen before the consent prompt")
+        # B9.12: INTERACTIVE flag captured ONCE — not re-tested via [ -t 0 ]
+        self.assertIn("INTERACTIVE=1", cmd,
+            "INTERACTIVE flag must be set after the rebind attempt")
+        self.assertIn('INTERACTIVE_DIAG="rebind_ok"', cmd,
+            "rebind success must record diagnostic state")
+        self.assertIn('INTERACTIVE_DIAG="rebind_failed"', cmd,
+            "rebind failure must record diagnostic state")
+        self.assertIn('INTERACTIVE_DIAG="already_tty"', cmd,
+            "pre-existing TTY must record diagnostic state")
+        # pause_for_user uses the captured flag, NOT a fresh -t 0 test
+        self.assertIn('if [ "$AUTO_MODE" = "1" ] || [ "$INTERACTIVE" = "0" ]; then', cmd,
+            "pause_for_user must gate on $INTERACTIVE, not [ -t 0 ]")
+        # Diagnostic gets logged so post-mortem support can see what happened
+        self.assertIn('log "tty_state: ${INTERACTIVE_DIAG}', cmd,
+            "tty diagnostic must be written to install log")
+
+    def test_installer_consent_gate_does_not_silently_cancel_on_empty(self):
+        """B9.12 — empty input at the consent gate previously matched the
+        cancel branch ("no"|"cancel"|"quit"|"stop"|""), causing the install
+        to exit silently saying "install cancelled" if the TTY rebind
+        failed. Now empty input falls through to a re-prompt with a clear
+        "I didn't catch that" message; only explicit cancel words exit.
+        After 5 consecutive empties we bail with a clear support pointer
+        (catches the case where the rebind is genuinely broken so we
+        don't loop forever)."""
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
+        # The cancel case no longer includes empty
+        self.assertIn('"no"|"cancel"|"quit"|"stop")', cmd,
+            "explicit cancel branch should not include empty input")
+        self.assertNotIn('"no"|"cancel"|"quit"|"stop"|"")', cmd,
+            "empty input must NOT be in the cancel branch")
+        # There's an explicit empty-input branch with a clear message
+        self.assertIn('"")', cmd,
+            "must have a dedicated empty-input branch")
+        self.assertIn("I didn't catch any input", cmd,
+            "empty-input branch should explain what to type")
+        # Bail-out after N empties prevents infinite loop on broken TTY
+        self.assertIn("EMPTY_COUNT", cmd,
+            "must track empty-input count")
+        self.assertIn('if [ "$EMPTY_COUNT" -ge 5 ]', cmd,
+            "must bail after 5 empties to avoid infinite loop")
 
     def test_installer_pre_consent_block_is_paced(self):
         """Dry-run feedback: the opening (welcome + 3-step preview, prototype

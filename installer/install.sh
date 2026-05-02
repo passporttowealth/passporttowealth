@@ -30,14 +30,24 @@ set -u
 # bash reads the entire script from the pipe and stdin reaches EOF before any
 # `read` runs — so consent prompts auto-fire with empty input and the install
 # silently cancels. Re-bind stdin to the controlling terminal so `read` works.
-# In headless / CI runs (no /dev/tty), set AUTO_MODE so the script never tries
-# to read interactively at all.
-if [ ! -t 0 ]; then
-  if [ -e /dev/tty ] && exec </dev/tty 2>/dev/null; then
-    : # stdin is now bound to the user's terminal; reads will work
-  else
-    AUTO_MODE_FORCED=1   # truly headless — fall back to non-interactive
-  fi
+#
+# We capture the interactive state into INTERACTIVE *once* here. Helpers like
+# pause_for_user use that flag instead of re-testing `[ -t 0 ]` later, because
+# bash 3.2 (Apple's default) sometimes returns the original (pre-redirect)
+# tty state from `[ -t 0 ]` even after a successful redirect — leading to
+# pauses being silently skipped even when stdin IS a tty after rebind.
+#
+# INTERACTIVE_DIAG is logged later (once $INSTALL_LOG is open) so support
+# can see exactly which branch fired without asking the user to re-run.
+INTERACTIVE=1
+if [ -t 0 ]; then
+  INTERACTIVE_DIAG="already_tty"
+elif [ -e /dev/tty ] && exec </dev/tty 2>/dev/null; then
+  INTERACTIVE_DIAG="rebind_ok"
+else
+  INTERACTIVE=0
+  INTERACTIVE_DIAG="rebind_failed"
+  AUTO_MODE_FORCED=1   # truly headless — fall back to non-interactive
 fi
 
 # Friendly title bar
@@ -81,7 +91,11 @@ say_paced() { say "$@"; [ "$AUTO_MODE" = "0" ] && sleep "$PACE_SLEEP"; }
 # sections. Converts the firehose into a conversation. TTY-guarded so
 # non-interactive runs (--auto, scripts, CI) don't hang.
 pause_for_user() {
-  if [ "$AUTO_MODE" = "1" ] || [ ! -t 0 ]; then
+  # Use the captured INTERACTIVE flag set at the top, NOT a fresh `-t 0`
+  # test. Bash 3.2 can return the pre-redirect TTY state even after a
+  # successful `exec </dev/tty`, which previously caused this function
+  # to silently skip every pause.
+  if [ "$AUTO_MODE" = "1" ] || [ "$INTERACTIVE" = "0" ]; then
     return 0
   fi
   printf '\n'
@@ -93,6 +107,12 @@ mkdir -p "$(dirname "$INSTALL_LOG")"
 exec 3>>"$INSTALL_LOG"
 
 log() { printf '[%s] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&3; }
+
+# Surface the early TTY-rebind result so post-mortem support knows
+# exactly which branch fired (already_tty / rebind_ok / rebind_failed).
+# If a future client reports "press enter never showed", this line in
+# the install log tells us why without needing a re-run.
+log "tty_state: ${INTERACTIVE_DIAG} interactive=${INTERACTIVE} auto_mode_forced=${AUTO_MODE_FORCED:-0}"
 
 # Track which phase we're in so a Ctrl-C / SIGTERM can log "cancelled at X".
 # Updated at each Step heading. Initial value covers "before pre-flight" so an
@@ -235,11 +255,31 @@ while true; do
       log "consent_accepted_at=$(date -u +%Y-%m-%dT%H:%M:%SZ) (anthropic_data_terms + prototype_status)"
       break
       ;;
-    "no"|"cancel"|"quit"|"stop"|"")
+    "no"|"cancel"|"quit"|"stop")
+      # Empty input intentionally NOT in this branch. If the TTY rebind
+      # failed, `read` returns immediately with empty input — we don't
+      # want that to silently exit. Empty falls through to the re-prompt
+      # below where the user gets a clear "I didn't catch that" message.
       say
       say "${DIM}No problem — install cancelled. Talk to your advisor any time.${RESET}"
       log "consent_declined_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
       exit 0
+      ;;
+    "")
+      warn "I didn't catch any input. Type ${BOLD}I accept${RESET} to continue, or ${BOLD}no${RESET} to cancel."
+      log "consent_empty_input — possibly tty_state=${INTERACTIVE_DIAG}"
+      # If we keep getting empty input, the TTY rebind is broken and
+      # we'd loop forever. Detect 5 empties in a row and bail with a
+      # clear support pointer.
+      EMPTY_COUNT=$((${EMPTY_COUNT:-0} + 1))
+      if [ "$EMPTY_COUNT" -ge 5 ]; then
+        fail "I'm not getting any input from you (5 empty replies in a row)."
+        fail "This usually means the install can't read from your terminal. See:"
+        fail "  $INSTALL_LOG"
+        fail "Send the log to your advisor."
+        log "consent_aborted_after_${EMPTY_COUNT}_empties tty_state=${INTERACTIVE_DIAG}"
+        exit 1
+      fi
       ;;
     *)
       warn "I didn't understand. Please type 'I accept' or 'no'."
