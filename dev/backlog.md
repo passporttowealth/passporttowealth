@@ -460,6 +460,24 @@ Code from email: ______
 **Bonus:** completely closes OP-8 for the publishing-host concern — the user never sees the brand "here.now" in any clickable surface.
 **Implementation:** ~50 lines in Welcome.command Step 4 + matching mirror in Welcome.ps1. New regression test asserting the email-code POST pattern is present.
 
+### B9.8 — Migrate skill distribution from `git clone` to `npx skills add` · **P2 · S**
+**Found by:** Strategic-recommendation #3 spike — investigated what `npx skills add heredotnow/skill --skill here-now -g` (the same pattern Welcome.command uses to install the here-now skill in Step 2g) actually does, to see if our own `finance-clarity-build` skill should be distributed the same way.
+**Spike findings:**
+- The `skills` CLI is an [npm package by vercel-labs](https://github.com/vercel-labs/skills). MIT-style open distribution. No registry account needed.
+- `heredotnow/skill` is a **GitHub `owner/repo` shorthand**, not an npm scope. The CLI clones the repo, walks for `SKILL.md`, installs them. No `package.json`, no npm publish, no proprietary backend.
+- Required to publish: a public GitHub repo with `skills/<skill-name>/SKILL.md` layout. That's it.
+- Updates: `npx skills update <name>` (re-pulls from `main`, no semver).
+- Privacy: public-repo only as a first-class flow. Private repos work via SSH-auth git clone but undocumented.
+**Today's mechanism (works):** Welcome.command's Step 2h does `git clone $SKILL_REPO_URL` to install `finance-clarity-build`. Functional.
+**Why migrate later:** the `npx skills add` flow is shorter and matches the pattern users already see for `here-now`. Single command instead of clone + symlink. Cleaner for users who go look at the install log.
+**Why not migrate now:** the canonical install string would be `npx skills add passporttowealth/finance-clarity-build --skill finance-clarity-build -g`, which requires a `passporttowealth` GitHub org (currently the repo is `rafaeldavid/passporttowealth`). Creating the org is a person-side action. Without it, the install string would have to be `rafaeldavid/passporttowealth` which is awkward branding. Also: shipping breaking changes to all users on every push to `main` is a real risk once we have real customers.
+**Recommended sequencing:**
+1. Defer until v1 ships (real customers exist + the skill is stable enough that breaking-on-main is rare).
+2. When ready: create `passporttowealth` GitHub org. Either move `rafaeldavid/passporttowealth` there, or fork the skill subtree into a clean `passporttowealth/finance-clarity-build` repo with the layout `skills/finance-clarity-build/SKILL.md`.
+3. Update Welcome.command Step 2h to `npx -y skills add passporttowealth/finance-clarity-build --skill finance-clarity-build -g`. Remove the git clone branch.
+4. Add a release-tagging discipline (or document explicitly that `main` is the release channel, no semver).
+**Estimated work when picked up:** ~30 lines deleted, ~5 lines added in Welcome.command. Org creation + repo restructure dominates.
+
 ## Epic 6.5 — v2 hardening: zero-touch advisor onboarding (deferred from v1)
 
 Items pulled out of `finance-clarity-build-spec.md` v1 to keep the first ship simple. Together they remove the one remaining moment of third-party-service exposure (the publishing-host signup during install) and let the advisor diagnose failures without the user having to email a support bundle.
