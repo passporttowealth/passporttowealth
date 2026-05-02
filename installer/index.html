@@ -307,15 +307,9 @@
     }
     .book-meta strong { color: var(--color-text); display: block; margin-bottom: 4px; }
     .book-meta a { font-size: 12px; }
-    /* Belt-and-suspenders: prevent the terminal from forcing a horizontal
-       scrollbar inside the narrower column. Shorter mockup content + this
-       fallback together = no side-scroll. */
-    .book-row .term {
-      min-width: 0;
-      overflow-x: hidden;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
+    /* Belt-and-suspenders for the narrow column. pre-wrap is now on .term
+       globally; this just ensures the grid item can shrink. */
+    .book-row .term { min-width: 0; }
     @media (max-width: 700px) {
       .book-row { grid-template-columns: 1fr; gap: 20px; }
       .book-cover { width: 140px; margin: 0 auto; }
@@ -371,7 +365,12 @@
       font-size: 13px;
       line-height: 1.65;
       margin: 0;
-      overflow-x: auto;
+      /* pre-wrap so AI conversational responses wrap naturally at the column
+         width instead of needing manual mid-sentence breaks. Status-line
+         sections (Drop your files / Share if you want) have short discrete
+         lines so this doesn't affect them visibly. */
+      white-space: pre-wrap;
+      word-break: break-word;
     }
     .term .you {
       color: var(--color-code-text);
@@ -853,12 +852,10 @@
       <h2><span class="num">02</span>Have a conversation</h2>
       <p class="section-lede">Plain English, no commands to memorize. Ask about a charge, fix a misclassification, convert a PDF, rename a category. The assistant works through it with you.</p>
       <pre class="term"><span class="you">what's that "ACME PAYMENTS" charge in March?</span>
-<span class="ai">$1,247.30 on March 14, marked as Travel. It looks like a hotel</span>
-<span class="ai">charge — want me to recategorize as <span class="ai-strong">Travel › Hotels</span>?</span>
+<span class="ai">$1,247.30 on March 14, marked as Travel. It looks like a hotel charge — want me to recategorize as <span class="ai-strong">Travel › Hotels</span>?</span>
 <span class="blank"></span>
 <span class="you">yeah, and apply that going forward</span>
-<span class="ai">Done. Updated the rule for ACME PAYMENTS → Travel/Hotels.</span>
-<span class="ai">Recategorized 4 historical entries too. Rebuild the dashboard?</span>
+<span class="ai">Done. Updated the rule for ACME PAYMENTS → Travel/Hotels. Recategorized 4 historical entries too. Rebuild the dashboard?</span>
 <span class="blank"></span>
 <span class="you">yes please</span>
 <span class="ai"><span class="ok">✓</span> Done. Open in your browser.</span></pre>
@@ -923,12 +920,10 @@
       <h2><span class="num">04</span>Ask for new analysis<span class="coming-soon-chip">Coming soon</span></h2>
       <p class="section-lede">Once your data's in, request new views. Calculators, comparisons, scenario models. We're building this layer now.</p>
       <pre class="term"><span class="you">build me a FIRE calculator from my data</span>
-<span class="ai"><span class="ai-strong">Coming soon</span> — I'll use your income, spending, and savings rate</span>
-<span class="ai">to project financial-independence timelines and scenarios.</span>
+<span class="ai"><span class="ai-strong">Coming soon</span> — I'll use your income, spending, and savings rate to project financial-independence timelines and scenarios.</span>
 <span class="blank"></span>
 <span class="you">show me my FX exposure across currencies</span>
-<span class="ai"><span class="ai-strong">Coming soon</span> — multi-currency risk view: where your money sits,</span>
-<span class="ai">what's denominated in what, and how much swings if rates move.</span>
+<span class="ai"><span class="ai-strong">Coming soon</span> — multi-currency risk view: where your money sits, what's denominated in what, and how much swings if rates move.</span>
 <span class="blank"></span>
 <span class="you">compare my dining spend year-over-year</span>
 <span class="ai"><span class="ai-strong">Coming soon</span> — custom comparisons across any category, any window.</span></pre>
@@ -950,19 +945,13 @@
           </p>
         </div>
         <pre class="term"><span class="you">US retirement compliance from Switzerland?</span>
-<span class="ai"><span class="ai-strong">Coming soon</span> — answers grounded in the</span>
-<span class="ai">Playbook's cross-border investing +</span>
-<span class="ai">IRS compliance chapters.</span>
+<span class="ai"><span class="ai-strong">Coming soon</span> — answers grounded in the Playbook's cross-border investing + IRS compliance chapters.</span>
 <span class="blank"></span>
 <span class="you">what to plan before I move abroad?</span>
-<span class="ai"><span class="ai-strong">Coming soon</span> — pre-move planning</span>
-<span class="ai">checklist drawn from Tucker's</span>
-<span class="ai">"unknown unknowns" framework.</span>
+<span class="ai"><span class="ai-strong">Coming soon</span> — pre-move planning checklist drawn from Tucker's "unknown unknowns" framework.</span>
 <span class="blank"></span>
 <span class="you">estate planning across two countries</span>
-<span class="ai"><span class="ai-strong">Coming soon</span> — estate considerations</span>
-<span class="ai">specific to Americans abroad, sourced</span>
-<span class="ai">from the Playbook.</span></pre>
+<span class="ai"><span class="ai-strong">Coming soon</span> — estate considerations specific to Americans abroad, sourced from the Playbook.</span></pre>
       </div>
     </section>
 
