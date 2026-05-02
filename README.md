@@ -12,7 +12,7 @@ A private financial dashboard you build on your own laptop in under 30 minutes �
 curl -fsSL https://passporttowealth.app/install | bash
 ```
 
-**Windows** — open PowerShell (`Win` → `PowerShell` → `Enter`) and paste:
+**Windows** — *coming soon.* The PowerShell installer is in active development (backlog #B9.16). Mac is the only supported platform today. Once it ships, the one-liner will be:
 
 ```powershell
 irm https://passporttowealth.app/install.ps1 | iex
@@ -50,7 +50,7 @@ Full privacy operating principles in [`dev/finance-clarity-build-spec.md`](dev/f
 
 The one-liner streams a shell script over HTTPS and pipes it to bash (or PowerShell). Same pattern as Homebrew, Rust, uv, and Claude Code itself. Nothing lands in your `Downloads` folder, so no Gatekeeper / SmartScreen warnings to dismiss.
 
-The script provisions: `uv` (Python toolchain), Python 3.11, `jq`, Claude Code, the [`here-now`](https://github.com/heredotnow/skill) publishing skill, the `finance-clarity-build` skill (this repo, fetched via [`npx skills add`](https://github.com/vercel-labs/skills)), and the workspace at `~/Documents/my-finances/`. Logs to `~/Library/Logs/passport-to-wealth-install.log` (macOS) or `%LOCALAPPDATA%\PassportToWealth\Logs\` (Windows).
+The script provisions: `uv` (Python toolchain), Python 3.11, `jq`, Node.js (Apple doesn't ship it; required for `npx skills add`), Claude Code, the [`here-now`](https://github.com/heredotnow/skill) publishing skill, the `finance-clarity-build` skill (this repo, fetched via [`npx skills add`](https://github.com/vercel-labs/skills)), and the workspace at `~/Documents/my-finances/`. Logs to `~/Library/Logs/passport-to-wealth-install.log` (macOS) or `%LOCALAPPDATA%\PassportToWealth\Logs\` (Windows).
 
 The full source of `install.sh` is right here in this repo for inspection — `curl ... | less` first if you want to read before running.
 

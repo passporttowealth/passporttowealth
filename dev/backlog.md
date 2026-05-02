@@ -269,7 +269,8 @@ Modern best practice: a Loom or 30-sec MP4 above the fold showing the product in
 
 ## Epic 9 — Bugs surfaced during the dry-run walkthrough
 
-### B9.1 — `Welcome.command` opens browser before user reads the consent text · **P1 · XS**
+### B9.1 — `Welcome.command` opens browser before user reads the consent text · ✅ **DONE** (Issue A in commit 72ded60)
+**Status:** Auto-open removed. URL is printed for the user to click — Terminal linkifies it. Same fix in legacy/Welcome.ps1.
 **Found by:** dry-run, Phase 1 of `dev/SMOKE_CHECKS.md`-style walkthrough.
 **Symptom:** During the Anthropic data-terms consent gate, the script prints the explanatory text *and* calls `open https://privacy.anthropic.com/` in the same flow before prompting for `I accept` / `no`. The browser snaps focus, the user loses their place in the Terminal, doesn't know what to type next.
 **Root cause:** Lines in `installer/Welcome.command`:
@@ -291,7 +292,8 @@ Browser opens between the info print and the prompt — focus shift kills the mo
 Recommend option 1 — least surprising, fewest moving parts.
 **Mirror in `Welcome.ps1`** — same bug exists there, same fix.
 
-### B9.2 — Seamless install → first-run handoff (no Desktop double-click required) · **P1 · S**
+### B9.2 — Seamless install → first-run handoff · ✅ **DONE** (commit 475513e, then superseded by B9.10)
+**Status:** Originally shipped as a "Want to start now?" prompt that exec'd into the workspace launcher (commit 475513e). B9.10 then removed START-HERE entirely + the launcher wrapper, so the seamless-handoff prompt is also gone. Re-entry is now just "open Terminal, type claude" (printed at end of install).
 **Found by:** dry-run user-interview phase.
 **Symptom (the surface complaint):** The installer ends with "Double-click START-HERE on your Desktop whenever you want to use it." This forces a context switch right when momentum is highest — Terminal → minimize/cmd-tab → find Desktop icon → double-click → wait for new Terminal → resume. The user just spent 10+ minutes installing and now has to *find a thing*.
 **The deeper need (what user-interview surfaced):** First-run should feel like ONE coherent flow, not two disjointed events stitched by a Desktop shortcut. The shortcut is fine for *next time*; it's wrong as the first-run handoff.
@@ -323,7 +325,8 @@ esac
 ~10 lines. Mirror in `Welcome.ps1` (PowerShell `Start-Process` instead of exec).
 **Bonus:** for the first-ever install, the user could go straight from the install script into the workflow without ever needing the Desktop shortcut. The shortcut is then only for sessions 2+, where it actually makes sense.
 
-### B9.3 — Pace the CLI output so a human can actually read it · **P1 · S**
+### B9.3 — Pace the CLI output so a human can actually read it · ✅ **DONE** (commits 92b0a4a, 72ded60)
+**Status:** `say_paced` / `ok_paced` / `pause_for_user` helpers + section-by-section pre-consent pacing. `--auto` bypasses for CI. Visible-prompt fix in commit 544f749 (printf prompt as line then read, sidesteps read -p invisibility on some Mac terminals).
 **Found by:** dry-run user-interview phase.
 **Symptom (the surface complaint):** "The terminal responses were really quick and it didn't let me read through each of the progress process." Pre-flight checks (4 sequential ✓s) appear in under a second. The user feels processed, not guided.
 **The deeper need (what user-interview surfaced):** The user wants to FEEL competent — like they're following along with what's happening, not watching a robot do work TO them. Pacing is a trust-building mechanism.
@@ -369,7 +372,8 @@ spin() {
 **Trade-off:** the explicit gates add 4-5 keypresses. For non-technical users this is a clear win. Add `--auto` flag for technical users / CI / Rafa's own re-runs that skips the gates. Pacing the output (sleeps, spinners) costs ~3-5 seconds total per install — negligible against a 10+ min install.
 **Mirror in `Welcome.ps1`** — PowerShell has `Write-Progress` for spinners and `Read-Host` for gates; same patterns translate cleanly.
 
-### B9.4 — Re-evaluate the `START-HERE` shortcut as the primary re-entry method · **P2 · S**
+### B9.4 — Re-evaluate the `START-HERE` shortcut as the primary re-entry method · ✅ **DONE** (commit 6ec981d, B9.10)
+**Status:** START-HERE removed entirely. Re-entry is `claude` from any Terminal — no Desktop artifact. refresh.sh defaults PYTHON to the workspace venv so the pipeline runs from any cwd. API-key auth users get an idempotent `export ANTHROPIC_API_KEY=…` block in their shell rc.
 **Found by:** B9.2 follow-on thinking.
 **Question:** If B9.2 lets the user go straight from install to first run without ever touching the Desktop, do we still need the Desktop shortcut at all? Or is there a better re-entry pattern for sessions 2+?
 **Alternatives to investigate:**
@@ -379,7 +383,8 @@ spin() {
   - **Status quo Desktop shortcut**: lowest-tech, most visible, requires zero packaging work. Not glamorous but works.
 **Recommendation:** keep the Desktop shortcut for v1 (it works, costs nothing). Promote it from "the only way to start" to "the re-entry shortcut after the first run." Revisit when v1 ships if a real signed app is on the table.
 
-### B9.5 — Pipeline operations need ongoing-progress signals (FX fetch is the worst offender) · **P1 · S**
+### B9.5 — Pipeline operations need ongoing-progress signals (FX fetch is the worst offender) · ✅ **DONE** (commit 72ded60)
+**Status:** `progress()` helper added to `skill/scripts/_lib.py` (TTY-guarded, writes to stderr). FX prewarm in install.sh redirects stderr to /dev/tty so the bar reaches the user during install. Issue C in the original quick-wins commit.
 **Found by:** dry-run user-interview phase. "Output felt like it got stuck when it was fetching the exchange rate."
 **Symptom (the surface complaint):** During step 4/7 of the pipeline, the user sees:
 ```
@@ -428,7 +433,8 @@ Same pattern in `build_site.py` for the asset copy loop. Skip `categorize`/`norm
 **Trade-off:** None worth speaking of. Stdlib-only, no dep weight, ~30 lines added across the skill, pure UX improvement. Could later upgrade to `tqdm` if we want polish (single-line change at each call site).
 **Bonus:** the `progress()` helper writes to stderr, which means our `--json` output paths (used by tests) keep emitting clean JSON to stdout. Tests don't break.
 
-### B9.6 — Suppress `DeprecationWarning` noise in user-facing pipeline output · **P2 · XS**
+### B9.6 — Suppress `DeprecationWarning` noise in user-facing pipeline output · ✅ **DONE** (commit 72ded60)
+**Status:** Replaced `datetime.utcnow()` with `datetime.now(timezone.utc)` in `fx_fetch.py` and `sanity.py`. No more deprecation noise mid-pipeline.
 **Found by:** dry-run user-interview phase. The output during the FX fetch included this:
 ```
 /path/to/skill/scripts/fx_fetch.py:99: DeprecationWarning: datetime.datetime.utcnow() is
@@ -440,7 +446,8 @@ deprecated and scheduled for removal in a future version. Use timezone-aware obj
 **Fallback fix (suppress, don't address):** Add `import warnings; warnings.filterwarnings("ignore", category=DeprecationWarning)` at the top of pipeline scripts. Hides the noise but masks future deprecations too. Not recommended.
 **Recommendation:** preferred fix. ~3 lines changed total. Run regression suite after.
 
-### B9.7 — Replace publishing-host signup with the in-agent email-code flow · **P1 · M**
+### B9.7 — Replace publishing-host signup with the in-agent email-code flow · ✅ **DONE** (commits 925ecea, 3cb16bf)
+**Status:** Email-code flow shipped. Then moved out of the installer entirely (commit 3cb16bf) — local-first means most users never see this. The flow now lives in `skill/scripts/publish.sh` and runs only on first share. Uses `POST /api/auth/agent/request-code` + `/verify-code` — two user actions instead of six.
 **Found by:** dry-run + investigation when the user reported the broken `here.now/signup` URL.
 **Surface complaint:** "the page https://here.now/signup doesn't exist... so user gets blocked."
 **Immediate fix (already shipped):** point at the homepage `https://here.now/` instead and walk the user through clicking "Sign in" → email signup → API key copy → paste back. Works, but requires 6+ user actions and a context switch into the browser.
@@ -498,9 +505,45 @@ Code from email: ______
 - All in-repo URL references updated (`cloudflare-worker/README.md`, `skill/templates/site/index.html`, `tests/test_pipeline.py`, `docs/feedback-channel.md`, `dev/github-repo-layout.md`, `dev/finance-clarity-build-spec.md`).
 - New regression tests pin the npx-skills-add invocations + the absence of `git clone $SKILL_REPO_URL` in `install.sh`.
 **Follow-up (still TODO):**
-- Landing page (`installer/index.html`) needs the redesign to lead with the curl one-liner instead of download buttons (egregore-style; B9.10).
-- The Cloudflare Worker's GitHub PAT was scoped to `rafaeldavid/passporttowealth`. Fine-grained PATs are scoped by repo ID not URL, so the existing PAT continues to work after the transfer. After the GitHub auto-redirect window (~6 months from the migration), revisit.
-- README.md still describes the old download-and-double-click flow; rewrite as part of B9.10.
+- Landing page (`installer/index.html`) needs the redesign to lead with the curl one-liner instead of download buttons (egregore-style; B9.10). ✅ done in B9.10.
+- The Cloudflare Worker's GitHub PAT was scoped to `rafaeldavid/passporttowealth`. After the migration the PAT was rotated (a new fine-grained PAT scoped to `passporttowealth/passporttowealth`) and the Worker re-deployed. ⚠ The user pasted that new PAT in chat as part of the rotation — track-#63 to rotate it again.
+- README.md still describes the old download-and-double-click flow; rewrite as part of B9.10. ✅ done.
+
+### B9.11 — Brew-install Node.js so npx works on fresh Macs · ✅ **DONE** (commit b84af60)
+**Surface complaint:** "Is it possible a user can't run `curl ... | bash` because of a missing dependency?"
+**Root cause:** Apple doesn't ship Node. Steps 2g/2h of install.sh use `npx skills add` to fetch the here-now and finance-clarity-build skills. Without Node, the script dead-ended at "npx: command not found" before reaching workspace setup.
+**Fix:** install.sh Step 2b's `NEED_BREW` gate now triggers on missing jq OR missing node. Step 2e brew-installs Node alongside jq with a "Installing Node.js (~10s, gives us npx for the next steps)" message. Step 5 diagnostic checks `command -v npx` to verify. Spec §4.2 dependency table updated to list Node as a required dep with conditional Homebrew install.
+**Tests:** new `test_installer_brew_installs_node_for_npx`. Existing `test_installer_uses_uv_for_python_provisioning` updated for the dual jq+node NEED_BREW gating.
+
+### B9.12 — Bulletproof TTY rebind + visible prompts + non-cancelling consent gate · ✅ **DONE** (commits dfff5e8, 544f749)
+**Surface complaint:** "I still can't see the press enter to continue or similar text" after running the curl one-liner on a real Mac terminal.
+**Root cause (compound):**
+- `exec </dev/tty` early in install.sh could fail silently or succeed but then bash 3.2 (Apple's default) returned the pre-redirect TTY state from `[ -t 0 ]` later — pause_for_user's re-test wrongly skipped every pause.
+- The consent gate's case-statement treated empty input as "cancel" (`"no"|"cancel"|"quit"|"stop"|""`), so when read returned empty (the rebind silently failed), the install exited saying "install cancelled" before the user understood what happened.
+- Even when the rebind worked + `read -p` triggered, bash's `read -p PROMPT` writes to stderr with quirky flushing on some macOS terminals — the prompt could fail to render. Plus the prompt used DIM ANSI which is borderline-invisible against several Mac Terminal default themes.
+**Fix (4 changes):**
+1. Capture INTERACTIVE flag once at the top, after the rebind attempt. pause_for_user gates on $INTERACTIVE instead of re-testing `[ -t 0 ]`. Eliminates the bash 3.2 stale-test-result class of bug.
+2. Log the rebind diagnostic (`tty_state: <state> interactive=<0|1> auto_mode_forced=<0|1>`) to install.log. Post-mortem support can see exactly which branch fired without a re-run.
+3. Empty input no longer matches the cancel branch. Now falls through to a dedicated "I didn't catch any input" re-prompt. After 5 consecutive empties, bail with a clear support pointer (catches genuinely-broken TTY without infinite loop).
+4. All visible prompts now print as standalone bold lines via `printf '%s▶ Prompt%s\n' "$BOLD" "$RESET"` then `read -r VAR` with no `-p`. Sidesteps the read-p flushing quirk and makes the prompt unmissable.
+**Tests:** `test_installer_curl_pipe_safe` extended for the new INTERACTIVE flag pattern + diagnostic log. New `test_installer_consent_gate_does_not_silently_cancel_on_empty`.
+
+### B9.13 — Landing page polish: gold accent, left-gutter section nav, working watermark · ✅ **DONE** (commit 9561bfe)
+**Found by:** ongoing landing-page iteration with the user.
+**What changed:**
+- New `--color-gold` (#C9A75D) brand accent. Sprinkled at <10% visual weight: section number badges, active section-nav indicator, latest month bar in the dashboard preview chart, pill dot.
+- Egregore-style left-gutter section nav. Sticky, appears once the hero scrolls out of view, IntersectionObserver tracks the section currently in view, smooth-scroll on click. Hidden below 1100px viewport.
+- Watermark fix: previous regex stripping had broken the SVG XML (orphan `</path>` tag); re-fetched + re-stripped using xml.etree.ElementTree (proper parser). Country shapes now render correctly. Switched from mask-image to background-image with fill baked into the SVG root. Opacity tuned to 5% / 7% mobile per "less prominent" feedback.
+- H1 polish: "Your crossborder finances, **the easy way.**" with line-break + "the easy way" in gold.
+- Floating prototype pill now only appears when the header pill scrolls out of view (IntersectionObserver pattern).
+
+### B9.14 — Landing page narrative: Have a conversation + Ask for new analysis sections · ✅ **DONE** (commit 671f9cf)
+**Found by:** user feedback that the page narrative was missing the conversational layer + a forward-looking "more is coming" beat.
+**What changed:**
+- New section 02 "Have a conversation" between "Drop your files" and "See your numbers". Frames the plain-English Q&A interaction (ask about a charge, propose a recategorization, apply a rule going forward). Terminal mockup shows the round-trip pattern.
+- New section 04 "Ask for new analysis" between "See your numbers" and "Share if you want". Marked **Coming soon** via a small gold-on-cream pill in the heading. Terminal mockup shows three calculator examples (FIRE, FX exposure, year-over-year category compare) — communicates breadth without overpromising.
+- New `.coming-soon-chip` CSS class (reusable for any future Coming-soon sections).
+- Section IDs renumbered (sec-01..sec-06). Section nav updated. Prototype-modal Privacy anchor moved to #sec-06.
 
 ## Epic 6.5 — v2 hardening: zero-touch advisor onboarding (deferred from v1)
 
