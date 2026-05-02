@@ -585,55 +585,65 @@ class TestPipelineHealth(unittest.TestCase):
         # The case dispatch should be on (1, 2) not (1, 2, 3)
         self.assertNotIn("1|2)", cmd, "old Pro/Max combined branch should be gone")
 
-    def test_installer_creates_launcher_and_desktop_shortcut(self):
-        """Step 5 must write .skill-launcher.sh into the workspace (used by the
-        B9.2 seamless handoff) AND drop START-HERE.command on the Desktop."""
+    def test_installer_leaves_no_desktop_artifacts(self):
+        """B9.10 — START-HERE.command and the workspace launcher were removed.
+        Re-entry is `claude` from any Terminal. The installer must NOT create
+        anything on the Desktop or anywhere visible to the user beyond the
+        workspace folder itself."""
         cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
-        self.assertIn('LAUNCHER="$WS/.skill-launcher.sh"', cmd,
-            "Step 5 must write the workspace launcher")
-        self.assertIn('DESKTOP_SHORTCUT="$HOME/Desktop/START-HERE.command"', cmd,
-            "Step 5 must drop the Desktop shortcut")
-        self.assertIn('chmod +x "$LAUNCHER"', cmd, "launcher must be executable")
-        self.assertIn('chmod +x "$DESKTOP_SHORTCUT"', cmd, "shortcut must be executable")
-        # Launcher must activate the venv + export ANTHROPIC_API_KEY if set
-        self.assertIn('source "\\$WS/.venv/bin/activate"', cmd,
-            "launcher must source the workspace venv")
-        self.assertIn('ANTHROPIC_API_KEY=', cmd,
-            "launcher must export ANTHROPIC_API_KEY for the API-key auth path")
+        # No Desktop shortcut creation
+        self.assertNotIn('"$HOME/Desktop/START-HERE.command"', cmd,
+            "must not create a START-HERE shortcut on the Desktop")
+        self.assertNotIn('cat > "$DESKTOP_SHORTCUT"', cmd,
+            "must not write any Desktop shortcut")
+        # No workspace launcher script
+        self.assertNotIn('cat > "$LAUNCHER"', cmd,
+            "must not create the .skill-launcher.sh wrapper")
+        self.assertNotIn('LAUNCHER="$WS/.skill-launcher.sh"', cmd,
+            "must not declare the launcher path")
+        # The end-of-install message tells users how to re-enter
+        self.assertIn("type:", cmd.lower().replace('  ', ' '),
+            "end-of-install must tell users what to type to start")
+        self.assertIn("claude", cmd,
+            "end-of-install must mention the `claude` command")
 
-    def test_installer_step6_diagnostic_replaces_stub(self):
-        """Step 6 used to be '[STUB] Would run the diagnostic'. Should now do
-        actual checks, count failures, and exit non-zero on any red."""
+    def test_installer_step5_diagnostic_runs_checks(self):
+        """Step 5 (was Step 6 — renumbered after START-HERE removal in B9.10)
+        runs actual diagnostic checks. Failures are warnings, not blockers —
+        the skill catches real problems at runtime."""
         cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
         self.assertIn("DIAGNOSTIC_FAILS=0", cmd,
-            "Step 6 should track diagnostic failure count")
+            "Step 5 should track diagnostic failure count")
         # At least 8 distinct diagnostic checks
         self.assertGreaterEqual(cmd.count("check ") + cmd.count("check_file "), 8,
-            "Step 6 should run at least 8 diagnostic checks")
-        # And exit non-zero on red
-        self.assertIn("if [ \"$DIAGNOSTIC_FAILS\" -gt 0 ]", cmd,
-            "Step 6 should branch on diagnostic-fail count")
+            "Step 5 should run at least 8 diagnostic checks")
+        # Failures are warnings, not exit-1 blockers
+        self.assertIn("warn \"$DIAGNOSTIC_FAILS diagnostic check(s) reported issues", cmd,
+            "diagnostic failures should warn, not block")
+        self.assertNotIn("exit 1\nfi\nelse\n  ok_paced \"All diagnostics passed\"", cmd,
+            "must not exit 1 on diagnostic failure (B9.10 — warnings only)")
 
-    def test_installer_offers_start_now_handoff(self):
-        """B9.2 invariant: at end of install, ask 'Want to start now?'
-        and exec/launch the workflow if user says yes — instead of forcing
-        them to find and double-click START-HERE on the Desktop. Desktop
-        shortcut still exists for re-entry sessions 2+; just not the first-
-        run handoff."""
+    def test_installer_ends_with_clear_reentry_instructions(self):
+        """B9.10 — replaces the old 'Want to start now?' seamless handoff.
+        With START-HERE removed, end-of-install just tells the user how to
+        re-enter: open Terminal, type `claude`, ask for a report. No prompt,
+        no exec into a launcher (because there is no launcher)."""
         cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
-        ps1 = (REPO / "installer" / "legacy" / "Welcome.ps1").read_text(encoding="utf-8")
-        self.assertIn("Want to start now?", cmd,
-            "install.sh must offer the seamless start-now prompt (B9.2)")
-        self.assertIn("Want to start now?", ps1,
-            "Welcome.ps1 must offer the seamless start-now prompt (B9.2)")
-        # Mac: must close fd 3 before exec to release the install-log handle
-        self.assertIn("exec 3>&-", cmd,
-            "install.sh must release log fd before exec to avoid leak")
-        self.assertIn('exec "$WORKSPACE_LAUNCHER"', cmd,
-            "install.sh must exec into the workspace launcher")
-        # Windows: must Start-Process the launcher
-        self.assertIn("Start-Process -FilePath $WorkspaceLauncher", ps1,
-            "Welcome.ps1 must Start-Process the workspace launcher")
+        # The old prompt is gone
+        self.assertNotIn("Want to start now?", cmd,
+            "old 'Want to start now?' prompt should be removed")
+        self.assertNotIn('exec "$WORKSPACE_LAUNCHER"', cmd,
+            "old workspace-launcher exec should be removed")
+        # The new instructions are present
+        self.assertIn("Open ${BOLD}Terminal", cmd,
+            "end-of-install must instruct user to open Terminal")
+        self.assertIn("claude", cmd,
+            "end-of-install must show the `claude` command")
+        self.assertIn("build my report", cmd,
+            "end-of-install must show an example prompt")
+        # No exit auto-close (this is the user's own terminal in curl-pipe mode)
+        self.assertNotIn("close_terminal_window_after_countdown", cmd,
+            "auto-close terminal helper should be removed (B9.10)")
 
     def test_installer_has_pause_gates_and_auto_flag(self):
         """B9.3 invariant: paced output + Press-Enter gates between sections.
@@ -692,50 +702,38 @@ class TestPipelineHealth(unittest.TestCase):
             self.assertIn(f'CURRENT_STEP="{step_label}', cmd,
                 f"CURRENT_STEP should be set to '{step_label}…' at that step")
 
-    def test_installer_diagnostic_failure_does_not_dead_end(self):
-        """Issue E1 — the previous installer always exit 1'd on any diagnostic
-        failure, even a single false-positive. Combined with Issue D's
-        false-positive on the Python 3.11 check, real installs got blocked
-        for no reason. Now: if the workspace launcher is in place + executable,
-        diagnostic failures are demoted to a warning and the seamless handoff
-        continues. Only a missing/non-executable launcher blocks."""
+    def test_installer_diagnostic_failure_warns_does_not_block(self):
+        """Issue E1 + B9.10 — diagnostic failures are warnings, period. The
+        previous launcher-gate logic is gone (no launcher to gate on). The
+        skill catches real problems at runtime."""
         cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
-        # The new gating: branches on launcher presence, not on count alone
-        self.assertIn('if [ -x "$WS/.skill-launcher.sh" ]; then', cmd,
-            "diagnostic-fail handling must branch on launcher presence")
-        # Demoted-to-warning copy is in place
-        self.assertIn("diagnostic check(s) reported issues", cmd,
-            "demoted path should describe failures as 'issues', not 'failed'")
-        self.assertIn("Workspace launcher is in place, so I'll continue", cmd,
-            "demoted path should explicitly tell the user we're continuing")
-        # Hard-fail path still exists for the genuinely-broken case
-        self.assertIn("workspace launcher is missing — install can't continue", cmd,
-            "missing-launcher path must still hard-fail")
-        # And the success path still says "All diagnostics passed" (now in else)
+        # Failures emit a warn() call, no exit 1
+        self.assertIn('warn "$DIAGNOSTIC_FAILS diagnostic check(s) reported issues', cmd,
+            "diagnostic-fail must warn, not block")
+        # The launcher-gate path is gone (B9.10 removed the launcher entirely)
+        self.assertNotIn('if [ -x "$WS/.skill-launcher.sh" ]; then', cmd,
+            "old launcher-presence gate should be gone")
+        # Success path still says "All diagnostics passed"
         self.assertIn('ok_paced "All diagnostics passed"', cmd,
             "success path should still confirm")
 
-    def test_installer_auto_closes_terminal_window(self):
-        """Issue E2 — when the install ends without the seamless handoff
-        (user picked 'n', or launcher was missing), Terminal.app passively
-        shows '[Process completed]' and the window sits there. Users read
-        that as broken. Now the script counts down + osascript-closes the
-        window so the exit feels intentional. Apple_Terminal only — leaves
-        iTerm/Alacritty/Warp alone."""
+    def test_installer_curl_pipe_safe(self):
+        """B9.10 — install.sh must rebind stdin to /dev/tty early, otherwise
+        curl-pipe-bash invocations can't read user input (bash drained the
+        pipe to load the script body). Without this fix, the consent gate
+        auto-fires empty and the install silently cancels."""
         cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
-        self.assertIn("close_terminal_window_after_countdown()", cmd,
-            "must define the auto-close helper")
-        # Apple_Terminal detection — don't try to close iTerm/Warp/etc
-        self.assertIn('"${TERM_PROGRAM:-}" = "Apple_Terminal"', cmd,
-            "auto-close must gate on TERM_PROGRAM=Apple_Terminal")
-        self.assertIn("tell application \"Terminal\" to close", cmd,
-            "must use osascript to close the Terminal window")
-        # Helper is invoked at the end (not just defined)
-        self.assertIn("close_terminal_window_after_countdown 5", cmd,
-            "helper must be invoked at end-of-install with a countdown")
-        # AUTO_MODE bypass — CI / scripted runs shouldn't try to close
-        self.assertIn('if [ "$AUTO_MODE" = "1" ] || [ ! -t 1 ]; then return 0; fi', cmd,
-            "auto-close must bypass in AUTO_MODE and when not on a TTY")
+        # The TTY rebind must happen before any read prompt
+        self.assertIn("exec </dev/tty", cmd,
+            "must rebind stdin to /dev/tty for curl-pipe-bash to work")
+        # Headless fallback: if no /dev/tty, force AUTO_MODE
+        self.assertIn("AUTO_MODE_FORCED=1", cmd,
+            "must fall back to AUTO_MODE when no controlling tty")
+        # The rebind must come BEFORE the consent gate's read
+        rebind_idx = cmd.find("exec </dev/tty")
+        consent_idx = cmd.find("Type %sI accept%s")
+        self.assertLess(rebind_idx, consent_idx,
+            "stdin rebind must happen before the consent prompt")
 
     def test_installer_pre_consent_block_is_paced(self):
         """Dry-run feedback: the opening (welcome + 3-step preview, prototype
@@ -950,6 +948,84 @@ class TestPipelineHealth(unittest.TestCase):
             cmd,
             "header should document the canonical curl install URL")
 
+    def test_install_shim_exists_and_execs_canonical(self):
+        """B9.10 — installer/install is a tiny shim that exec-fetches the
+        canonical install.sh from raw.githubusercontent.com. Mirrored into
+        the here.now publish bundle so the user-facing URL can be the
+        short, branded passporttowealth.app/install instead of the long
+        raw GitHub URL."""
+        shim = REPO / "installer" / "install"
+        self.assertTrue(shim.exists(), "installer/install (the shim) must exist")
+        self.assertTrue(os.access(shim, os.X_OK),
+            "installer/install must be executable")
+        body = shim.read_text(encoding="utf-8")
+        self.assertIn("exec bash <(curl -fsSL", body,
+            "shim must exec-fetch via curl + process substitution")
+        self.assertIn(
+            "https://raw.githubusercontent.com/passporttowealth/passporttowealth/main/installer/install.sh",
+            body, "shim must point at the canonical install.sh on GitHub raw")
+
+    def test_install_sh_appends_api_key_to_shell_rc(self):
+        """B9.10 — with START-HERE removed, the API-key auth path stores the
+        key in the user's shell rc (not the now-deleted launcher script) so
+        `claude` picks it up from any new Terminal session. Idempotent —
+        re-running the installer strips the previous block before adding a
+        new one."""
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
+        # Detects the user's shell
+        self.assertIn('case "${SHELL:-}" in', cmd,
+            "must detect the user's shell to pick the right rc file")
+        self.assertIn('*/zsh) SHELL_RC="$HOME/.zshrc"', cmd,
+            "must default to zshrc on modern macOS")
+        # Idempotent block markers
+        self.assertIn("# Passport to Wealth — Finance Clarity API key", cmd,
+            "must use a marked block so re-runs can find/replace it")
+        self.assertIn("# Passport to Wealth — end", cmd,
+            "must mark the block end")
+        # The actual export
+        self.assertIn("export ANTHROPIC_API_KEY=", cmd,
+            "must export ANTHROPIC_API_KEY into the shell rc")
+
+    def test_refresh_sh_defaults_to_workspace_venv(self):
+        """B9.10 — without START-HERE activating the venv, refresh.sh has to
+        default PYTHON to the workspace venv's python so the pipeline runs
+        with the right deps from any cwd."""
+        refresh = (REPO / "skill" / "scripts" / "refresh.sh").read_text(encoding="utf-8")
+        self.assertIn('elif [ -x "$WS/.venv/bin/python" ]; then', refresh,
+            "refresh.sh must check for the workspace venv before falling back")
+        self.assertIn('PY="$WS/.venv/bin/python"', refresh,
+            "refresh.sh must default PY to the workspace venv's python")
+        # PYTHON env var still overrides for testing
+        self.assertIn('if [ -n "${PYTHON:-}" ]; then', refresh,
+            "PYTHON env var should still override (for test fixtures)")
+
+    def test_landing_page_uses_short_install_url(self):
+        """B9.10 — the published landing page advertises the short branded URL
+        (passporttowealth.app/install), not the long GitHub raw URL.
+        Transparency is preserved by the README which shows the shim
+        target."""
+        html = (REPO / "installer" / "index.html").read_text(encoding="utf-8")
+        # Mac command — short URL
+        self.assertIn("https://passporttowealth.app/install", html,
+            "Mac install command must use the short URL")
+        # The long raw URL must NOT appear (transparency happens in README)
+        self.assertNotIn(
+            "raw.githubusercontent.com/passporttowealth/passporttowealth/main/installer/install.sh",
+            html,
+            "landing page must NOT show the long raw URL — that's the README's job")
+        # Windows: short URL too
+        self.assertIn("https://passporttowealth.app/install.ps1", html,
+            "Windows install command must use the short URL")
+        # Copy buttons + OS toggle
+        self.assertIn('class="copy-btn"', html, "must have copy buttons on install commands")
+        self.assertIn('id="tab-mac"', html, "must have OS toggle for Mac")
+        self.assertIn('id="tab-win"', html, "must have OS toggle for Windows")
+        # Old Gatekeeper instructions are gone (curl-pipe never triggers it)
+        self.assertNotIn('Gatekeeper', html,
+            "Gatekeeper instructions should be removed (curl-pipe bypasses it)")
+        self.assertNotIn('right-click', html.lower(),
+            "right-click → Open instructions should be removed")
+
     def test_legacy_installers_archived_with_readme(self):
         """B9.9 — Welcome.command, Welcome.bat, Welcome.ps1 moved to
         installer/legacy/ as a fallback for users who can't open Terminal.
@@ -1008,11 +1084,15 @@ class TestPipelineHealth(unittest.TestCase):
         Fix: stdout → install log (silent), stderr → /dev/tty so the
         progress bar reaches the user even though we're inside redirects."""
         cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
-        # Find the FX prewarm invocation
+        # Find the FX prewarm invocation. Bound the slice tightly to the actual
+        # fx_fetch invocation (not the surrounding diagnostic helpers, which
+        # legitimately use 2>&1 for log-only output).
         fx_block_start = cmd.find("Pre-warming exchange-rate cache")
         self.assertGreater(fx_block_start, 0, "FX prewarm block must exist")
-        # Grab a window large enough to see the redirect
-        fx_block = cmd[fx_block_start:fx_block_start + 1200]
+        # The fx_fetch invocation ends at the `|| warn ...` fallback; bound there
+        fx_block_end = cmd.find('|| warn "FX pre-warm failed', fx_block_start)
+        self.assertGreater(fx_block_end, fx_block_start, "FX prewarm fallback must exist")
+        fx_block = cmd[fx_block_start:fx_block_end + 50]
         self.assertIn("fx_fetch.py", fx_block)
         self.assertIn("2>/dev/tty", fx_block,
             "FX prewarm must redirect stderr to /dev/tty so progress() shows")

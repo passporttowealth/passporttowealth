@@ -13,7 +13,8 @@
 # Provisions Xcode CLT, uv (Python toolchain), Python 3.11 via uv, jq (via
 # Homebrew only if missing), Claude Code, the here-now publishing skill, the
 # finance-clarity-build skill (via npx skills add), and the workspace at
-# ~/Documents/my-finances. Drops a START-HERE shortcut on the Desktop.
+# ~/Documents/my-finances. Leaves no artifacts on the Desktop. Re-entry is
+# `claude` from any Terminal — the skill knows where the workspace is.
 #
 # Curl-pipe-bash bypasses macOS Gatekeeper because nothing lands on disk as a
 # downloaded file. The legacy double-click path lives at installer/legacy/
@@ -24,6 +25,20 @@
 # Copyright © 2026 Passport to Wealth. All rights reserved.
 
 set -u
+
+# Curl-pipe-bash gotcha: when the script is invoked as `curl ... | bash`,
+# bash reads the entire script from the pipe and stdin reaches EOF before any
+# `read` runs — so consent prompts auto-fire with empty input and the install
+# silently cancels. Re-bind stdin to the controlling terminal so `read` works.
+# In headless / CI runs (no /dev/tty), set AUTO_MODE so the script never tries
+# to read interactively at all.
+if [ ! -t 0 ]; then
+  if [ -e /dev/tty ] && exec </dev/tty 2>/dev/null; then
+    : # stdin is now bound to the user's terminal; reads will work
+  else
+    AUTO_MODE_FORCED=1   # truly headless — fall back to non-interactive
+  fi
+fi
 
 # Friendly title bar
 printf '\033]0;Setting up your finance workspace\007'
@@ -52,6 +67,12 @@ for arg in "$@"; do
     --auto) AUTO_MODE=1; PACE_SLEEP="0" ;;
   esac
 done
+# AUTO_MODE_FORCED is set above when there's no controlling TTY (headless
+# install, e.g. CI). Honor it the same way as the explicit --auto flag.
+if [ "${AUTO_MODE_FORCED:-0}" = "1" ]; then
+  AUTO_MODE=1
+  PACE_SLEEP="0"
+fi
 
 ok_paced()  { ok "$@"; [ "$AUTO_MODE" = "0" ] && sleep "$PACE_SLEEP"; }
 say_paced() { say "$@"; [ "$AUTO_MODE" = "0" ] && sleep "$PACE_SLEEP"; }
@@ -90,27 +111,12 @@ on_interrupt() {
 }
 trap on_interrupt INT TERM
 
-# Issue E2 — Terminal-window auto-close. After the install is fully done and
-# the user has either declined the seamless handoff (or auto-mode skipped it),
-# Terminal.app passively shows "[Process completed]" and the window sits there.
-# Users read that as broken. Count down + osascript-close so it feels intentional.
-# Only fires when running inside Apple Terminal (TERM_PROGRAM check) — iTerm,
-# Alacritty, Warp and other emulators are left alone.
-close_terminal_window_after_countdown() {
-  local secs="${1:-5}"
-  if [ "$AUTO_MODE" = "1" ] || [ ! -t 1 ]; then return 0; fi
-  printf '\n'
-  local i="$secs"
-  while [ "$i" -gt 0 ]; do
-    printf '\r%sClosing this window in %d…%s ' "$DIM" "$i" "$RESET"
-    sleep 1
-    i=$((i - 1))
-  done
-  printf '\n'
-  if [ "${TERM_PROGRAM:-}" = "Apple_Terminal" ]; then
-    osascript -e 'tell application "Terminal" to close (every window whose name contains "Setting up your finance workspace")' 2>/dev/null || true
-  fi
-}
+# Note: the previous Terminal-window auto-close helper was removed in B9.10.
+# It existed because the legacy Welcome.command opened its own Terminal window
+# via `open -a Terminal "$0"` and we wanted to clean up at exit. The curl-piped
+# install.sh runs inside the user's existing Terminal — closing that window
+# would yank away their other tabs/windows. Just exit cleanly with a friendly
+# message instead.
 
 # Workspace location — overridable via FCB_WORKSPACE for testing.
 # Default is ~/Documents/my-finances (adjusted later if iCloud-synced).
@@ -519,7 +525,13 @@ case "$auth_choice" in
       401|403) fail "Anthropic rejected that key (HTTP $HTTP_CODE) — check your billing dashboard"; exit 1 ;;
       *)   warn "Couldn't verify (HTTP $HTTP_CODE) — saving anyway; you can re-test later" ;;
     esac
-    # Store key in workspace .env so START-HERE can export it as ANTHROPIC_API_KEY.
+    # Store the key in two places:
+    #   1. Workspace .env (so the skill scripts can read it if needed).
+    #   2. The user's shell rc, exported as ANTHROPIC_API_KEY (so claude
+    #      picks it up no matter where they run it from). With START-HERE
+    #      gone, the workspace launcher doesn't export the env var anymore,
+    #      so the shell-rc export becomes the only universal path for
+    #      API-key-auth users.
     mkdir -p "$WS"
     if [ -f "$WS/.env" ]; then
       grep -v '^ANTHROPIC_API_KEY=' "$WS/.env" 2>/dev/null > "$WS/.env.tmp" || true
@@ -527,7 +539,29 @@ case "$auth_choice" in
     fi
     printf 'ANTHROPIC_API_KEY=%s\n' "$api_key" >> "$WS/.env"
     chmod 600 "$WS/.env"
-    log "api key saved to workspace .env"
+
+    # Detect the user's shell rc (zsh on macOS 10.15+, bash for older systems).
+    # Append a guarded export — idempotent if the user re-runs the installer.
+    SHELL_RC=""
+    case "${SHELL:-}" in
+      */zsh) SHELL_RC="$HOME/.zshrc" ;;
+      */bash) [ -f "$HOME/.bash_profile" ] && SHELL_RC="$HOME/.bash_profile" || SHELL_RC="$HOME/.bashrc" ;;
+      *) SHELL_RC="$HOME/.zshrc" ;;  # default to zsh — modern macOS default
+    esac
+    touch "$SHELL_RC"
+    # Strip any prior block we added (idempotent rerun)
+    if grep -q '^# Passport to Wealth — Finance Clarity API key' "$SHELL_RC" 2>/dev/null; then
+      sed -i.fcb-bak '/^# Passport to Wealth — Finance Clarity API key$/,/^# Passport to Wealth — end$/d' "$SHELL_RC"
+      rm -f "${SHELL_RC}.fcb-bak"
+    fi
+    {
+      printf '\n# Passport to Wealth — Finance Clarity API key\n'
+      printf 'export ANTHROPIC_API_KEY=%s\n' "$api_key"
+      printf '# Passport to Wealth — end\n'
+    } >> "$SHELL_RC"
+    log "api key saved to workspace .env + exported in $SHELL_RC"
+    say "${DIM}Note: I added an export line to $SHELL_RC so claude finds the key${RESET}"
+    say "${DIM}from any new Terminal window. Open a fresh tab to pick it up.${RESET}"
     ;;
   *)
     fail "I didn't understand. Run me again and pick 1 or 2."
@@ -608,48 +642,11 @@ if [ -x "$SKILL_INSTALL_DIR/scripts/fx_fetch.py" ]; then
   ok_paced "Exchange rate cache pre-warmed"
 fi
 
-# 5e. Workspace launcher — the script START-HERE.command on the Desktop calls.
-# This is what the B9.2 seamless-handoff exec's into at end of install.
-LAUNCHER="$WS/.skill-launcher.sh"
-cat > "$LAUNCHER" <<LAUNCHER_EOF
-#!/bin/bash
-# Finance Clarity — workspace launcher.
-# Created by install.sh. Runs every time the user double-clicks
-# START-HERE.command on their Desktop.
-
-WS="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
-cd "\$WS"
-
-# Activate the workspace venv so the pipeline scripts use the right Python
-if [ -f "\$WS/.venv/bin/activate" ]; then
-  source "\$WS/.venv/bin/activate"
-fi
-
-# Export Anthropic API key from .env if present (for the API-key auth path)
-if [ -f "\$WS/.env" ] && grep -q '^ANTHROPIC_API_KEY=' "\$WS/.env"; then
-  export ANTHROPIC_API_KEY="\$(grep '^ANTHROPIC_API_KEY=' "\$WS/.env" | cut -d= -f2-)"
-fi
-
-# Open Finder window at inbox so the user has a visible drop target
-open "\$WS/inbox" 2>/dev/null || true
-
-# Launch Claude Code in the workspace
-exec claude
-LAUNCHER_EOF
-chmod +x "$LAUNCHER"
-ok_paced "Workspace launcher created"
-
-# 5f. Desktop shortcut — START-HERE.command. Self-deletes on close to avoid
-# clutter; user can re-create later by re-running this installer.
-DESKTOP_SHORTCUT="$HOME/Desktop/START-HERE.command"
-cat > "$DESKTOP_SHORTCUT" <<SHORTCUT_EOF
-#!/bin/bash
-# Re-entry point for Finance Clarity. Created by the installer.
-# Just runs the workspace launcher in the right workspace.
-exec "$LAUNCHER"
-SHORTCUT_EOF
-chmod +x "$DESKTOP_SHORTCUT"
-ok_paced "START-HERE shortcut on Desktop"
+# Note: Step 5e/5f (workspace launcher script + START-HERE Desktop shortcut)
+# were intentionally removed. Re-entry is now: open Terminal, type `claude`.
+# The skill scripts default to ~/Documents/my-finances/.venv/bin/python (set
+# in refresh.sh) so no venv-activation wrapper is needed. Claude Code's own
+# auth state handles the AI side. No artifacts on the user's Desktop.
 
 say
 hr
@@ -681,8 +678,6 @@ check       "Claude Code installed"          command -v claude
 check_file  "Workspace folder"               "$WS"
 check_file  "Workspace venv"                 "$WS/.venv/bin/python"
 check_file  "Workspace config"               "$WS/config.yaml"
-check_file  "Workspace launcher"             "$WS/.skill-launcher.sh"
-check_file  "Desktop shortcut"               "$HOME/Desktop/START-HERE.command"
 # Publishing-host credential is provisioned on first share (publish.sh runs
 # the email-code flow then). Not checked here — most users never publish.
 check_file  "Publishing-host skill"          "$HOME/.claude/skills/here-now"
@@ -693,23 +688,13 @@ check       "Pipeline scripts importable"    \
   "$WS/.venv/bin/python" -c "import sys; sys.path.insert(0, '$SKILL_INSTALL_DIR/scripts'); import _lib, classify, normalize, categorize, build_site"
 
 if [ "$DIAGNOSTIC_FAILS" -gt 0 ]; then
-  # Issue E1 — don't dead-end the user over a single false-positive diagnostic.
-  # The workspace launcher being in place + executable is a strong signal the
-  # install actually worked. Demote diagnostic failures to a warning and let
-  # the seamless handoff continue. Only block (exit 1) if the launcher itself
-  # is missing — at that point the install genuinely cannot proceed.
-  if [ -x "$WS/.skill-launcher.sh" ]; then
-    warn "$DIAGNOSTIC_FAILS diagnostic check(s) reported issues — see $INSTALL_LOG."
-    warn "Workspace launcher is in place, so I'll continue. If anything misbehaves,"
-    warn "re-run me or share the log with your advisor."
-    log "diagnostic_failures_demoted count=$DIAGNOSTIC_FAILS launcher_present=true"
-  else
-    fail "$DIAGNOSTIC_FAILS diagnostic check(s) failed — see $INSTALL_LOG for details."
-    fail "The workspace launcher is missing — install can't continue."
-    fail "Re-run me, or contact your advisor with the log file attached."
-    log "diagnostic_failures_blocking count=$DIAGNOSTIC_FAILS launcher_present=false"
-    exit 1
-  fi
+  # Diagnostic failures are now warnings, not blockers. The skill itself will
+  # surface real problems when the user tries to use it; no point dead-ending
+  # a possibly-fine install over a single check that may be a false positive.
+  warn "$DIAGNOSTIC_FAILS diagnostic check(s) reported issues — see $INSTALL_LOG."
+  warn "If something misbehaves when you run claude, re-run the installer or"
+  warn "share the log with your advisor."
+  log "diagnostic_failures count=$DIAGNOSTIC_FAILS"
 else
   ok_paced "All diagnostics passed"
 fi
@@ -719,42 +704,15 @@ hr
 say "${GREEN}${BOLD}✓ Your workspace is ready.${RESET}"
 hr
 say
-
-# B9.2 — seamless first-run handoff. Don't make the user hunt for a Desktop
-# icon when momentum is highest. Ask, default-yes, exec straight into the
-# workflow if a launcher exists. Desktop shortcut is for re-entry next time.
-WORKSPACE_LAUNCHER="${WS:-${HOME}/Documents/my-finances}/.skill-launcher.sh"
-
-if [ "$AUTO_MODE" = "1" ] || [ ! -t 0 ]; then
-  say "Run START-HERE on your Desktop whenever you want to use it."
-  log "completed; auto-mode skipped start-now prompt"
-  exit 0
-fi
-
-read -r -p "$(printf 'Want to start now? %s[Y/n]%s ' "$BOLD" "$RESET")" START_ANSWER
-case "$(printf '%s' "$START_ANSWER" | tr '[:upper:]' '[:lower:]' | xargs)" in
-  ""|y|yes)
-    if [ -x "$WORKSPACE_LAUNCHER" ]; then
-      log "completed; launching workspace"
-      exec 3>&-                          # release the install-log fd before exec
-      exec "$WORKSPACE_LAUNCHER"
-      # exec replaces this process — nothing below runs on the Y path.
-    else
-      # Defensive fallback — Step 5e always provisions the launcher, so this
-      # branch only fires if the install was interrupted or someone deleted
-      # ~/Documents/my-finances/.skill-launcher.sh between Step 5 and now.
-      warn "Workspace launcher missing at $WORKSPACE_LAUNCHER — re-run me to fix."
-      say "Once it's back, double-click ${BOLD}START-HERE${RESET} on your Desktop."
-    fi
-    ;;
-  *)
-    say
-    say "Double-click ${BOLD}START-HERE${RESET} on your Desktop whenever you want to use it."
-    ;;
-esac
-log "install completed; closing terminal window"
-# Issue E2 — auto-close the install Terminal window so the user doesn't end up
-# staring at "[Process completed]" wondering what happened. The seamless-handoff
-# (Y) path exec'd above and never reaches here. The (n / launcher-missing)
-# paths land here and need an active close to feel intentional.
-close_terminal_window_after_countdown 5
+say "Anytime you want to use it:"
+say
+say "  ${BOLD}1.${RESET} Open ${BOLD}Terminal${RESET} (⌘+Space → type ${BOLD}Terminal${RESET} → Enter)"
+say "  ${BOLD}2.${RESET} Type:  ${BOLD}claude${RESET}"
+say "  ${BOLD}3.${RESET} Tell it ${BOLD}\"build my report\"${RESET} or ${BOLD}\"refresh my finances\"${RESET}"
+say
+say "Drop your bank statements and other files in:"
+say "  ${BOLD}$WS/inbox/${RESET}"
+say
+say "${DIM}The skill knows where your workspace is — no need to navigate to it.${RESET}"
+say
+log "install completed"

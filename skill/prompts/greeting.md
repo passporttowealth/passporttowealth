@@ -1,6 +1,6 @@
 # greeting.md
 
-The skill prints this verbatim when the AI assistant first launches inside the workspace via START-HERE and the inbox is empty. If files are already in the inbox, jump straight to `prompts/sanity_gate.md` after running the build flow.
+The skill prints this verbatim the first time the user runs `claude` post-install and the inbox is empty. If files are already in the inbox, jump straight to `prompts/sanity_gate.md` after running the build flow.
 
 ---
 
@@ -10,9 +10,9 @@ The skill prints this verbatim when the AI assistant first launches inside the w
 Hi — I'm here to turn your financial files into a private dashboard
 only you can see.
 
-I just opened a folder window for you called "inbox" (look for it
-on your screen — it might be behind this Terminal). Drag your files
-into it from anywhere on your computer:
+Your finance folder is at ~/Documents/my-finances/. Drag your files
+into the inbox subfolder there (Spotlight: ⌘+Space → type
+my-finances → Enter) — anything financial works:
 
   • Bank statements (CSVs, PDFs — whatever your bank gives you)
   • Paystubs (I won't read them unless you ask)
@@ -47,7 +47,8 @@ No problem. The next step depends on where you are:
 
   • Haven't put files in yet?
        Drag bank statements, paystubs, anything financial into the
-       "inbox" folder window I opened. Then say "build my report".
+       inbox folder at ~/Documents/my-finances/inbox/. Then say
+       "build my report".
 
   • Files are in but you want to see what I'd do first?
        Say "preview" and I'll list what I see without changing anything.

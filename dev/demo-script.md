@@ -29,21 +29,27 @@ Same checklist every client. If any of these aren't true, fix them before sendin
 
 ### What the client does
 
-Send the client one link. They:
+Send the client one link: `https://passporttowealth.app/`. They:
 
-1. **Open the link.** It's a one-page site with a "Download for Mac" button and a callout explaining the Mac warning.
-2. **Get past Mac's "unidentified developer" warning** using the three-step instruction on the page (right-click → Open → Open Anyway). This is the single most common point of abandonment — the on-page screenshots exist for it.
-3. **Double-click `Welcome.command`.** A Terminal opens. The installer:
+1. **Open the link.** A single-page site with a copy-button install command and a one-line "how to open Terminal" hint for first-timers.
+2. **Open Terminal** (`⌘ Space` → type `Terminal` → `Enter`). The site walks them through this if they haven't done it before.
+3. **Paste the one-liner and hit Enter:**
+   ```
+   curl -fsSL https://raw.githubusercontent.com/passporttowealth/passporttowealth/main/installer/install.sh | bash
+   ```
+   The installer runs in that Terminal window:
    - Runs pre-flight (disk, MDM, macOS version, network). Aborts cleanly with a plain-English message if anything is off.
    - Tells them realistic install time based on whether developer tools are present.
    - Asks for their Mac password once (system tools install).
-   - **Asks how they sign in to Claude:** Pro / Max / API key. Walks them through the right path.
-   - **Walks them through the publishing-host signup** in their browser, with explicit guidance on where to find the API key, how to handle email verification, and clear errors for the common paste-the-wrong-thing mistakes.
+   - **Asks how they sign in to Claude:** paid subscription (Pro/Max) or API key. Walks them through the right path.
    - Detects iCloud-synced Documents and offers to relocate the workspace outside the sync root.
-   - Drops `START-HERE` on the Desktop. `Welcome.command` self-deletes.
-4. **No passcode for them to invent.** The skill generates one when they publish — phone-friendly, lowercase, no autocorrect-eating characters.
+   - Prints a final "✓ Done" with three lines of "what to do next" (open Terminal, type `claude`, ask for a report). **No Desktop shortcut, no app icon, no other artifacts on the user's laptop** beyond the workspace folder itself.
+4. **No publishing-host signup at install time.** The dashboard is local-only by default. If they later choose to share with their advisor, the email-code signup runs then — once.
+5. **No passcode for them to invent.** When they do choose to share, the skill generates one — phone-friendly, lowercase, no autocorrect-eating characters.
 
-If anything fails, the installer writes `install.log` and offers to bundle it for the advisor. Pre-flight runs again on every START-HERE launch so problems that develop later (e.g. Claude subscription lapses) surface immediately.
+**Curl-piping the install bypasses macOS Gatekeeper entirely** because nothing lands on disk as a downloaded file. The previous file-download path (with the right-click → Open dance) is the v1 abandonment surface we removed; legacy `Welcome.command` lives at `installer/legacy/` as a fallback for clients who genuinely won't open Terminal.
+
+If anything fails, the installer writes `install.log` and offers to bundle it for the advisor.
 
 **No file sorting required.** The user can drop everything they have into the workspace `inbox/` in any structure — zipped, nested, duplicated, mixed-format. The skill handles the rest.
 
@@ -53,11 +59,10 @@ If anything fails, the installer writes `install.log` and offers to bundle it fo
 
 Live, screen-sharing.
 
-1. **Double-click `START-HERE`** on the Desktop. Two windows open at the same time:
-   - A Terminal where the AI assistant greets them.
-   - A Finder window pointing at the `inbox/` folder so they have a visible place to drop files.
-2. The greeting tells them, in plain English, what stays on their laptop, what they can ask, and that paystubs/tax docs are skipped by default.
-3. Client drags their finance folder (or files) into the open `inbox/` Finder window from anywhere on their computer.
+1. **Open Terminal and type `claude`.** The AI assistant greets them. The skill (`finance-clarity-build`) auto-loads — it's globally registered under `~/.claude/skills/`. No need to be in any particular folder.
+2. **Open Finder separately** at `~/Documents/my-finances/inbox/` so they have a visible drop target. (Spotlight: ⌘+Space → type `my-finances` → Enter.)
+3. The assistant's greeting tells them, in plain English, what stays on their laptop, what they can ask, and that paystubs/tax docs are skipped by default.
+4. Client drags their finance folder (or files) into the open `inbox/` Finder window from anywhere on their computer.
 
 ---
 

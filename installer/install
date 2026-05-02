@@ -1,0 +1,16 @@
+#!/bin/bash
+# install — short-URL shim for the canonical installer.
+#
+# This file is mirrored into the here.now publish bundle as
+# `install` (no extension), reachable at:
+#
+#   curl -fsSL https://passporttowealth.app/install | bash
+#
+# It does nothing except exec-fetch the real installer from GitHub raw,
+# so there's a single source of truth (installer/install.sh in this repo)
+# that any change ships immediately — no need to re-publish the landing
+# page just to update the install logic.
+#
+# The trailing redirect on `<()` keeps stdin open for the install script's
+# interactive prompts (consent gate, code paste, etc.).
+exec bash <(curl -fsSL https://raw.githubusercontent.com/passporttowealth/passporttowealth/main/installer/install.sh) "$@"

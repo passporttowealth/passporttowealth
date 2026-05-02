@@ -473,6 +473,22 @@ Code from email: ______
 - Updates: `npx skills update <name>` re-pulls from `main` (no semver discipline yet on our side — track if this becomes a problem).
 - Privacy: public-repo only as a first-class flow. We made the repo public as part of the org migration.
 
+### B9.10 — Egregore-style landing page + START-HERE removal + short-URL shim · ✅ **DONE**
+**Found by:** user feedback — "no .command files is better for now... add a command on the website that does the same thing etc."
+**What changed:**
+- `installer/index.html` rewritten as a single-page product site in egregore.xyz aesthetic. Hero is the install command with copy button. Mac/Windows OS toggle. Navy/white minimalism with brand `#0F1E33` accent. No download buttons (curl-pipe is the only path the page advertises). No Gatekeeper instructions (curl-pipe never triggers it).
+- `installer/install` (no extension) is a 2-line shim that exec-fetches the canonical `install.sh` from raw.githubusercontent.com. Mirrored into the here.now publish bundle so users can paste the short URL: `curl -fsSL https://passporttowealth.app/install | bash`. Single source of truth on GitHub.
+- **START-HERE.command and `.skill-launcher.sh` removed entirely.** Re-entry is `claude` from any Terminal — no Desktop shortcut, no app icon, no other artifacts on the user's laptop besides `~/Documents/my-finances/`.
+- `skill/scripts/refresh.sh` defaults `PYTHON` to `$WS/.venv/bin/python` so the pipeline runs from any cwd without venv activation.
+- For API-key auth, install.sh appends an `export ANTHROPIC_API_KEY=…` block (with idempotent guards) to the user's shell rc — claude finds the key from any new Terminal.
+- `install.sh` early `exec </dev/tty` fixes the curl-pipe-bash gotcha where `read` prompts auto-fire empty (because bash's stdin = the drained pipe). With this fix, the consent gate and option pickers actually receive user input under `curl ... | bash`.
+- Diagnostic-failure handling simplified: warnings, not blockers. The skill catches real problems at runtime.
+- Step 6 became Step 5 (5-step install: pre-flight, tools, Claude auth, workspace, diagnostics).
+- README.md rewritten to match the landing page + new re-entry pattern.
+- Spec §4.2 (installer behavior) and §4.5 (re-entry) rewritten. Greeting prompt no longer assumes a pre-opened Finder window.
+- Demo script Phase 0 updated: paste the curl one-liner; Phase 1 walks through opening Claude from any Terminal.
+- Advisor onboarding playbook updated: kickoff verifies the workspace folder + `claude` works, not the Desktop shortcut.
+
 ### B9.9 — Curl-pipe-bash install bypass + repo migration to `passporttowealth` org · ✅ **DONE**
 **Shipped together with B9.8.**
 **What changed:**

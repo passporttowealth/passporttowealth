@@ -21,7 +21,18 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 WS="${FCB_WORKSPACE:-${HOME}/Documents/my-finances}"
-PY="${PYTHON:-python3}"
+
+# Default to the workspace venv's Python so the script works from any cwd,
+# without relying on a venv-activation wrapper. Falls back to system python3
+# if the venv is missing (rare — installer creates it). PYTHON env var
+# overrides for testing.
+if [ -n "${PYTHON:-}" ]; then
+  PY="$PYTHON"
+elif [ -x "$WS/.venv/bin/python" ]; then
+  PY="$WS/.venv/bin/python"
+else
+  PY="python3"
+fi
 
 # Bootstrap a workspace config.yaml from the skill's example if missing.
 # Lets users edit feedback.endpoint_url, advisor.feedback_email, etc.

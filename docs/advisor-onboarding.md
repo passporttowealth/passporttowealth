@@ -40,28 +40,29 @@ Here's the install link for the financial dashboard we discussed:
 
   https://passporttowealth.app/
 
+The page shows a single command to copy. You'll open Terminal (on Mac:
+press ⌘+Space, type "Terminal", hit Enter — the page walks you through
+this if it's your first time), paste the command, and the installer
+runs from there.
+
 A few things upfront:
 
   • It takes about 10 minutes if you've installed developer tools on
     this computer before, or up to an hour on a fresh laptop (Mac
     needs to download some Apple developer tools first).
 
-  • Mac/Windows will warn you about the file when you download it —
-    that's normal. The download page shows you exactly what to do to
-    get past it (right-click → Open on Mac; "More info" → "Run anyway"
-    on Windows).
+  • You'll be asked once how you sign in to Claude — paid subscription
+    (Pro/Max) or an API key. Pick whichever you have.
 
-  • You'll be asked once how you sign in to Claude — Pro, Max, or
-    API key. Pick whichever you have.
-
-  • You'll also be asked to sign up for the service that hosts your
-    private dashboard. The signup is free, takes one minute, and
-    you only do it once.
+  • The dashboard opens locally in your browser by default — your
+    files don't leave your laptop. If you later want to share it with
+    me or family, just tell the assistant "share my dashboard" and
+    it walks you through a one-time email signup with the host.
 
 If you'd rather we do this together — I'm happy to share my screen
 and walk through every step on our kickoff call. Just let me know.
 
-When you're ready, click the link.
+When you're ready, open the link.
 
 — {your name}
 ```
@@ -72,8 +73,8 @@ When you're ready, click the link.
 
 If the client has installed already, walk through this together:
 
-1. **`START-HERE` is on their Desktop.** If not, the install didn't complete. Run them through `Welcome.command` again or check the install log.
-2. **Double-clicking `START-HERE` opens Terminal with a friendly greeting** + a Finder window pointing at the `inbox/` folder. If Terminal opens but no greeting appears, the AI assistant didn't authenticate — re-run install.
+1. **`~/Documents/my-finances/` exists** with subfolders. If not, the install didn't complete — have them re-run the curl one-liner from passporttowealth.app, or check the install log.
+2. **They can run `claude` from any Terminal** and see the AI assistant greeting. If `claude: command not found`, the Claude Code install didn't complete — re-run install. If claude opens but says "no API key" / "not authenticated", their auth didn't take — re-run install and pick the right option (paid subscription vs API key).
 3. **They have files to drop in.** Confirm they have at minimum: bank statements as CSV exports (check they can actually export from their bank — some banks make this hard). Paystubs and tax docs are optional and won't be read by default.
 4. **They've picked one calculator** (see `skill/references/CALCULATOR_INTERFACE.md`) — or they're comfortable shipping with the placeholder card.
 
