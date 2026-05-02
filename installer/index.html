@@ -43,35 +43,30 @@
     }
 
     /* ── Crossborder watermark ────────────────────────────────────────────
-       Robinson-projection world map (Wikimedia Commons, CC0 public domain,
-       trimmed for size — see installer/assets/world-map.svg attribution).
-       Positioned behind the hero only. SVG is colored via mask-image so the
-       countries pick up the brand navy rather than rendering with their
-       default fills. Hidden in print. */
+       Robinson-projection world map (Wikimedia Commons, CC0 public domain).
+       The water/ocean group was stripped so only country outlines render.
+       SVG has fill="#0F1E33" baked in at the root. Rendered as a background-
+       image, sized large + low opacity so it reads as a watermark behind
+       the hero. Hidden in print. */
     .watermark {
       position: absolute;
-      top: 0;
+      top: 40px;
       left: 50%;
       transform: translateX(-50%);
-      width: 1400px;
-      max-width: 180vw;
-      height: 600px;
+      width: 1600px;
+      max-width: 200vw;
+      aspect-ratio: 2.04 / 1;        /* matches the SVG viewBox 360 × 182.6 */
       pointer-events: none;
       z-index: 0;
-      opacity: 0.045;
-      background-color: var(--color-accent);
-      -webkit-mask-image: url('assets/world-map.svg');
-              mask-image: url('assets/world-map.svg');
-      -webkit-mask-repeat: no-repeat;
-              mask-repeat: no-repeat;
-      -webkit-mask-position: center top;
-              mask-position: center top;
-      -webkit-mask-size: contain;
-              mask-size: contain;
+      opacity: 0.10;
+      background-image: url('assets/world-map.svg');
+      background-repeat: no-repeat;
+      background-position: center top;
+      background-size: contain;
     }
     main { position: relative; z-index: 1; }
     @media (max-width: 700px) {
-      .watermark { width: 200vw; height: 400px; opacity: 0.06; }
+      .watermark { width: 220vw; opacity: 0.12; top: 24px; }
     }
     @media print {
       .watermark { display: none; }
@@ -405,26 +400,41 @@
       margin-bottom: 4px;
     }
 
-    /* ── Final CTA ────────────────────────────────────────────────────────── */
+    /* ── Final CTA — inverse colors for visual rhythm ────────────────────── */
     .final-cta {
-      margin-top: 112px;
-      padding: 56px 0;
+      margin: 112px -24px 0;          /* break out of main's 24px gutter so the dark band is full-bleed */
+      padding: 64px 24px 72px;
       text-align: center;
-      border-top: 1px solid var(--color-border);
+      background: var(--color-accent);
+      color: var(--color-code-text);
+      border-radius: var(--radius);
+      position: relative;
     }
     .final-cta h2 {
       font-size: 28px;
       margin: 0 0 12px;
       letter-spacing: -0.015em;
+      color: var(--color-code-text);
     }
     .final-cta p {
-      color: var(--color-text-muted);
+      color: rgba(245, 243, 238, 0.72);
       margin: 0 0 28px;
     }
+    /* Within the inverse band, the install-block contrasts INTO the dark bg
+       by going lighter. Same width as the hero command — no max-width clip. */
     .final-cta .install-block {
-      max-width: 560px;
-      margin: 0 auto;
+      background: rgba(245, 243, 238, 0.08);
+      border: 1px solid rgba(245, 243, 238, 0.15);
       text-align: left;
+      margin: 0 auto;
+    }
+    .final-cta .install-block .label { color: rgba(245, 243, 238, 0.6); }
+    .final-cta .copy-btn {
+      background: rgba(245, 243, 238, 0.18);
+      border-color: rgba(245, 243, 238, 0.28);
+    }
+    .final-cta .copy-btn:hover:not([disabled]) {
+      background: rgba(245, 243, 238, 0.28);
     }
 
     /* ── Floating prototype pill ──────────────────────────────────────────── */
@@ -537,7 +547,7 @@
       section h2 { font-size: 24px; }
       .kpis { grid-template-columns: 1fr; gap: 8px; }
       .term { font-size: 12px; padding: 16px 18px; }
-      .final-cta { margin-top: 80px; padding: 40px 0; }
+      .final-cta { margin: 80px -20px 0; padding: 48px 20px 56px; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { transition: none !important; animation: none !important; }
@@ -696,7 +706,7 @@
     <!-- ── Final CTA ───────────────────────────────────────────────────── -->
     <div class="final-cta">
       <h2>Ready when you are.</h2>
-      <p>One command. About 10 minutes if you've installed dev tools before, up to an hour on a fresh laptop.</p>
+      <p>A clear view of your finances in under an hour.</p>
       <div class="install-block">
         <span class="label">macOS — paste in Terminal</span>
         <code id="cmd-final">curl -fsSL https://passporttowealth.app/install | bash</code>
