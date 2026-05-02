@@ -315,6 +315,34 @@ class TestBuildSite(PipelineTestBase):
         ]:
             self.assertIn(marker, html, f"required DOM marker missing: {marker!r}")
 
+    def test_privacy_footer_is_honest_about_what_publishes(self):
+        """The dashboard's footer claims about privacy must match reality.
+
+        Reality: publish.sh uploads the entire site/ directory, which includes
+        site/downloads/transactions_tagged.csv (every row) and the embedded
+        dashboard-data JSON (which also contains the per-transaction list).
+
+        The previous copy ('the host never received your transactions, only
+        the rendered numbers') was misleading — flagged by a user. Source
+        files (bank PDFs, paystubs) DO stay local; categorized transactions
+        and CSV exports DO get uploaded. The footer must be specific about
+        the split, not over-promise."""
+        html = (self.workspace / "site" / "index.html").read_text()
+        # Old misleading copy must not creep back in.
+        self.assertNotIn("host never received your transactions", html,
+            "dashboard footer must not claim transactions don't reach the host — "
+            "downloads/transactions_tagged.csv and embedded JSON both ship them")
+        self.assertNotIn("only the rendered numbers", html,
+            "dashboard footer must not claim 'only the rendered numbers' — "
+            "the embedded dashboard-data JSON includes per-transaction rows")
+        # New honest copy must be present.
+        self.assertIn("Hosted privately, behind a passcode you set", html,
+            "footer must keep the passcode-gated framing")
+        self.assertIn("source files", html.lower(),
+            "footer must call out that source files (PDFs/statements) stay local")
+        self.assertIn("categorized transactions", html,
+            "footer must disclose that categorized transactions ARE uploaded")
+
     def test_chartjs_bundled_inline(self):
         """Chart.js must be bundled, not referenced via CDN (OP — works offline)."""
         html = (self.workspace / "site" / "index.html").read_text()
@@ -1220,6 +1248,54 @@ class TestPipelineHealth(unittest.TestCase):
                     f"here-now publish.sh skips symlinks and the live site will 404. "
                     f"Replace with a real file/directory copy.")
                 cur = cur.parent
+
+    def test_dashboard_demo_bundle_complete(self):
+        """The /dashboard-demo subdirectory of the landing-page bundle is a
+        live demo dashboard built by the real skill pipeline against the
+        demo-kit fixture. Guard the bundle:
+
+        - index.html exists, fully populated (no `{{ … }}` placeholders left)
+        - the dashboard's assets (brand/, fonts/, js/) all exist as real
+          files (no symlinks — same regression class as the brand-logo 404)
+        - the demo banner is in place so visitors know the data is synthetic
+        """
+        demo = REPO / "installer" / "dashboard-demo"
+        self.assertTrue(demo.is_dir(), "installer/dashboard-demo must exist")
+        idx = demo / "index.html"
+        self.assertTrue(idx.is_file(), "installer/dashboard-demo/index.html must exist")
+        body = idx.read_text(encoding="utf-8")
+
+        # Pipeline must have populated every {{ TOKEN }}. A leftover would mean
+        # build_site.py didn't see the workspace data.
+        self.assertNotIn("{{", body,
+            "dashboard-demo/index.html still has unfilled template placeholders")
+
+        # Demo banner must be present so public visitors know the data is
+        # synthetic (real per-client dashboards don't have this).
+        self.assertIn("Demo dashboard", body,
+            "demo banner must say 'Demo dashboard' so visitors aren't confused")
+        self.assertIn("synthetic", body,
+            "demo banner must call the data 'synthetic'")
+
+        # Footer footnote must NOT claim this is a passcode-gated private host
+        # (the template default copy applies to per-client dashboards, not this
+        # public mirror — gets rewritten when copying the build output here).
+        self.assertNotIn("only after the passcode is verified", body,
+            "demo footer must not claim passcode-gated hosting (it's public)")
+        self.assertIn("public demo dashboard", body,
+            "demo footer must declare itself as a public demo dashboard")
+
+        # Dashboard's own assets must be real files (no symlinks anywhere).
+        for sub in ("assets/brand", "assets/fonts", "assets/js"):
+            d = demo / sub
+            self.assertTrue(d.is_dir(), f"dashboard-demo/{sub} must exist")
+            self.assertFalse(d.is_symlink(),
+                f"dashboard-demo/{sub} must be a real directory, not a symlink "
+                f"(here-now publish.sh skips symlinks).")
+            for f in d.iterdir():
+                if f.is_file():
+                    self.assertFalse(f.is_symlink(),
+                        f"dashboard-demo/{sub}/{f.name} must be a real file, not a symlink")
 
     def test_install_ps1_exists_with_winget_provisioning(self):
         """B9.16 — first version of the Windows installer. Same UX patterns

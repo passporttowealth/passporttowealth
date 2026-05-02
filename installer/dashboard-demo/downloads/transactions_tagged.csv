@@ -1,0 +1,520 @@
+date,description,amount,currency,account,source_file,source_row,category,subcategory
+2025-01-12,VANGUARD TOTAL STOCK MKT ETF — DIVIDEND,38.47,USD,Brokerage,demo_brokerage_2025.csv,1,EXCLUDE,Investment activity
+2025-03-19,INCOMING TRANSFER FROM CHECKING 0000,2000.0,USD,Brokerage,demo_brokerage_2025.csv,2,TRANSFER,transfer from Checking
+2025-03-21,BUY VTI,-2027.57,USD,Brokerage,demo_brokerage_2025.csv,3,EXCLUDE,Investment activity
+2025-04-12,VANGUARD TOTAL STOCK MKT ETF — DIVIDEND,44.05,USD,Brokerage,demo_brokerage_2025.csv,4,EXCLUDE,Investment activity
+2025-06-19,INCOMING TRANSFER FROM CHECKING 0000,2000.0,USD,Brokerage,demo_brokerage_2025.csv,5,TRANSFER,transfer from Checking
+2025-06-21,BUY VTI,-2040.85,USD,Brokerage,demo_brokerage_2025.csv,6,EXCLUDE,Investment activity
+2025-07-12,VANGUARD TOTAL STOCK MKT ETF — DIVIDEND,41.49,USD,Brokerage,demo_brokerage_2025.csv,7,EXCLUDE,Investment activity
+2025-09-19,INCOMING TRANSFER FROM CHECKING 0000,2000.0,USD,Brokerage,demo_brokerage_2025.csv,8,TRANSFER,transfer from Checking
+2025-09-21,BUY VTI,-2008.85,USD,Brokerage,demo_brokerage_2025.csv,9,EXCLUDE,Investment activity
+2025-10-12,VANGUARD TOTAL STOCK MKT ETF — DIVIDEND,44.73,USD,Brokerage,demo_brokerage_2025.csv,10,EXCLUDE,Investment activity
+2025-12-19,INCOMING TRANSFER FROM CHECKING 0000,2000.0,USD,Brokerage,demo_brokerage_2025.csv,11,TRANSFER,transfer from Checking
+2025-12-21,BUY VTI,-2006.86,USD,Brokerage,demo_brokerage_2025.csv,12,EXCLUDE,Investment activity
+2025-01-01,RENT - PARK STREET PROPERTIES,-2590.38,USD,Checking,demo_checking_2025.csv,1,Housing,Rent
+2025-01-03,PG&E ELECTRIC AUTOPAY,-91.59,USD,Checking,demo_checking_2025.csv,2,EXCLUDE,Credit card payment
+2025-01-03,CHEVRON 0099,-38.87,USD,Checking,demo_checking_2025.csv,3,Transport,Fuel
+2025-01-03,CHIPOTLE 0298,-18.74,USD,Checking,demo_checking_2025.csv,4,Restaurants,Fast food
+2025-01-05,AT&T MOBILITY,-87.01,USD,Checking,demo_checking_2025.csv,5,Utilities,Telecom (US)
+2025-01-07,COMCAST XFINITY INTERNET,-71.23,USD,Checking,demo_checking_2025.csv,6,Utilities,Telecom (US)
+2025-01-07,ZARA US 1234,-92.18,USD,Checking,demo_checking_2025.csv,7,Shopping,Clothing
+2025-01-08,ZARA US 1234,-89.57,USD,Checking,demo_checking_2025.csv,8,Shopping,Clothing
+2025-01-09,REI CO-OP MOUNTAIN VIEW,-206.17,USD,Checking,demo_checking_2025.csv,9,Uncategorized,
+2025-01-10,BLUE SHIELD CA HEALTH PREMIUM,-428.16,USD,Checking,demo_checking_2025.csv,10,Insurance,Health insurance (US)
+2025-01-12,STATE FARM AUTO INSURANCE,-141.89,USD,Checking,demo_checking_2025.csv,11,Insurance,Insurance (US)
+2025-01-12,BURMA SUPERSTAR SF,-103.86,USD,Checking,demo_checking_2025.csv,12,Uncategorized,
+2025-01-13,SAFEWAY STORE 0998,-104.19,USD,Checking,demo_checking_2025.csv,13,Groceries,Supermarket (US)
+2025-01-13,UBER *EATS,-40.95,USD,Checking,demo_checking_2025.csv,14,Restaurants,Food delivery
+2025-01-13,UBER *EATS,-53.24,USD,Checking,demo_checking_2025.csv,15,Restaurants,Food delivery
+2025-01-14,NETFLIX.COM,-17.85,USD,Checking,demo_checking_2025.csv,16,Entertainment,Netflix
+2025-01-14,SPOTIFY USA,-11.43,USD,Checking,demo_checking_2025.csv,17,Entertainment,Spotify
+2025-01-14,CHIPOTLE 0298,-15.19,USD,Checking,demo_checking_2025.csv,18,Restaurants,Fast food
+2025-01-14,UBER *TRIP SAN FRANCISCO,-21.75,USD,Checking,demo_checking_2025.csv,19,Transport,Ride-hailing
+2025-01-15,PAYROLL DEPOSIT EXAMPLE CORP,2963.94,USD,Checking,demo_checking_2025.csv,20,Income,Salary
+2025-01-16,APPLE.COM/BILL,-34.01,USD,Checking,demo_checking_2025.csv,21,Subscriptions,Apple
+2025-01-18,ANTHROPIC CLAUDE PRO,-20.01,USD,Checking,demo_checking_2025.csv,22,Subscriptions,AI assistants
+2025-01-18,STARBUCKS STORE 09221,-9.0,USD,Checking,demo_checking_2025.csv,23,Restaurants,Coffee / cafe
+2025-01-20,EQUINOX FITNESS,-204.82,USD,Checking,demo_checking_2025.csv,24,Personal Care,Gym / fitness
+2025-01-20,AIRBNB * HMTRPDQRS9,-281.64,USD,Checking,demo_checking_2025.csv,25,Travel,Lodging
+2025-01-22,AMAZON.COM*PRIME MEMBERSHIP,-14.54,USD,Checking,demo_checking_2025.csv,26,SPLIT_AMAZON,Amazon (auto-split)
+2025-01-23,SAFEWAY STORE 0998,-76.21,USD,Checking,demo_checking_2025.csv,27,Groceries,Supermarket (US)
+2025-01-23,UNITED AIRLINES TKT,-508.82,USD,Checking,demo_checking_2025.csv,28,Travel,Flights
+2025-01-24,CHIPOTLE 0298,-12.75,USD,Checking,demo_checking_2025.csv,29,Restaurants,Fast food
+2025-01-25,NYTIMES DIGITAL SUBSCRIPTION,-17.25,USD,Checking,demo_checking_2025.csv,30,Subscriptions,News / writing
+2025-01-25,REI CO-OP MOUNTAIN VIEW,-139.74,USD,Checking,demo_checking_2025.csv,31,Uncategorized,
+2025-01-26,TRADER JOE'S #154 SF,-89.62,USD,Checking,demo_checking_2025.csv,32,Groceries,Supermarket (US)
+2025-01-27,AIRBNB * HMTRPDQRS9,-365.39,USD,Checking,demo_checking_2025.csv,33,Travel,Lodging
+2025-01-27,LYFT *RIDE,-16.52,USD,Checking,demo_checking_2025.csv,34,Transport,Ride-hailing
+2025-01-28,LYFT *RIDE,-21.39,USD,Checking,demo_checking_2025.csv,35,Transport,Ride-hailing
+2025-01-28,LYFT *RIDE,-21.09,USD,Checking,demo_checking_2025.csv,36,Transport,Ride-hailing
+2025-01-31,PAYROLL DEPOSIT EXAMPLE CORP,2902.5,USD,Checking,demo_checking_2025.csv,37,Income,Salary
+2025-02-01,RENT - PARK STREET PROPERTIES,-2698.92,USD,Checking,demo_checking_2025.csv,38,Housing,Rent
+2025-02-03,PG&E ELECTRIC AUTOPAY,-97.43,USD,Checking,demo_checking_2025.csv,39,EXCLUDE,Credit card payment
+2025-02-04,UNITED AIRLINES TKT,-569.61,USD,Checking,demo_checking_2025.csv,40,Travel,Flights
+2025-02-04,AIRBNB * HMTRPDQRS9,-305.47,USD,Checking,demo_checking_2025.csv,41,Travel,Lodging
+2025-02-05,AT&T MOBILITY,-87.35,USD,Checking,demo_checking_2025.csv,42,Utilities,Telecom (US)
+2025-02-05,UBER *EATS,-33.76,USD,Checking,demo_checking_2025.csv,43,Restaurants,Food delivery
+2025-02-05,CVS/PHARMACY #02184,-31.24,USD,Checking,demo_checking_2025.csv,44,Healthcare,Pharmacy
+2025-02-05,AIRBNB * HMTRPDQRS9,-279.55,USD,Checking,demo_checking_2025.csv,45,Travel,Lodging
+2025-02-05,LYFT *RIDE,-23.14,USD,Checking,demo_checking_2025.csv,46,Transport,Ride-hailing
+2025-02-06,AMAZON.COM*A2K9P3RT0,-67.76,USD,Checking,demo_checking_2025.csv,47,SPLIT_AMAZON,Amazon (auto-split)
+2025-02-07,COMCAST XFINITY INTERNET,-68.09,USD,Checking,demo_checking_2025.csv,48,Utilities,Telecom (US)
+2025-02-10,BLUE SHIELD CA HEALTH PREMIUM,-392.72,USD,Checking,demo_checking_2025.csv,49,Insurance,Health insurance (US)
+2025-02-11,STARBUCKS STORE 09221,-6.34,USD,Checking,demo_checking_2025.csv,50,Restaurants,Coffee / cafe
+2025-02-12,STATE FARM AUTO INSURANCE,-145.27,USD,Checking,demo_checking_2025.csv,51,Insurance,Insurance (US)
+2025-02-13,CHEVRON 0099,-52.44,USD,Checking,demo_checking_2025.csv,52,Transport,Fuel
+2025-02-14,NETFLIX.COM,-17.57,USD,Checking,demo_checking_2025.csv,53,Entertainment,Netflix
+2025-02-14,SPOTIFY USA,-11.64,USD,Checking,demo_checking_2025.csv,54,Entertainment,Spotify
+2025-02-15,PAYROLL DEPOSIT EXAMPLE CORP,2964.0,USD,Checking,demo_checking_2025.csv,55,Income,Salary
+2025-02-15,CVS/PHARMACY #02184,-27.1,USD,Checking,demo_checking_2025.csv,56,Healthcare,Pharmacy
+2025-02-16,APPLE.COM/BILL,-36.54,USD,Checking,demo_checking_2025.csv,57,Subscriptions,Apple
+2025-02-17,ZARA US 1234,-83.46,USD,Checking,demo_checking_2025.csv,58,Shopping,Clothing
+2025-02-18,ANTHROPIC CLAUDE PRO,-20.75,USD,Checking,demo_checking_2025.csv,59,Subscriptions,AI assistants
+2025-02-18,WHOLE FOODS MKT 12345 SF,-179.05,USD,Checking,demo_checking_2025.csv,60,Groceries,Supermarket (US)
+2025-02-18,ZARA US 1234,-124.52,USD,Checking,demo_checking_2025.csv,61,Shopping,Clothing
+2025-02-19,CHEVRON 0099,-46.08,USD,Checking,demo_checking_2025.csv,62,Transport,Fuel
+2025-02-20,EQUINOX FITNESS,-211.02,USD,Checking,demo_checking_2025.csv,63,Personal Care,Gym / fitness
+2025-02-21,CVS/PHARMACY #02184,-33.21,USD,Checking,demo_checking_2025.csv,64,Healthcare,Pharmacy
+2025-02-22,AMAZON.COM*PRIME MEMBERSHIP,-15.22,USD,Checking,demo_checking_2025.csv,65,SPLIT_AMAZON,Amazon (auto-split)
+2025-02-22,SHELL OIL 12345,-61.13,USD,Checking,demo_checking_2025.csv,66,Transport,Fuel
+2025-02-24,WALGREENS #04456,-38.31,USD,Checking,demo_checking_2025.csv,67,Healthcare,Pharmacy
+2025-02-24,HOME DEPOT 0099,-150.1,USD,Checking,demo_checking_2025.csv,68,Shopping,Home improvement
+2025-02-24,BART TICKETS,-8.81,USD,Checking,demo_checking_2025.csv,69,Transport,Public transport (US)
+2025-02-25,NYTIMES DIGITAL SUBSCRIPTION,-16.82,USD,Checking,demo_checking_2025.csv,70,Subscriptions,News / writing
+2025-02-25,TRADER JOE'S #154 SF,-95.33,USD,Checking,demo_checking_2025.csv,71,Groceries,Supermarket (US)
+2025-02-25,UBER *EATS,-48.18,USD,Checking,demo_checking_2025.csv,72,Restaurants,Food delivery
+2025-02-28,PAYROLL DEPOSIT EXAMPLE CORP,2955.69,USD,Checking,demo_checking_2025.csv,73,Income,Salary
+2025-03-01,RENT - PARK STREET PROPERTIES,-2646.98,USD,Checking,demo_checking_2025.csv,74,Housing,Rent
+2025-03-01,HOME DEPOT 0099,-160.79,USD,Checking,demo_checking_2025.csv,75,Shopping,Home improvement
+2025-03-03,PG&E ELECTRIC AUTOPAY,-90.54,USD,Checking,demo_checking_2025.csv,76,EXCLUDE,Credit card payment
+2025-03-03,TRADER JOE'S #154 SF,-95.26,USD,Checking,demo_checking_2025.csv,77,Groceries,Supermarket (US)
+2025-03-03,CVS/PHARMACY #02184,-26.87,USD,Checking,demo_checking_2025.csv,78,Healthcare,Pharmacy
+2025-03-05,AT&T MOBILITY,-83.84,USD,Checking,demo_checking_2025.csv,79,Utilities,Telecom (US)
+2025-03-05,UNITED AIRLINES TKT,-464.45,USD,Checking,demo_checking_2025.csv,80,Travel,Flights
+2025-03-05,BART TICKETS,-12.52,USD,Checking,demo_checking_2025.csv,81,Transport,Public transport (US)
+2025-03-07,COMCAST XFINITY INTERNET,-73.39,USD,Checking,demo_checking_2025.csv,82,Utilities,Telecom (US)
+2025-03-07,WALGREENS #04456,-42.73,USD,Checking,demo_checking_2025.csv,83,Healthcare,Pharmacy
+2025-03-08,CHIPOTLE 0298,-11.91,USD,Checking,demo_checking_2025.csv,84,Restaurants,Fast food
+2025-03-10,BLUE SHIELD CA HEALTH PREMIUM,-424.64,USD,Checking,demo_checking_2025.csv,85,Insurance,Health insurance (US)
+2025-03-12,STATE FARM AUTO INSURANCE,-144.14,USD,Checking,demo_checking_2025.csv,86,Insurance,Insurance (US)
+2025-03-13,UNITED AIRLINES TKT,-509.29,USD,Checking,demo_checking_2025.csv,87,Travel,Flights
+2025-03-14,NETFLIX.COM,-17.52,USD,Checking,demo_checking_2025.csv,88,Entertainment,Netflix
+2025-03-14,SPOTIFY USA,-12.07,USD,Checking,demo_checking_2025.csv,89,Entertainment,Spotify
+2025-03-15,PAYROLL DEPOSIT EXAMPLE CORP,2991.85,USD,Checking,demo_checking_2025.csv,90,Income,Salary
+2025-03-15,CVS/PHARMACY #02184,-30.52,USD,Checking,demo_checking_2025.csv,91,Healthcare,Pharmacy
+2025-03-16,APPLE.COM/BILL,-33.52,USD,Checking,demo_checking_2025.csv,92,Subscriptions,Apple
+2025-03-18,ANTHROPIC CLAUDE PRO,-20.46,USD,Checking,demo_checking_2025.csv,93,Subscriptions,AI assistants
+2025-03-18,RESTAURANT FOREIGN CINEMA,-107.41,USD,Checking,demo_checking_2025.csv,94,Restaurants,Restaurant
+2025-03-18,TRANSFER TO BROKERAGE ACCT 0000,-2000.0,USD,Checking,demo_checking_2025.csv,95,TRANSFER,transfer to Brokerage
+2025-03-19,CHIPOTLE 0298,-11.42,USD,Checking,demo_checking_2025.csv,96,Restaurants,Fast food
+2025-03-19,HOME DEPOT 0099,-153.87,USD,Checking,demo_checking_2025.csv,97,Shopping,Home improvement
+2025-03-20,EQUINOX FITNESS,-221.79,USD,Checking,demo_checking_2025.csv,98,Personal Care,Gym / fitness
+2025-03-22,AMAZON.COM*PRIME MEMBERSHIP,-15.71,USD,Checking,demo_checking_2025.csv,99,SPLIT_AMAZON,Amazon (auto-split)
+2025-03-22,TARGET 00012345,-63.33,USD,Checking,demo_checking_2025.csv,100,Uncategorized,
+2025-03-23,BURMA SUPERSTAR SF,-106.08,USD,Checking,demo_checking_2025.csv,101,Uncategorized,
+2025-03-23,AIRBNB * HMTRPDQRS9,-260.62,USD,Checking,demo_checking_2025.csv,102,Travel,Lodging
+2025-03-25,NYTIMES DIGITAL SUBSCRIPTION,-17.06,USD,Checking,demo_checking_2025.csv,103,Subscriptions,News / writing
+2025-03-28,DR MARTINEZ DENTAL CLINIC,-252.93,USD,Checking,demo_checking_2025.csv,104,Healthcare,Doctor / clinic
+2025-03-31,PAYROLL DEPOSIT EXAMPLE CORP,2959.89,USD,Checking,demo_checking_2025.csv,105,Income,Salary
+2025-04-01,RENT - PARK STREET PROPERTIES,-2567.96,USD,Checking,demo_checking_2025.csv,106,Housing,Rent
+2025-04-02,HOME DEPOT 0099,-176.28,USD,Checking,demo_checking_2025.csv,107,Shopping,Home improvement
+2025-04-02,BART TICKETS,-9.09,USD,Checking,demo_checking_2025.csv,108,Transport,Public transport (US)
+2025-04-02,HOME DEPOT 0099,-154.22,USD,Checking,demo_checking_2025.csv,109,Shopping,Home improvement
+2025-04-03,PG&E ELECTRIC AUTOPAY,-90.4,USD,Checking,demo_checking_2025.csv,110,EXCLUDE,Credit card payment
+2025-04-03,ZARA US 1234,-120.45,USD,Checking,demo_checking_2025.csv,111,Shopping,Clothing
+2025-04-05,AT&T MOBILITY,-84.41,USD,Checking,demo_checking_2025.csv,112,Utilities,Telecom (US)
+2025-04-05,BURMA SUPERSTAR SF,-84.5,USD,Checking,demo_checking_2025.csv,113,Uncategorized,
+2025-04-06,UBER *EATS,-41.16,USD,Checking,demo_checking_2025.csv,114,Restaurants,Food delivery
+2025-04-06,SHELL OIL 12345,-57.63,USD,Checking,demo_checking_2025.csv,115,Transport,Fuel
+2025-04-06,CHEVRON 0099,-36.3,USD,Checking,demo_checking_2025.csv,116,Transport,Fuel
+2025-04-07,COMCAST XFINITY INTERNET,-69.46,USD,Checking,demo_checking_2025.csv,117,Utilities,Telecom (US)
+2025-04-07,CHEVRON 0099,-60.77,USD,Checking,demo_checking_2025.csv,118,Transport,Fuel
+2025-04-10,BLUE SHIELD CA HEALTH PREMIUM,-410.64,USD,Checking,demo_checking_2025.csv,119,Insurance,Health insurance (US)
+2025-04-12,STATE FARM AUTO INSURANCE,-151.39,USD,Checking,demo_checking_2025.csv,120,Insurance,Insurance (US)
+2025-04-13,UBER *EATS,-51.8,USD,Checking,demo_checking_2025.csv,121,Restaurants,Food delivery
+2025-04-14,NETFLIX.COM,-18.3,USD,Checking,demo_checking_2025.csv,122,Entertainment,Netflix
+2025-04-14,SPOTIFY USA,-12.57,USD,Checking,demo_checking_2025.csv,123,Entertainment,Spotify
+2025-04-15,PAYROLL DEPOSIT EXAMPLE CORP,2978.46,USD,Checking,demo_checking_2025.csv,124,Income,Salary
+2025-04-16,APPLE.COM/BILL,-33.58,USD,Checking,demo_checking_2025.csv,125,Subscriptions,Apple
+2025-04-18,ANTHROPIC CLAUDE PRO,-19.81,USD,Checking,demo_checking_2025.csv,126,Subscriptions,AI assistants
+2025-04-18,AMAZON.COM*A2K9P3RT0,-74.71,USD,Checking,demo_checking_2025.csv,127,SPLIT_AMAZON,Amazon (auto-split)
+2025-04-18,UNITED AIRLINES TKT,-526.89,USD,Checking,demo_checking_2025.csv,128,Travel,Flights
+2025-04-20,EQUINOX FITNESS,-211.55,USD,Checking,demo_checking_2025.csv,129,Personal Care,Gym / fitness
+2025-04-21,WALGREENS #04456,-44.39,USD,Checking,demo_checking_2025.csv,130,Healthcare,Pharmacy
+2025-04-22,AMAZON.COM*PRIME MEMBERSHIP,-15.53,USD,Checking,demo_checking_2025.csv,131,SPLIT_AMAZON,Amazon (auto-split)
+2025-04-23,BART TICKETS,-12.85,USD,Checking,demo_checking_2025.csv,132,Transport,Public transport (US)
+2025-04-25,NYTIMES DIGITAL SUBSCRIPTION,-16.57,USD,Checking,demo_checking_2025.csv,133,Subscriptions,News / writing
+2025-04-26,AMAZON.COM*A2K9P3RT0,-82.06,USD,Checking,demo_checking_2025.csv,134,SPLIT_AMAZON,Amazon (auto-split)
+2025-04-28,SAFEWAY STORE 0998,-98.17,USD,Checking,demo_checking_2025.csv,135,Groceries,Supermarket (US)
+2025-04-28,WALGREENS #04456,-29.28,USD,Checking,demo_checking_2025.csv,136,Healthcare,Pharmacy
+2025-04-30,PAYROLL DEPOSIT EXAMPLE CORP,2980.75,USD,Checking,demo_checking_2025.csv,137,Income,Salary
+2025-05-01,RENT - PARK STREET PROPERTIES,-2532.57,USD,Checking,demo_checking_2025.csv,138,Housing,Rent
+2025-05-01,UNITED AIRLINES TKT,-552.23,USD,Checking,demo_checking_2025.csv,139,Travel,Flights
+2025-05-03,PG&E ELECTRIC AUTOPAY,-94.27,USD,Checking,demo_checking_2025.csv,140,EXCLUDE,Credit card payment
+2025-05-03,WALGREENS #04456,-31.64,USD,Checking,demo_checking_2025.csv,141,Healthcare,Pharmacy
+2025-05-05,AT&T MOBILITY,-87.99,USD,Checking,demo_checking_2025.csv,142,Utilities,Telecom (US)
+2025-05-05,UBER *EATS,-37.02,USD,Checking,demo_checking_2025.csv,143,Restaurants,Food delivery
+2025-05-07,COMCAST XFINITY INTERNET,-66.97,USD,Checking,demo_checking_2025.csv,144,Utilities,Telecom (US)
+2025-05-07,HERTZ RENT A CAR LAX,-185.05,USD,Checking,demo_checking_2025.csv,145,Housing,Rent
+2025-05-09,PHILZ COFFEE 24TH ST,-8.09,USD,Checking,demo_checking_2025.csv,146,Restaurants,Coffee / cafe
+2025-05-10,BLUE SHIELD CA HEALTH PREMIUM,-394.2,USD,Checking,demo_checking_2025.csv,147,Insurance,Health insurance (US)
+2025-05-10,AMAZON.COM*A2K9P3RT0,-83.63,USD,Checking,demo_checking_2025.csv,148,SPLIT_AMAZON,Amazon (auto-split)
+2025-05-10,UNITED AIRLINES TKT,-369.0,USD,Checking,demo_checking_2025.csv,149,Travel,Flights
+2025-05-11,UBER *EATS,-35.24,USD,Checking,demo_checking_2025.csv,150,Restaurants,Food delivery
+2025-05-12,STATE FARM AUTO INSURANCE,-153.35,USD,Checking,demo_checking_2025.csv,151,Insurance,Insurance (US)
+2025-05-12,DOORDASH SUSHI ROKU,-57.7,USD,Checking,demo_checking_2025.csv,152,Restaurants,Food delivery
+2025-05-13,PHILZ COFFEE 24TH ST,-7.16,USD,Checking,demo_checking_2025.csv,153,Restaurants,Coffee / cafe
+2025-05-14,NETFLIX.COM,-17.82,USD,Checking,demo_checking_2025.csv,154,Entertainment,Netflix
+2025-05-14,SPOTIFY USA,-12.52,USD,Checking,demo_checking_2025.csv,155,Entertainment,Spotify
+2025-05-14,UBER *EATS,-31.57,USD,Checking,demo_checking_2025.csv,156,Restaurants,Food delivery
+2025-05-15,PAYROLL DEPOSIT EXAMPLE CORP,2991.94,USD,Checking,demo_checking_2025.csv,157,Income,Salary
+2025-05-16,APPLE.COM/BILL,-35.23,USD,Checking,demo_checking_2025.csv,158,Subscriptions,Apple
+2025-05-17,TARGET 00012345,-64.84,USD,Checking,demo_checking_2025.csv,159,Uncategorized,
+2025-05-18,ANTHROPIC CLAUDE PRO,-20.16,USD,Checking,demo_checking_2025.csv,160,Subscriptions,AI assistants
+2025-05-20,EQUINOX FITNESS,-205.1,USD,Checking,demo_checking_2025.csv,161,Personal Care,Gym / fitness
+2025-05-20,HOME DEPOT 0099,-198.47,USD,Checking,demo_checking_2025.csv,162,Shopping,Home improvement
+2025-05-20,REI CO-OP MOUNTAIN VIEW,-186.01,USD,Checking,demo_checking_2025.csv,163,Uncategorized,
+2025-05-22,AMAZON.COM*PRIME MEMBERSHIP,-14.36,USD,Checking,demo_checking_2025.csv,164,SPLIT_AMAZON,Amazon (auto-split)
+2025-05-22,AIRBNB * HMTRPDQRS9,-409.27,USD,Checking,demo_checking_2025.csv,165,Travel,Lodging
+2025-05-23,UBER *TRIP SAN FRANCISCO,-21.22,USD,Checking,demo_checking_2025.csv,166,Transport,Ride-hailing
+2025-05-25,NYTIMES DIGITAL SUBSCRIPTION,-17.27,USD,Checking,demo_checking_2025.csv,167,Subscriptions,News / writing
+2025-05-25,SAFEWAY STORE 0998,-74.19,USD,Checking,demo_checking_2025.csv,168,Groceries,Supermarket (US)
+2025-05-27,WALGREENS #04456,-41.67,USD,Checking,demo_checking_2025.csv,169,Healthcare,Pharmacy
+2025-05-29,SAFEWAY STORE 0998,-122.27,USD,Checking,demo_checking_2025.csv,170,Groceries,Supermarket (US)
+2025-05-29,PHILZ COFFEE 24TH ST,-5.7,USD,Checking,demo_checking_2025.csv,171,Restaurants,Coffee / cafe
+2025-05-29,STARBUCKS STORE 09221,-8.1,USD,Checking,demo_checking_2025.csv,172,Restaurants,Coffee / cafe
+2025-05-30,TRADER JOE'S #154 SF,-61.93,USD,Checking,demo_checking_2025.csv,173,Groceries,Supermarket (US)
+2025-05-31,PAYROLL DEPOSIT EXAMPLE CORP,2953.11,USD,Checking,demo_checking_2025.csv,174,Income,Salary
+2025-06-01,RENT - PARK STREET PROPERTIES,-2777.15,USD,Checking,demo_checking_2025.csv,175,Housing,Rent
+2025-06-01,RESTAURANT FOREIGN CINEMA,-139.1,USD,Checking,demo_checking_2025.csv,176,Restaurants,Restaurant
+2025-06-03,PG&E ELECTRIC AUTOPAY,-91.01,USD,Checking,demo_checking_2025.csv,177,EXCLUDE,Credit card payment
+2025-06-04,LYFT *RIDE,-23.33,USD,Checking,demo_checking_2025.csv,178,Transport,Ride-hailing
+2025-06-05,AT&T MOBILITY,-84.51,USD,Checking,demo_checking_2025.csv,179,Utilities,Telecom (US)
+2025-06-07,COMCAST XFINITY INTERNET,-71.43,USD,Checking,demo_checking_2025.csv,180,Utilities,Telecom (US)
+2025-06-07,UNITED AIRLINES TKT,-406.48,USD,Checking,demo_checking_2025.csv,181,Travel,Flights
+2025-06-08,RESTAURANT FOREIGN CINEMA,-155.2,USD,Checking,demo_checking_2025.csv,182,Restaurants,Restaurant
+2025-06-10,BLUE SHIELD CA HEALTH PREMIUM,-414.51,USD,Checking,demo_checking_2025.csv,183,Insurance,Health insurance (US)
+2025-06-10,LYFT *RIDE,-24.64,USD,Checking,demo_checking_2025.csv,184,Transport,Ride-hailing
+2025-06-11,REI CO-OP MOUNTAIN VIEW,-211.92,USD,Checking,demo_checking_2025.csv,185,Uncategorized,
+2025-06-12,STATE FARM AUTO INSURANCE,-142.26,USD,Checking,demo_checking_2025.csv,186,Insurance,Insurance (US)
+2025-06-14,NETFLIX.COM,-18.79,USD,Checking,demo_checking_2025.csv,187,Entertainment,Netflix
+2025-06-14,SPOTIFY USA,-12.22,USD,Checking,demo_checking_2025.csv,188,Entertainment,Spotify
+2025-06-15,PAYROLL DEPOSIT EXAMPLE CORP,2933.36,USD,Checking,demo_checking_2025.csv,189,Income,Salary
+2025-06-16,APPLE.COM/BILL,-33.76,USD,Checking,demo_checking_2025.csv,190,Subscriptions,Apple
+2025-06-18,ANTHROPIC CLAUDE PRO,-19.07,USD,Checking,demo_checking_2025.csv,191,Subscriptions,AI assistants
+2025-06-18,TRANSFER TO BROKERAGE ACCT 0000,-2000.0,USD,Checking,demo_checking_2025.csv,192,TRANSFER,transfer to Brokerage
+2025-06-20,EQUINOX FITNESS,-212.19,USD,Checking,demo_checking_2025.csv,193,Personal Care,Gym / fitness
+2025-06-22,AMAZON.COM*PRIME MEMBERSHIP,-15.07,USD,Checking,demo_checking_2025.csv,194,SPLIT_AMAZON,Amazon (auto-split)
+2025-06-24,PHILZ COFFEE 24TH ST,-8.06,USD,Checking,demo_checking_2025.csv,195,Restaurants,Coffee / cafe
+2025-06-25,NYTIMES DIGITAL SUBSCRIPTION,-16.88,USD,Checking,demo_checking_2025.csv,196,Subscriptions,News / writing
+2025-06-26,TRADER JOE'S #154 SF,-96.97,USD,Checking,demo_checking_2025.csv,197,Groceries,Supermarket (US)
+2025-06-26,RESTAURANT FOREIGN CINEMA,-148.83,USD,Checking,demo_checking_2025.csv,198,Restaurants,Restaurant
+2025-06-26,UNITED AIRLINES TKT,-564.29,USD,Checking,demo_checking_2025.csv,199,Travel,Flights
+2025-06-26,CHIPOTLE 0298,-13.63,USD,Checking,demo_checking_2025.csv,200,Restaurants,Fast food
+2025-06-26,HERTZ RENT A CAR LAX,-159.13,USD,Checking,demo_checking_2025.csv,201,Housing,Rent
+2025-06-28,TRADER JOE'S #154 SF,-95.22,USD,Checking,demo_checking_2025.csv,202,Groceries,Supermarket (US)
+2025-06-29,SHELL OIL 12345,-73.09,USD,Checking,demo_checking_2025.csv,203,Transport,Fuel
+2025-06-30,PAYROLL DEPOSIT EXAMPLE CORP,2913.08,USD,Checking,demo_checking_2025.csv,204,Income,Salary
+2025-07-01,RENT - PARK STREET PROPERTIES,-2639.48,USD,Checking,demo_checking_2025.csv,205,Housing,Rent
+2025-07-01,DOORDASH SUSHI ROKU,-62.7,USD,Checking,demo_checking_2025.csv,206,Restaurants,Food delivery
+2025-07-03,PG&E ELECTRIC AUTOPAY,-92.36,USD,Checking,demo_checking_2025.csv,207,EXCLUDE,Credit card payment
+2025-07-04,BART TICKETS,-12.33,USD,Checking,demo_checking_2025.csv,208,Transport,Public transport (US)
+2025-07-05,AT&T MOBILITY,-87.51,USD,Checking,demo_checking_2025.csv,209,Utilities,Telecom (US)
+2025-07-07,COMCAST XFINITY INTERNET,-68.08,USD,Checking,demo_checking_2025.csv,210,Utilities,Telecom (US)
+2025-07-07,LYFT *RIDE,-19.48,USD,Checking,demo_checking_2025.csv,211,Transport,Ride-hailing
+2025-07-09,RESTAURANT FOREIGN CINEMA,-128.62,USD,Checking,demo_checking_2025.csv,212,Restaurants,Restaurant
+2025-07-09,TRADER JOE'S #154 SF,-62.63,USD,Checking,demo_checking_2025.csv,213,Groceries,Supermarket (US)
+2025-07-10,BLUE SHIELD CA HEALTH PREMIUM,-392.37,USD,Checking,demo_checking_2025.csv,214,Insurance,Health insurance (US)
+2025-07-10,CHEVRON 0099,-51.13,USD,Checking,demo_checking_2025.csv,215,Transport,Fuel
+2025-07-11,WHOLE FOODS MKT 12345 SF,-128.82,USD,Checking,demo_checking_2025.csv,216,Groceries,Supermarket (US)
+2025-07-11,SHELL OIL 12345,-61.44,USD,Checking,demo_checking_2025.csv,217,Transport,Fuel
+2025-07-11,CHEVRON 0099,-55.19,USD,Checking,demo_checking_2025.csv,218,Transport,Fuel
+2025-07-12,STATE FARM AUTO INSURANCE,-143.46,USD,Checking,demo_checking_2025.csv,219,Insurance,Insurance (US)
+2025-07-14,NETFLIX.COM,-17.68,USD,Checking,demo_checking_2025.csv,220,Entertainment,Netflix
+2025-07-14,SPOTIFY USA,-12.43,USD,Checking,demo_checking_2025.csv,221,Entertainment,Spotify
+2025-07-14,LYFT *RIDE,-22.76,USD,Checking,demo_checking_2025.csv,222,Transport,Ride-hailing
+2025-07-14,REI CO-OP MOUNTAIN VIEW,-179.09,USD,Checking,demo_checking_2025.csv,223,Uncategorized,
+2025-07-15,PAYROLL DEPOSIT EXAMPLE CORP,2922.24,USD,Checking,demo_checking_2025.csv,224,Income,Salary
+2025-07-16,APPLE.COM/BILL,-36.62,USD,Checking,demo_checking_2025.csv,225,Subscriptions,Apple
+2025-07-17,STARBUCKS STORE 09221,-6.7,USD,Checking,demo_checking_2025.csv,226,Restaurants,Coffee / cafe
+2025-07-17,DOORDASH SUSHI ROKU,-77.41,USD,Checking,demo_checking_2025.csv,227,Restaurants,Food delivery
+2025-07-18,ANTHROPIC CLAUDE PRO,-19.56,USD,Checking,demo_checking_2025.csv,228,Subscriptions,AI assistants
+2025-07-18,PHILZ COFFEE 24TH ST,-5.44,USD,Checking,demo_checking_2025.csv,229,Restaurants,Coffee / cafe
+2025-07-19,BURMA SUPERSTAR SF,-82.32,USD,Checking,demo_checking_2025.csv,230,Uncategorized,
+2025-07-20,EQUINOX FITNESS,-218.04,USD,Checking,demo_checking_2025.csv,231,Personal Care,Gym / fitness
+2025-07-20,UBER *TRIP SAN FRANCISCO,-26.96,USD,Checking,demo_checking_2025.csv,232,Transport,Ride-hailing
+2025-07-22,AMAZON.COM*PRIME MEMBERSHIP,-14.84,USD,Checking,demo_checking_2025.csv,233,SPLIT_AMAZON,Amazon (auto-split)
+2025-07-22,CHEVRON 0099,-54.65,USD,Checking,demo_checking_2025.csv,234,Transport,Fuel
+2025-07-23,SHELL OIL 12345,-42.29,USD,Checking,demo_checking_2025.csv,235,Transport,Fuel
+2025-07-24,BART TICKETS,-11.43,USD,Checking,demo_checking_2025.csv,236,Transport,Public transport (US)
+2025-07-25,NYTIMES DIGITAL SUBSCRIPTION,-17.82,USD,Checking,demo_checking_2025.csv,237,Subscriptions,News / writing
+2025-07-29,RESTAURANT FOREIGN CINEMA,-130.96,USD,Checking,demo_checking_2025.csv,238,Restaurants,Restaurant
+2025-07-30,REI CO-OP MOUNTAIN VIEW,-175.2,USD,Checking,demo_checking_2025.csv,239,Uncategorized,
+2025-07-31,PAYROLL DEPOSIT EXAMPLE CORP,2981.66,USD,Checking,demo_checking_2025.csv,240,Income,Salary
+2025-07-31,UNITED AIRLINES TKT,-578.85,USD,Checking,demo_checking_2025.csv,241,Travel,Flights
+2025-08-01,RENT - PARK STREET PROPERTIES,-2634.67,USD,Checking,demo_checking_2025.csv,242,Housing,Rent
+2025-08-02,CHIPOTLE 0298,-19.74,USD,Checking,demo_checking_2025.csv,243,Restaurants,Fast food
+2025-08-02,WALGREENS #04456,-32.38,USD,Checking,demo_checking_2025.csv,244,Healthcare,Pharmacy
+2025-08-03,PG&E ELECTRIC AUTOPAY,-91.5,USD,Checking,demo_checking_2025.csv,245,EXCLUDE,Credit card payment
+2025-08-05,AT&T MOBILITY,-84.77,USD,Checking,demo_checking_2025.csv,246,Utilities,Telecom (US)
+2025-08-07,COMCAST XFINITY INTERNET,-72.8,USD,Checking,demo_checking_2025.csv,247,Utilities,Telecom (US)
+2025-08-10,BLUE SHIELD CA HEALTH PREMIUM,-424.2,USD,Checking,demo_checking_2025.csv,248,Insurance,Health insurance (US)
+2025-08-12,STATE FARM AUTO INSURANCE,-143.11,USD,Checking,demo_checking_2025.csv,249,Insurance,Insurance (US)
+2025-08-13,CHIPOTLE 0298,-12.62,USD,Checking,demo_checking_2025.csv,250,Restaurants,Fast food
+2025-08-14,NETFLIX.COM,-17.24,USD,Checking,demo_checking_2025.csv,251,Entertainment,Netflix
+2025-08-14,SPOTIFY USA,-12.01,USD,Checking,demo_checking_2025.csv,252,Entertainment,Spotify
+2025-08-14,AIRBNB * HMTRPDQRS9,-357.37,USD,Checking,demo_checking_2025.csv,253,Travel,Lodging
+2025-08-15,PAYROLL DEPOSIT EXAMPLE CORP,2965.47,USD,Checking,demo_checking_2025.csv,254,Income,Salary
+2025-08-16,APPLE.COM/BILL,-35.46,USD,Checking,demo_checking_2025.csv,255,Subscriptions,Apple
+2025-08-18,ANTHROPIC CLAUDE PRO,-19.67,USD,Checking,demo_checking_2025.csv,256,Subscriptions,AI assistants
+2025-08-18,DR MARTINEZ DENTAL CLINIC,-237.69,USD,Checking,demo_checking_2025.csv,257,Healthcare,Doctor / clinic
+2025-08-20,EQUINOX FITNESS,-221.85,USD,Checking,demo_checking_2025.csv,258,Personal Care,Gym / fitness
+2025-08-20,ZARA US 1234,-77.62,USD,Checking,demo_checking_2025.csv,259,Shopping,Clothing
+2025-08-22,AMAZON.COM*PRIME MEMBERSHIP,-15.37,USD,Checking,demo_checking_2025.csv,260,SPLIT_AMAZON,Amazon (auto-split)
+2025-08-23,HERTZ RENT A CAR LAX,-189.59,USD,Checking,demo_checking_2025.csv,261,Housing,Rent
+2025-08-23,WHOLE FOODS MKT 12345 SF,-197.94,USD,Checking,demo_checking_2025.csv,262,Groceries,Supermarket (US)
+2025-08-24,CVS/PHARMACY #02184,-30.1,USD,Checking,demo_checking_2025.csv,263,Healthcare,Pharmacy
+2025-08-25,NYTIMES DIGITAL SUBSCRIPTION,-17.29,USD,Checking,demo_checking_2025.csv,264,Subscriptions,News / writing
+2025-08-25,SHELL OIL 12345,-49.17,USD,Checking,demo_checking_2025.csv,265,Transport,Fuel
+2025-08-25,AMAZON.COM*A2K9P3RT0,-98.66,USD,Checking,demo_checking_2025.csv,266,SPLIT_AMAZON,Amazon (auto-split)
+2025-08-26,BURMA SUPERSTAR SF,-76.76,USD,Checking,demo_checking_2025.csv,267,Uncategorized,
+2025-08-26,HERTZ RENT A CAR LAX,-204.38,USD,Checking,demo_checking_2025.csv,268,Housing,Rent
+2025-08-26,AMAZON.COM*A2K9P3RT0,-101.45,USD,Checking,demo_checking_2025.csv,269,SPLIT_AMAZON,Amazon (auto-split)
+2025-08-28,ZARA US 1234,-122.48,USD,Checking,demo_checking_2025.csv,270,Shopping,Clothing
+2025-08-28,STARBUCKS STORE 09221,-6.98,USD,Checking,demo_checking_2025.csv,271,Restaurants,Coffee / cafe
+2025-08-30,WALGREENS #04456,-36.4,USD,Checking,demo_checking_2025.csv,272,Healthcare,Pharmacy
+2025-08-31,PAYROLL DEPOSIT EXAMPLE CORP,2946.5,USD,Checking,demo_checking_2025.csv,273,Income,Salary
+2025-09-01,RENT - PARK STREET PROPERTIES,-2636.77,USD,Checking,demo_checking_2025.csv,274,Housing,Rent
+2025-09-03,PG&E ELECTRIC AUTOPAY,-96.57,USD,Checking,demo_checking_2025.csv,275,EXCLUDE,Credit card payment
+2025-09-05,AT&T MOBILITY,-87.89,USD,Checking,demo_checking_2025.csv,276,Utilities,Telecom (US)
+2025-09-07,COMCAST XFINITY INTERNET,-68.43,USD,Checking,demo_checking_2025.csv,277,Utilities,Telecom (US)
+2025-09-08,CHEVRON 0099,-55.1,USD,Checking,demo_checking_2025.csv,278,Transport,Fuel
+2025-09-09,SHELL OIL 12345,-57.63,USD,Checking,demo_checking_2025.csv,279,Transport,Fuel
+2025-09-10,BLUE SHIELD CA HEALTH PREMIUM,-423.44,USD,Checking,demo_checking_2025.csv,280,Insurance,Health insurance (US)
+2025-09-10,ZARA US 1234,-95.13,USD,Checking,demo_checking_2025.csv,281,Shopping,Clothing
+2025-09-12,STATE FARM AUTO INSURANCE,-147.77,USD,Checking,demo_checking_2025.csv,282,Insurance,Insurance (US)
+2025-09-13,UBER *TRIP SAN FRANCISCO,-27.03,USD,Checking,demo_checking_2025.csv,283,Transport,Ride-hailing
+2025-09-14,NETFLIX.COM,-17.52,USD,Checking,demo_checking_2025.csv,284,Entertainment,Netflix
+2025-09-14,SPOTIFY USA,-11.92,USD,Checking,demo_checking_2025.csv,285,Entertainment,Spotify
+2025-09-14,UBER *TRIP SAN FRANCISCO,-25.33,USD,Checking,demo_checking_2025.csv,286,Transport,Ride-hailing
+2025-09-14,TRADER JOE'S #154 SF,-66.9,USD,Checking,demo_checking_2025.csv,287,Groceries,Supermarket (US)
+2025-09-14,CHEVRON 0099,-60.83,USD,Checking,demo_checking_2025.csv,288,Transport,Fuel
+2025-09-15,PAYROLL DEPOSIT EXAMPLE CORP,2915.92,USD,Checking,demo_checking_2025.csv,289,Income,Salary
+2025-09-16,APPLE.COM/BILL,-35.74,USD,Checking,demo_checking_2025.csv,290,Subscriptions,Apple
+2025-09-16,WHOLE FOODS MKT 12345 SF,-202.39,USD,Checking,demo_checking_2025.csv,291,Groceries,Supermarket (US)
+2025-09-18,ANTHROPIC CLAUDE PRO,-19.47,USD,Checking,demo_checking_2025.csv,292,Subscriptions,AI assistants
+2025-09-18,TRANSFER TO BROKERAGE ACCT 0000,-2000.0,USD,Checking,demo_checking_2025.csv,293,TRANSFER,transfer to Brokerage
+2025-09-19,HERTZ RENT A CAR LAX,-149.36,USD,Checking,demo_checking_2025.csv,294,Housing,Rent
+2025-09-20,EQUINOX FITNESS,-211.47,USD,Checking,demo_checking_2025.csv,295,Personal Care,Gym / fitness
+2025-09-22,AMAZON.COM*PRIME MEMBERSHIP,-15.58,USD,Checking,demo_checking_2025.csv,296,SPLIT_AMAZON,Amazon (auto-split)
+2025-09-23,BURMA SUPERSTAR SF,-72.45,USD,Checking,demo_checking_2025.csv,297,Uncategorized,
+2025-09-24,WALGREENS #04456,-43.65,USD,Checking,demo_checking_2025.csv,298,Healthcare,Pharmacy
+2025-09-25,NYTIMES DIGITAL SUBSCRIPTION,-16.29,USD,Checking,demo_checking_2025.csv,299,Subscriptions,News / writing
+2025-09-26,CHEVRON 0099,-55.92,USD,Checking,demo_checking_2025.csv,300,Transport,Fuel
+2025-09-27,AMAZON.COM*A2K9P3RT0,-114.22,USD,Checking,demo_checking_2025.csv,301,SPLIT_AMAZON,Amazon (auto-split)
+2025-09-29,ZARA US 1234,-105.38,USD,Checking,demo_checking_2025.csv,302,Shopping,Clothing
+2025-09-29,SHELL OIL 12345,-59.29,USD,Checking,demo_checking_2025.csv,303,Transport,Fuel
+2025-09-29,CHIPOTLE 0298,-15.52,USD,Checking,demo_checking_2025.csv,304,Restaurants,Fast food
+2025-09-30,PAYROLL DEPOSIT EXAMPLE CORP,2986.15,USD,Checking,demo_checking_2025.csv,305,Income,Salary
+2025-10-01,RENT - PARK STREET PROPERTIES,-2757.84,USD,Checking,demo_checking_2025.csv,306,Housing,Rent
+2025-10-01,DOORDASH SUSHI ROKU,-73.88,USD,Checking,demo_checking_2025.csv,307,Restaurants,Food delivery
+2025-10-02,ZARA US 1234,-75.31,USD,Checking,demo_checking_2025.csv,308,Shopping,Clothing
+2025-10-03,PG&E ELECTRIC AUTOPAY,-95.07,USD,Checking,demo_checking_2025.csv,309,EXCLUDE,Credit card payment
+2025-10-03,ZARA US 1234,-126.44,USD,Checking,demo_checking_2025.csv,310,Shopping,Clothing
+2025-10-05,AT&T MOBILITY,-86.39,USD,Checking,demo_checking_2025.csv,311,Utilities,Telecom (US)
+2025-10-06,DOORDASH SUSHI ROKU,-55.78,USD,Checking,demo_checking_2025.csv,312,Restaurants,Food delivery
+2025-10-07,COMCAST XFINITY INTERNET,-67.08,USD,Checking,demo_checking_2025.csv,313,Utilities,Telecom (US)
+2025-10-08,BURMA SUPERSTAR SF,-112.63,USD,Checking,demo_checking_2025.csv,314,Uncategorized,
+2025-10-09,SAFEWAY STORE 0998,-99.67,USD,Checking,demo_checking_2025.csv,315,Groceries,Supermarket (US)
+2025-10-09,ZARA US 1234,-93.96,USD,Checking,demo_checking_2025.csv,316,Shopping,Clothing
+2025-10-10,BLUE SHIELD CA HEALTH PREMIUM,-409.06,USD,Checking,demo_checking_2025.csv,317,Insurance,Health insurance (US)
+2025-10-12,STATE FARM AUTO INSURANCE,-153.43,USD,Checking,demo_checking_2025.csv,318,Insurance,Insurance (US)
+2025-10-14,NETFLIX.COM,-17.42,USD,Checking,demo_checking_2025.csv,319,Entertainment,Netflix
+2025-10-14,SPOTIFY USA,-11.7,USD,Checking,demo_checking_2025.csv,320,Entertainment,Spotify
+2025-10-15,PAYROLL DEPOSIT EXAMPLE CORP,2998.07,USD,Checking,demo_checking_2025.csv,321,Income,Salary
+2025-10-16,APPLE.COM/BILL,-34.39,USD,Checking,demo_checking_2025.csv,322,Subscriptions,Apple
+2025-10-16,UNITED AIRLINES TKT,-371.78,USD,Checking,demo_checking_2025.csv,323,Travel,Flights
+2025-10-18,ANTHROPIC CLAUDE PRO,-19.91,USD,Checking,demo_checking_2025.csv,324,Subscriptions,AI assistants
+2025-10-20,EQUINOX FITNESS,-211.51,USD,Checking,demo_checking_2025.csv,325,Personal Care,Gym / fitness
+2025-10-20,PHILZ COFFEE 24TH ST,-5.61,USD,Checking,demo_checking_2025.csv,326,Restaurants,Coffee / cafe
+2025-10-20,DR MARTINEZ DENTAL CLINIC,-330.78,USD,Checking,demo_checking_2025.csv,327,Healthcare,Doctor / clinic
+2025-10-22,AMAZON.COM*PRIME MEMBERSHIP,-15.56,USD,Checking,demo_checking_2025.csv,328,SPLIT_AMAZON,Amazon (auto-split)
+2025-10-22,DR MARTINEZ DENTAL CLINIC,-308.0,USD,Checking,demo_checking_2025.csv,329,Healthcare,Doctor / clinic
+2025-10-23,STARBUCKS STORE 09221,-8.23,USD,Checking,demo_checking_2025.csv,330,Restaurants,Coffee / cafe
+2025-10-23,BURMA SUPERSTAR SF,-73.06,USD,Checking,demo_checking_2025.csv,331,Uncategorized,
+2025-10-23,AIRBNB * HMTRPDQRS9,-295.06,USD,Checking,demo_checking_2025.csv,332,Travel,Lodging
+2025-10-23,ZARA US 1234,-90.25,USD,Checking,demo_checking_2025.csv,333,Shopping,Clothing
+2025-10-24,WALGREENS #04456,-28.35,USD,Checking,demo_checking_2025.csv,334,Healthcare,Pharmacy
+2025-10-25,NYTIMES DIGITAL SUBSCRIPTION,-16.62,USD,Checking,demo_checking_2025.csv,335,Subscriptions,News / writing
+2025-10-26,HOME DEPOT 0099,-180.28,USD,Checking,demo_checking_2025.csv,336,Shopping,Home improvement
+2025-10-30,CHEVRON 0099,-47.02,USD,Checking,demo_checking_2025.csv,337,Transport,Fuel
+2025-10-31,PAYROLL DEPOSIT EXAMPLE CORP,2953.41,USD,Checking,demo_checking_2025.csv,338,Income,Salary
+2025-10-31,LYFT *RIDE,-17.2,USD,Checking,demo_checking_2025.csv,339,Transport,Ride-hailing
+2025-10-31,BURMA SUPERSTAR SF,-93.23,USD,Checking,demo_checking_2025.csv,340,Uncategorized,
+2025-11-01,RENT - PARK STREET PROPERTIES,-2615.7,USD,Checking,demo_checking_2025.csv,341,Housing,Rent
+2025-11-01,TARGET 00012345,-89.38,USD,Checking,demo_checking_2025.csv,342,Uncategorized,
+2025-11-01,SAFEWAY STORE 0998,-89.94,USD,Checking,demo_checking_2025.csv,343,Groceries,Supermarket (US)
+2025-11-03,PG&E ELECTRIC AUTOPAY,-94.26,USD,Checking,demo_checking_2025.csv,344,EXCLUDE,Credit card payment
+2025-11-03,UBER *EATS,-50.77,USD,Checking,demo_checking_2025.csv,345,Restaurants,Food delivery
+2025-11-05,AT&T MOBILITY,-83.65,USD,Checking,demo_checking_2025.csv,346,Utilities,Telecom (US)
+2025-11-06,TARGET 00012345,-63.24,USD,Checking,demo_checking_2025.csv,347,Uncategorized,
+2025-11-07,COMCAST XFINITY INTERNET,-72.44,USD,Checking,demo_checking_2025.csv,348,Utilities,Telecom (US)
+2025-11-07,SAFEWAY STORE 0998,-87.02,USD,Checking,demo_checking_2025.csv,349,Groceries,Supermarket (US)
+2025-11-08,ZARA US 1234,-99.25,USD,Checking,demo_checking_2025.csv,350,Shopping,Clothing
+2025-11-08,HERTZ RENT A CAR LAX,-199.76,USD,Checking,demo_checking_2025.csv,351,Housing,Rent
+2025-11-09,WALGREENS #04456,-27.49,USD,Checking,demo_checking_2025.csv,352,Healthcare,Pharmacy
+2025-11-10,BLUE SHIELD CA HEALTH PREMIUM,-425.28,USD,Checking,demo_checking_2025.csv,353,Insurance,Health insurance (US)
+2025-11-11,CHIPOTLE 0298,-18.44,USD,Checking,demo_checking_2025.csv,354,Restaurants,Fast food
+2025-11-12,STATE FARM AUTO INSURANCE,-142.16,USD,Checking,demo_checking_2025.csv,355,Insurance,Insurance (US)
+2025-11-13,HERTZ RENT A CAR LAX,-174.06,USD,Checking,demo_checking_2025.csv,356,Housing,Rent
+2025-11-14,NETFLIX.COM,-18.82,USD,Checking,demo_checking_2025.csv,357,Entertainment,Netflix
+2025-11-14,SPOTIFY USA,-12.15,USD,Checking,demo_checking_2025.csv,358,Entertainment,Spotify
+2025-11-14,TARGET 00012345,-77.28,USD,Checking,demo_checking_2025.csv,359,Uncategorized,
+2025-11-15,PAYROLL DEPOSIT EXAMPLE CORP,2934.72,USD,Checking,demo_checking_2025.csv,360,Income,Salary
+2025-11-16,APPLE.COM/BILL,-36.14,USD,Checking,demo_checking_2025.csv,361,Subscriptions,Apple
+2025-11-18,ANTHROPIC CLAUDE PRO,-20.41,USD,Checking,demo_checking_2025.csv,362,Subscriptions,AI assistants
+2025-11-20,EQUINOX FITNESS,-213.61,USD,Checking,demo_checking_2025.csv,363,Personal Care,Gym / fitness
+2025-11-20,REI CO-OP MOUNTAIN VIEW,-210.88,USD,Checking,demo_checking_2025.csv,364,Uncategorized,
+2025-11-20,UNITED AIRLINES TKT,-439.72,USD,Checking,demo_checking_2025.csv,365,Travel,Flights
+2025-11-22,AMAZON.COM*PRIME MEMBERSHIP,-15.34,USD,Checking,demo_checking_2025.csv,366,SPLIT_AMAZON,Amazon (auto-split)
+2025-11-23,TARGET 00012345,-72.9,USD,Checking,demo_checking_2025.csv,367,Uncategorized,
+2025-11-25,NYTIMES DIGITAL SUBSCRIPTION,-17.79,USD,Checking,demo_checking_2025.csv,368,Subscriptions,News / writing
+2025-11-25,TARGET 00012345,-73.58,USD,Checking,demo_checking_2025.csv,369,Uncategorized,
+2025-11-26,UBER *EATS,-38.36,USD,Checking,demo_checking_2025.csv,370,Restaurants,Food delivery
+2025-11-27,BART TICKETS,-10.63,USD,Checking,demo_checking_2025.csv,371,Transport,Public transport (US)
+2025-11-29,DR MARTINEZ DENTAL CLINIC,-292.97,USD,Checking,demo_checking_2025.csv,372,Healthcare,Doctor / clinic
+2025-11-30,PAYROLL DEPOSIT EXAMPLE CORP,2942.84,USD,Checking,demo_checking_2025.csv,373,Income,Salary
+2025-12-01,RENT - PARK STREET PROPERTIES,-2664.17,USD,Checking,demo_checking_2025.csv,374,Housing,Rent
+2025-12-01,HOME DEPOT 0099,-137.83,USD,Checking,demo_checking_2025.csv,375,Shopping,Home improvement
+2025-12-02,TRADER JOE'S #154 SF,-81.96,USD,Checking,demo_checking_2025.csv,376,Groceries,Supermarket (US)
+2025-12-03,PG&E ELECTRIC AUTOPAY,-92.73,USD,Checking,demo_checking_2025.csv,377,EXCLUDE,Credit card payment
+2025-12-03,CHEVRON 0099,-49.61,USD,Checking,demo_checking_2025.csv,378,Transport,Fuel
+2025-12-04,BURMA SUPERSTAR SF,-84.48,USD,Checking,demo_checking_2025.csv,379,Uncategorized,
+2025-12-05,AT&T MOBILITY,-89.22,USD,Checking,demo_checking_2025.csv,380,Utilities,Telecom (US)
+2025-12-05,PHILZ COFFEE 24TH ST,-7.66,USD,Checking,demo_checking_2025.csv,381,Restaurants,Coffee / cafe
+2025-12-07,COMCAST XFINITY INTERNET,-70.34,USD,Checking,demo_checking_2025.csv,382,Utilities,Telecom (US)
+2025-12-07,BART TICKETS,-10.03,USD,Checking,demo_checking_2025.csv,383,Transport,Public transport (US)
+2025-12-10,BLUE SHIELD CA HEALTH PREMIUM,-405.89,USD,Checking,demo_checking_2025.csv,384,Insurance,Health insurance (US)
+2025-12-12,STATE FARM AUTO INSURANCE,-147.32,USD,Checking,demo_checking_2025.csv,385,Insurance,Insurance (US)
+2025-12-12,RESTAURANT FOREIGN CINEMA,-109.91,USD,Checking,demo_checking_2025.csv,386,Restaurants,Restaurant
+2025-12-14,NETFLIX.COM,-17.64,USD,Checking,demo_checking_2025.csv,387,Entertainment,Netflix
+2025-12-14,SPOTIFY USA,-11.67,USD,Checking,demo_checking_2025.csv,388,Entertainment,Spotify
+2025-12-15,PAYROLL DEPOSIT EXAMPLE CORP,2966.4,USD,Checking,demo_checking_2025.csv,389,Income,Salary
+2025-12-16,APPLE.COM/BILL,-35.76,USD,Checking,demo_checking_2025.csv,390,Subscriptions,Apple
+2025-12-16,AMAZON.COM*A2K9P3RT0,-84.87,USD,Checking,demo_checking_2025.csv,391,SPLIT_AMAZON,Amazon (auto-split)
+2025-12-17,DR MARTINEZ DENTAL CLINIC,-232.75,USD,Checking,demo_checking_2025.csv,392,Healthcare,Doctor / clinic
+2025-12-18,ANTHROPIC CLAUDE PRO,-19.63,USD,Checking,demo_checking_2025.csv,393,Subscriptions,AI assistants
+2025-12-18,TRANSFER TO BROKERAGE ACCT 0000,-2000.0,USD,Checking,demo_checking_2025.csv,394,TRANSFER,transfer to Brokerage
+2025-12-19,AIRBNB * HMTRPDQRS9,-378.1,USD,Checking,demo_checking_2025.csv,395,Travel,Lodging
+2025-12-20,EQUINOX FITNESS,-220.22,USD,Checking,demo_checking_2025.csv,396,Personal Care,Gym / fitness
+2025-12-22,AMAZON.COM*PRIME MEMBERSHIP,-15.67,USD,Checking,demo_checking_2025.csv,397,SPLIT_AMAZON,Amazon (auto-split)
+2025-12-23,WALGREENS #04456,-29.87,USD,Checking,demo_checking_2025.csv,398,Healthcare,Pharmacy
+2025-12-23,PHILZ COFFEE 24TH ST,-7.04,USD,Checking,demo_checking_2025.csv,399,Restaurants,Coffee / cafe
+2025-12-24,HOME DEPOT 0099,-196.81,USD,Checking,demo_checking_2025.csv,400,Shopping,Home improvement
+2025-12-25,NYTIMES DIGITAL SUBSCRIPTION,-17.32,USD,Checking,demo_checking_2025.csv,401,Subscriptions,News / writing
+2025-12-25,TARGET 00012345,-58.76,USD,Checking,demo_checking_2025.csv,402,Uncategorized,
+2025-12-28,TARGET 00012345,-59.23,USD,Checking,demo_checking_2025.csv,403,Uncategorized,
+2025-12-31,PAYROLL DEPOSIT EXAMPLE CORP,2936.9,USD,Checking,demo_checking_2025.csv,404,Income,Salary
+2025-12-31,TRADER JOE'S #154 SF,-68.89,USD,Checking,demo_checking_2025.csv,405,Groceries,Supermarket (US)
+2025-12-31,DOORDASH SUSHI ROKU,-54.9,USD,Checking,demo_checking_2025.csv,406,Restaurants,Food delivery
+2025-07-01,RENT - PARK STREET PROPERTIES,-2639.48,USD,Checking,duplicate_q3_checking.csv,1,Housing,Rent
+2025-07-01,DOORDASH SUSHI ROKU,-62.7,USD,Checking,duplicate_q3_checking.csv,2,Restaurants,Food delivery
+2025-07-03,PG&E ELECTRIC AUTOPAY,-92.36,USD,Checking,duplicate_q3_checking.csv,3,EXCLUDE,Credit card payment
+2025-07-04,BART TICKETS,-12.33,USD,Checking,duplicate_q3_checking.csv,4,Transport,Public transport (US)
+2025-07-05,AT&T MOBILITY,-87.51,USD,Checking,duplicate_q3_checking.csv,5,Utilities,Telecom (US)
+2025-07-07,COMCAST XFINITY INTERNET,-68.08,USD,Checking,duplicate_q3_checking.csv,6,Utilities,Telecom (US)
+2025-07-07,LYFT *RIDE,-19.48,USD,Checking,duplicate_q3_checking.csv,7,Transport,Ride-hailing
+2025-07-09,RESTAURANT FOREIGN CINEMA,-128.62,USD,Checking,duplicate_q3_checking.csv,8,Restaurants,Restaurant
+2025-07-09,TRADER JOE'S #154 SF,-62.63,USD,Checking,duplicate_q3_checking.csv,9,Groceries,Supermarket (US)
+2025-07-10,BLUE SHIELD CA HEALTH PREMIUM,-392.37,USD,Checking,duplicate_q3_checking.csv,10,Insurance,Health insurance (US)
+2025-07-10,CHEVRON 0099,-51.13,USD,Checking,duplicate_q3_checking.csv,11,Transport,Fuel
+2025-07-11,WHOLE FOODS MKT 12345 SF,-128.82,USD,Checking,duplicate_q3_checking.csv,12,Groceries,Supermarket (US)
+2025-07-11,SHELL OIL 12345,-61.44,USD,Checking,duplicate_q3_checking.csv,13,Transport,Fuel
+2025-07-11,CHEVRON 0099,-55.19,USD,Checking,duplicate_q3_checking.csv,14,Transport,Fuel
+2025-07-12,STATE FARM AUTO INSURANCE,-143.46,USD,Checking,duplicate_q3_checking.csv,15,Insurance,Insurance (US)
+2025-07-14,NETFLIX.COM,-17.68,USD,Checking,duplicate_q3_checking.csv,16,Entertainment,Netflix
+2025-07-14,SPOTIFY USA,-12.43,USD,Checking,duplicate_q3_checking.csv,17,Entertainment,Spotify
+2025-07-14,LYFT *RIDE,-22.76,USD,Checking,duplicate_q3_checking.csv,18,Transport,Ride-hailing
+2025-07-14,REI CO-OP MOUNTAIN VIEW,-179.09,USD,Checking,duplicate_q3_checking.csv,19,Uncategorized,
+2025-07-15,PAYROLL DEPOSIT EXAMPLE CORP,2922.24,USD,Checking,duplicate_q3_checking.csv,20,Income,Salary
+2025-07-16,APPLE.COM/BILL,-36.62,USD,Checking,duplicate_q3_checking.csv,21,Subscriptions,Apple
+2025-07-17,STARBUCKS STORE 09221,-6.7,USD,Checking,duplicate_q3_checking.csv,22,Restaurants,Coffee / cafe
+2025-07-17,DOORDASH SUSHI ROKU,-77.41,USD,Checking,duplicate_q3_checking.csv,23,Restaurants,Food delivery
+2025-07-18,ANTHROPIC CLAUDE PRO,-19.56,USD,Checking,duplicate_q3_checking.csv,24,Subscriptions,AI assistants
+2025-07-18,PHILZ COFFEE 24TH ST,-5.44,USD,Checking,duplicate_q3_checking.csv,25,Restaurants,Coffee / cafe
+2025-07-19,BURMA SUPERSTAR SF,-82.32,USD,Checking,duplicate_q3_checking.csv,26,Uncategorized,
+2025-07-20,EQUINOX FITNESS,-218.04,USD,Checking,duplicate_q3_checking.csv,27,Personal Care,Gym / fitness
+2025-07-20,UBER *TRIP SAN FRANCISCO,-26.96,USD,Checking,duplicate_q3_checking.csv,28,Transport,Ride-hailing
+2025-07-22,AMAZON.COM*PRIME MEMBERSHIP,-14.84,USD,Checking,duplicate_q3_checking.csv,29,SPLIT_AMAZON,Amazon (auto-split)
+2025-07-22,CHEVRON 0099,-54.65,USD,Checking,duplicate_q3_checking.csv,30,Transport,Fuel
+2025-07-23,SHELL OIL 12345,-42.29,USD,Checking,duplicate_q3_checking.csv,31,Transport,Fuel
+2025-07-24,BART TICKETS,-11.43,USD,Checking,duplicate_q3_checking.csv,32,Transport,Public transport (US)
+2025-07-25,NYTIMES DIGITAL SUBSCRIPTION,-17.82,USD,Checking,duplicate_q3_checking.csv,33,Subscriptions,News / writing
+2025-07-29,RESTAURANT FOREIGN CINEMA,-130.96,USD,Checking,duplicate_q3_checking.csv,34,Restaurants,Restaurant
+2025-07-30,REI CO-OP MOUNTAIN VIEW,-175.2,USD,Checking,duplicate_q3_checking.csv,35,Uncategorized,
+2025-07-31,PAYROLL DEPOSIT EXAMPLE CORP,2981.66,USD,Checking,duplicate_q3_checking.csv,36,Income,Salary
+2025-07-31,UNITED AIRLINES TKT,-578.85,USD,Checking,duplicate_q3_checking.csv,37,Travel,Flights
+2025-08-01,RENT - PARK STREET PROPERTIES,-2634.67,USD,Checking,duplicate_q3_checking.csv,38,Housing,Rent
+2025-08-02,CHIPOTLE 0298,-19.74,USD,Checking,duplicate_q3_checking.csv,39,Restaurants,Fast food
+2025-08-02,WALGREENS #04456,-32.38,USD,Checking,duplicate_q3_checking.csv,40,Healthcare,Pharmacy
+2025-08-03,PG&E ELECTRIC AUTOPAY,-91.5,USD,Checking,duplicate_q3_checking.csv,41,EXCLUDE,Credit card payment
+2025-08-05,AT&T MOBILITY,-84.77,USD,Checking,duplicate_q3_checking.csv,42,Utilities,Telecom (US)
+2025-08-07,COMCAST XFINITY INTERNET,-72.8,USD,Checking,duplicate_q3_checking.csv,43,Utilities,Telecom (US)
+2025-08-10,BLUE SHIELD CA HEALTH PREMIUM,-424.2,USD,Checking,duplicate_q3_checking.csv,44,Insurance,Health insurance (US)
+2025-08-12,STATE FARM AUTO INSURANCE,-143.11,USD,Checking,duplicate_q3_checking.csv,45,Insurance,Insurance (US)
+2025-08-13,CHIPOTLE 0298,-12.62,USD,Checking,duplicate_q3_checking.csv,46,Restaurants,Fast food
+2025-08-14,NETFLIX.COM,-17.24,USD,Checking,duplicate_q3_checking.csv,47,Entertainment,Netflix
+2025-08-14,SPOTIFY USA,-12.01,USD,Checking,duplicate_q3_checking.csv,48,Entertainment,Spotify
+2025-08-14,AIRBNB * HMTRPDQRS9,-357.37,USD,Checking,duplicate_q3_checking.csv,49,Travel,Lodging
+2025-08-15,PAYROLL DEPOSIT EXAMPLE CORP,2965.47,USD,Checking,duplicate_q3_checking.csv,50,Income,Salary
+2025-08-16,APPLE.COM/BILL,-35.46,USD,Checking,duplicate_q3_checking.csv,51,Subscriptions,Apple
+2025-08-18,ANTHROPIC CLAUDE PRO,-19.67,USD,Checking,duplicate_q3_checking.csv,52,Subscriptions,AI assistants
+2025-08-18,DR MARTINEZ DENTAL CLINIC,-237.69,USD,Checking,duplicate_q3_checking.csv,53,Healthcare,Doctor / clinic
+2025-08-20,EQUINOX FITNESS,-221.85,USD,Checking,duplicate_q3_checking.csv,54,Personal Care,Gym / fitness
+2025-08-20,ZARA US 1234,-77.62,USD,Checking,duplicate_q3_checking.csv,55,Shopping,Clothing
+2025-08-22,AMAZON.COM*PRIME MEMBERSHIP,-15.37,USD,Checking,duplicate_q3_checking.csv,56,SPLIT_AMAZON,Amazon (auto-split)
+2025-08-23,HERTZ RENT A CAR LAX,-189.59,USD,Checking,duplicate_q3_checking.csv,57,Housing,Rent
+2025-08-23,WHOLE FOODS MKT 12345 SF,-197.94,USD,Checking,duplicate_q3_checking.csv,58,Groceries,Supermarket (US)
+2025-08-24,CVS/PHARMACY #02184,-30.1,USD,Checking,duplicate_q3_checking.csv,59,Healthcare,Pharmacy
+2025-08-25,NYTIMES DIGITAL SUBSCRIPTION,-17.29,USD,Checking,duplicate_q3_checking.csv,60,Subscriptions,News / writing
+2025-08-25,SHELL OIL 12345,-49.17,USD,Checking,duplicate_q3_checking.csv,61,Transport,Fuel
+2025-08-25,AMAZON.COM*A2K9P3RT0,-98.66,USD,Checking,duplicate_q3_checking.csv,62,SPLIT_AMAZON,Amazon (auto-split)
+2025-08-26,BURMA SUPERSTAR SF,-76.76,USD,Checking,duplicate_q3_checking.csv,63,Uncategorized,
+2025-08-26,HERTZ RENT A CAR LAX,-204.38,USD,Checking,duplicate_q3_checking.csv,64,Housing,Rent
+2025-08-26,AMAZON.COM*A2K9P3RT0,-101.45,USD,Checking,duplicate_q3_checking.csv,65,SPLIT_AMAZON,Amazon (auto-split)
+2025-08-28,ZARA US 1234,-122.48,USD,Checking,duplicate_q3_checking.csv,66,Shopping,Clothing
+2025-08-28,STARBUCKS STORE 09221,-6.98,USD,Checking,duplicate_q3_checking.csv,67,Restaurants,Coffee / cafe
+2025-08-30,WALGREENS #04456,-36.4,USD,Checking,duplicate_q3_checking.csv,68,Healthcare,Pharmacy
+2025-08-31,PAYROLL DEPOSIT EXAMPLE CORP,2946.5,USD,Checking,duplicate_q3_checking.csv,69,Income,Salary
+2025-09-01,RENT - PARK STREET PROPERTIES,-2636.77,USD,Checking,duplicate_q3_checking.csv,70,Housing,Rent
+2025-09-03,PG&E ELECTRIC AUTOPAY,-96.57,USD,Checking,duplicate_q3_checking.csv,71,EXCLUDE,Credit card payment
+2025-09-05,AT&T MOBILITY,-87.89,USD,Checking,duplicate_q3_checking.csv,72,Utilities,Telecom (US)
+2025-09-07,COMCAST XFINITY INTERNET,-68.43,USD,Checking,duplicate_q3_checking.csv,73,Utilities,Telecom (US)
+2025-09-08,CHEVRON 0099,-55.1,USD,Checking,duplicate_q3_checking.csv,74,Transport,Fuel
+2025-09-09,SHELL OIL 12345,-57.63,USD,Checking,duplicate_q3_checking.csv,75,Transport,Fuel
+2025-09-10,BLUE SHIELD CA HEALTH PREMIUM,-423.44,USD,Checking,duplicate_q3_checking.csv,76,Insurance,Health insurance (US)
+2025-09-10,ZARA US 1234,-95.13,USD,Checking,duplicate_q3_checking.csv,77,Shopping,Clothing
+2025-09-12,STATE FARM AUTO INSURANCE,-147.77,USD,Checking,duplicate_q3_checking.csv,78,Insurance,Insurance (US)
+2025-09-13,UBER *TRIP SAN FRANCISCO,-27.03,USD,Checking,duplicate_q3_checking.csv,79,Transport,Ride-hailing
+2025-09-14,NETFLIX.COM,-17.52,USD,Checking,duplicate_q3_checking.csv,80,Entertainment,Netflix
+2025-09-14,SPOTIFY USA,-11.92,USD,Checking,duplicate_q3_checking.csv,81,Entertainment,Spotify
+2025-09-14,UBER *TRIP SAN FRANCISCO,-25.33,USD,Checking,duplicate_q3_checking.csv,82,Transport,Ride-hailing
+2025-09-14,TRADER JOE'S #154 SF,-66.9,USD,Checking,duplicate_q3_checking.csv,83,Groceries,Supermarket (US)
+2025-09-14,CHEVRON 0099,-60.83,USD,Checking,duplicate_q3_checking.csv,84,Transport,Fuel
+2025-09-15,PAYROLL DEPOSIT EXAMPLE CORP,2915.92,USD,Checking,duplicate_q3_checking.csv,85,Income,Salary
+2025-09-16,APPLE.COM/BILL,-35.74,USD,Checking,duplicate_q3_checking.csv,86,Subscriptions,Apple
+2025-09-16,WHOLE FOODS MKT 12345 SF,-202.39,USD,Checking,duplicate_q3_checking.csv,87,Groceries,Supermarket (US)
+2025-09-18,ANTHROPIC CLAUDE PRO,-19.47,USD,Checking,duplicate_q3_checking.csv,88,Subscriptions,AI assistants
+2025-09-18,TRANSFER TO BROKERAGE ACCT 0000,-2000.0,USD,Checking,duplicate_q3_checking.csv,89,EXCLUDE,Internal transfer
+2025-09-19,HERTZ RENT A CAR LAX,-149.36,USD,Checking,duplicate_q3_checking.csv,90,Housing,Rent
+2025-09-20,EQUINOX FITNESS,-211.47,USD,Checking,duplicate_q3_checking.csv,91,Personal Care,Gym / fitness
+2025-09-22,AMAZON.COM*PRIME MEMBERSHIP,-15.58,USD,Checking,duplicate_q3_checking.csv,92,SPLIT_AMAZON,Amazon (auto-split)
+2025-09-23,BURMA SUPERSTAR SF,-72.45,USD,Checking,duplicate_q3_checking.csv,93,Uncategorized,
+2025-09-24,WALGREENS #04456,-43.65,USD,Checking,duplicate_q3_checking.csv,94,Healthcare,Pharmacy
+2025-09-25,NYTIMES DIGITAL SUBSCRIPTION,-16.29,USD,Checking,duplicate_q3_checking.csv,95,Subscriptions,News / writing
+2025-09-26,CHEVRON 0099,-55.92,USD,Checking,duplicate_q3_checking.csv,96,Transport,Fuel
+2025-09-27,AMAZON.COM*A2K9P3RT0,-114.22,USD,Checking,duplicate_q3_checking.csv,97,SPLIT_AMAZON,Amazon (auto-split)
+2025-09-29,ZARA US 1234,-105.38,USD,Checking,duplicate_q3_checking.csv,98,Shopping,Clothing
+2025-09-29,SHELL OIL 12345,-59.29,USD,Checking,duplicate_q3_checking.csv,99,Transport,Fuel
+2025-09-29,CHIPOTLE 0298,-15.52,USD,Checking,duplicate_q3_checking.csv,100,Restaurants,Fast food
+2025-09-30,PAYROLL DEPOSIT EXAMPLE CORP,2986.15,USD,Checking,duplicate_q3_checking.csv,101,Income,Salary

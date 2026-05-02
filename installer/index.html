@@ -504,6 +504,21 @@
       height: 100%;
       opacity: 0.6;
     }
+    .dash-preview-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--color-text);
+      text-decoration: none;
+      border-bottom: 1px solid var(--color-gold);
+      padding-bottom: 2px;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    .dash-preview-link:hover { color: var(--color-gold); }
+    .dash-preview-link .arrow { color: var(--color-gold); transition: transform 0.15s ease; }
+    .dash-preview-link:hover .arrow { transform: translateX(2px); }
 
     /* ── Privacy block ────────────────────────────────────────────────────── */
     .privacy ul {
@@ -971,6 +986,7 @@
           <div class="cat-row"><span class="cat-name">Healthcare</span><span class="cat-amt">€4,210</span><div class="cat-bar-cell"><div class="cat-bar-fill" style="width: 15%"></div></div></div>
         </div>
       </div>
+      <a class="dash-preview-link" href="dashboard-demo/" target="_blank" rel="noopener">View the full live demo dashboard <span class="arrow">↗</span></a>
     </section>
 
     <!-- ── 04 — Ask for new analysis (coming soon) ─────────────────────── -->

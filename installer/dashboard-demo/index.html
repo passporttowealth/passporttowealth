@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your Finance Dashboard · Passport to Wealth</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0F1E33">
+  <link rel="icon" type="image/png" href="assets/brand/favicon.png">
+  <style>
+    /* ============================================================
+       INTER — bundled woff2 (latin subset, 4 weights). Self-hosted
+       so the dashboard works fully offline (OP-3: no CDN).
+       ============================================================ */
+    @font-face { font-family: "Inter"; font-style: normal; font-weight: 400; font-display: swap;
+      src: url("assets/fonts/Inter-400.woff2") format("woff2"); }
+    @font-face { font-family: "Inter"; font-style: normal; font-weight: 500; font-display: swap;
+      src: url("assets/fonts/Inter-500.woff2") format("woff2"); }
+    @font-face { font-family: "Inter"; font-style: normal; font-weight: 600; font-display: swap;
+      src: url("assets/fonts/Inter-600.woff2") format("woff2"); }
+    @font-face { font-family: "Inter"; font-style: normal; font-weight: 700; font-display: swap;
+      src: url("assets/fonts/Inter-700.woff2") format("woff2"); }
+
+    /* ============================================================
+       DESIGN TOKENS — see skill/references/DESIGN_TOKENS.md
+       ============================================================ */
+    :root {
+      /* Colors */
+      --bg:            #FFFFFF;
+      --bg-warm:       #FAF8F4;
+      --surface:       #FBFAF7;
+      --surface-card:  #FFFFFF;
+      --border:        #E8E5DE;
+      --border-strong: #D4D0C7;
+      --text:          #1D2433;
+      --text-muted:    #5E6473;
+      --text-subtle:   #8A8E9A;
+      --accent:        #0F1E33;
+      --accent-soft:   #EAEEF5;
+      --accent-hover:  #1A2D48;
+      --positive:      #1F6B4A;
+      --negative:      #A8392A;
+      --warning:       #B07C00;
+      --warning-bg:    #FFF6DD;
+
+      /* Brand-aligned chart palette (8 colors, all AA on white) */
+      --c1: #0F1E33;  /* deep navy — anchor */
+      --c2: #2D6E7E;  /* deep teal — sibling to navy */
+      --c3: #C49A4D;  /* warm gold */
+      --c4: #3A6B52;  /* forest */
+      --c5: #A65A3D;  /* warm clay */
+      --c6: #6B4E80;  /* muted plum */
+      --c7: #5C7080;  /* slate */
+      --c8: #4A5E80;  /* pale navy */
+
+      /* Spacing */
+      --s1: 4px;  --s2: 8px;  --s3: 12px;  --s4: 16px;
+      --s5: 24px; --s6: 32px; --s7: 48px;  --s8: 64px; --s9: 96px;
+
+      /* Radii */
+      --r-sm: 4px; --r-md: 10px; --r-lg: 18px;
+
+      /* Shadows */
+      --sh-sm: 0 1px 2px rgba(20,24,40,0.04), 0 1px 3px rgba(20,24,40,0.04);
+      --sh-md: 0 2px 6px rgba(20,24,40,0.05), 0 8px 24px rgba(20,24,40,0.06);
+
+      /* Layout */
+      --maxw: 1120px;
+      --maxw-text: 680px;
+    }
+
+    /* ============================================================
+       RESET / BASE
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 120px; }
+    body {
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+      font-size: 16px; line-height: 1.55;
+      color: var(--text);
+      background: var(--bg-warm);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      font-variant-numeric: tabular-nums;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+    h1, h2, h3, h4 { color: var(--text); font-weight: 600; letter-spacing: -0.01em; }
+    h1 { font-size: clamp(28px, 4vw, 36px); line-height: 1.15; margin: 0; }
+    /* h2 styling lives in `section > h2` below — gives every section start
+       a recurring navy "tab" + uppercase eyebrow that reads as a deliberate
+       breakpoint, not just a margin gap. (P0-3 from audit.) */
+    h2 { font-size: 18px; line-height: 1.3; margin: 0 0 var(--s3); }
+    section > h2 {
+      font-size: 12px; letter-spacing: 0.12em; font-weight: 600;
+      color: var(--accent); text-transform: uppercase;
+      margin: 0 0 var(--s4); padding-top: var(--s5);
+      display: block;
+    }
+    section > h2::before {
+      content: ""; display: block; width: 32px; height: 2px;
+      background: var(--accent); margin-bottom: var(--s3);
+    }
+    a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent;
+        transition: border-color 120ms ease; }
+    a:hover { border-color: currentColor; }
+
+    /* ============================================================
+       LAYOUT
+       ============================================================ */
+    main { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--s5) var(--s9); }
+    section { margin-top: var(--s8); }
+
+    /* ============================================================
+       HEADER (brand strip + dashboard title) + STICKY SECTION NAV
+       ============================================================ */
+    header.brand {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Sticky section nav — anchor links to each main section.
+       Mobile: horizontally scrollable strip (no hidden hamburger state).
+       Desktop: same strip, just doesn't need to scroll. */
+    nav.sections {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: saturate(180%) blur(8px);
+      -webkit-backdrop-filter: saturate(180%) blur(8px);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 0 rgba(20,24,40,0); /* upgraded to a subtle shadow once stuck via .stuck */
+      transition: box-shadow 200ms ease;
+    }
+    nav.sections.stuck { box-shadow: 0 4px 12px rgba(20,24,40,0.05); }
+    nav.sections .nav-inner {
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 0 var(--s5);
+      display: flex; align-items: stretch;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;            /* Firefox */
+      -ms-overflow-style: none;         /* old IE */
+      scroll-snap-type: x proximity;
+    }
+    nav.sections .nav-inner::-webkit-scrollbar { display: none; }   /* WebKit */
+    nav.sections a {
+      display: inline-flex; align-items: center;
+      flex: 0 0 auto;
+      padding: var(--s4) var(--s4);
+      font-size: 14px; font-weight: 500;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
+      white-space: nowrap;
+      scroll-snap-align: start;
+      transition: color 120ms ease, border-color 120ms ease;
+      min-height: 44px;                 /* Apple HIG min tap target */
+    }
+    nav.sections a:hover { color: var(--accent); border-bottom-color: var(--border-strong); }
+    nav.sections a.active { color: var(--accent); border-bottom-color: var(--accent); }
+    nav.sections a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: -4px;
+      border-radius: 4px;
+    }
+    /* Subtle gradient fade on the right edge of the nav scroller hints at more
+       items being scrollable on mobile. */
+    nav.sections .nav-inner::after {
+      content: ""; flex: 0 0 var(--s4);
+    }
+    @media (max-width: 600px) {
+      nav.sections .nav-inner { padding: 0 var(--s4); }
+      nav.sections a { padding: var(--s3) var(--s3); font-size: 13px; }
+    }
+    .brand-inner {
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: var(--s5) var(--s5);
+      display: flex; align-items: center; gap: var(--s4);
+    }
+    .brand-inner img { height: 56px; width: auto; }
+    .brand-meta {
+      flex: 1;
+      display: flex; align-items: baseline; gap: var(--s3);
+      font-size: 13px; color: var(--text-subtle);
+    }
+    .brand-meta .dot { color: var(--text-subtle); }
+    .brand-meta a { color: var(--text-muted); }
+    @media (max-width: 600px) {
+      .brand-inner { flex-direction: column; align-items: flex-start; gap: var(--s2); }
+      .brand-inner img { height: 44px; }
+    }
+
+    /* ============================================================
+       HERO BAND — full-bleed warm-to-white tonal break that anchors
+       the summary above the deep dives below (P0-2 from audit).
+       ============================================================ */
+    .hero-band {
+      background: linear-gradient(180deg, var(--bg-warm) 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-band > .hero,
+    .hero-band > .kpi-band {
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding-left: var(--s5);
+      padding-right: var(--s5);
+    }
+    .hero-band > .kpi-band { padding-bottom: var(--s7); }
+    main { background: var(--bg); }
+
+    .hero {
+      padding-top: var(--s8); padding-bottom: var(--s4);
+    }
+    .hero h1 {
+      font-size: clamp(32px, 4.5vw, 44px);
+      line-height: 1.1; letter-spacing: -0.015em;
+    }
+    .hero .meta {
+      color: var(--text-muted); margin: var(--s3) 0 0; font-size: 15px;
+    }
+
+    /* ============================================================
+       KPI CARDS — bigger numerals with anchor presence (P0-1)
+       ============================================================ */
+    .kpi-grid {
+      display: grid; gap: var(--s4);
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      margin-top: var(--s5);
+    }
+    .kpi {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: var(--s5);
+      box-shadow: var(--sh-sm);
+      transition: transform 160ms ease, box-shadow 160ms ease;
+      min-width: 0;                       /* grid-item shrink fix: prevents overflow */
+    }
+    .kpi:hover { transform: translateY(-1px); box-shadow: var(--sh-md); }
+    .kpi .label {
+      font-size: 11px; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.10em; font-weight: 500;
+    }
+    .kpi .value {
+      /* Sized to fit a 7-digit currency string ($999,999) at the minimum
+         220px card width (172px content area) without overflowing. Tabular
+         numerals + word-break: keep-all guard against any leftover tightness. */
+      font-size: clamp(26px, 3.4vw, 34px); font-weight: 600;
+      margin-top: var(--s3); letter-spacing: -0.02em; line-height: 1.05;
+      color: var(--accent); font-variant-numeric: tabular-nums;
+      white-space: nowrap; overflow-wrap: normal;
+    }
+    .kpi .sub { font-size: 12px; color: var(--text-subtle); margin-top: var(--s2); }
+    .kpi.positive .value { color: var(--positive); }
+    .kpi.negative .value { color: var(--negative); }
+
+    /* ============================================================
+       CHARTS
+       ============================================================ */
+    .chart-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: var(--s5);
+      box-shadow: var(--sh-sm);
+    }
+    .chart-card .chart-head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: var(--s4); gap: var(--s3); flex-wrap: wrap;
+    }
+    .chart-card .chart-title {
+      font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+      text-transform: uppercase; color: var(--text);
+    }
+    .chart-card .chart-sub { font-size: 12px; color: var(--text-subtle); margin-top: 2px; }
+    .chart-wrap { position: relative; height: 280px; }
+    @media (max-width: 600px) { .chart-wrap { height: 240px; } }
+
+    /* ============================================================
+       INSIGHTS
+       ============================================================ */
+    .insights {
+      background: var(--accent-soft);
+      border-radius: var(--r-md);
+      padding: var(--s5) var(--s6);
+      border-left: 3px solid var(--accent);
+    }
+    .insights h2 { color: var(--accent); margin-bottom: var(--s4); }
+    .insights ul { margin: 0; padding: 0; list-style: none; }
+    .insights li {
+      padding: var(--s3) 0; border-top: 1px solid rgba(15,30,51,0.10);
+      font-size: 15px;
+    }
+    .insights li:first-child { border-top: 0; padding-top: 0; }
+    .insights li strong { color: var(--accent); font-weight: 600; }
+
+    /* ============================================================
+       TRANSACTIONS TABLE
+       ============================================================ */
+    .table-tools {
+      display: flex; gap: var(--s3); flex-wrap: wrap; margin-bottom: var(--s4);
+    }
+    .table-tools input, .table-tools select {
+      font: inherit; font-size: 14px;
+      padding: var(--s2) var(--s3);
+      background: var(--bg);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--r-sm);
+      color: var(--text);
+      transition: border-color 120ms ease, box-shadow 120ms ease;
+    }
+    .table-tools input { min-width: 220px; }
+    .table-tools input:focus, .table-tools select:focus {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15,30,51,0.10);
+    }
+    .table-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      box-shadow: var(--sh-sm);
+    }
+    table.tx { width: 100%; border-collapse: collapse; font-size: 14px; }
+    table.tx th, table.tx td {
+      text-align: left; padding: var(--s3) var(--s4);
+      border-bottom: 1px solid var(--border);
+    }
+    table.tx tbody tr:last-child td { border-bottom: 0; }
+    table.tx th {
+      font-weight: 500; color: var(--text-subtle);
+      text-transform: uppercase; font-size: 11px; letter-spacing: 0.08em;
+      cursor: pointer; user-select: none;
+      background: var(--surface);
+    }
+    table.tx th:hover { color: var(--accent); }
+    table.tx th.sorted::after { content: ""; display: inline-block; margin-left: 6px; color: var(--accent); }
+    table.tx th.sorted.asc::after  { content: "▲"; }
+    table.tx th.sorted.desc::after { content: "▼"; }
+    table.tx td.amount { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    table.tx td.amount.neg { color: var(--negative); }
+    table.tx td.amount.pos { color: var(--positive); }
+    table.tx tbody tr { transition: background 100ms ease; }
+    table.tx tbody tr:hover td { background: var(--bg-warm); }
+    .tx-foot {
+      display: flex; align-items: center; justify-content: space-between; gap: var(--s3);
+      padding: var(--s3) var(--s4); border-top: 1px solid var(--border); background: var(--surface);
+      flex-wrap: wrap;
+    }
+    .tx-meta { font-size: 12px; color: var(--text-subtle); }
+    .tx-show-more { display: flex; align-items: center; gap: var(--s2); }
+    .cat-pill {
+      display: inline-block; padding: 2px 10px; border-radius: 999px;
+      background: var(--accent-soft); color: var(--accent);
+      font-size: 12px; font-weight: 500;
+    }
+    .tool-btn {
+      font: inherit; font-size: 13px; font-weight: 500;
+      padding: var(--s2) var(--s3);
+      background: var(--bg); color: var(--text);
+      border: 1px solid var(--border-strong); border-radius: var(--r-sm);
+      cursor: pointer;
+      transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+      min-height: 36px;
+    }
+    .tool-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .tool-btn:focus-visible {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15,30,51,0.10);
+    }
+    .tool-btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+
+    /* ============================================================
+       FEEDBACK WIDGET — FAB + drawer
+       ============================================================ */
+    .fb-fab {
+      position: fixed; bottom: var(--s5); right: var(--s5);
+      z-index: 100;
+      display: inline-flex; align-items: center; gap: var(--s2);
+      padding: var(--s3) var(--s5);
+      background: var(--accent); color: #fff;
+      font: inherit; font-size: 14px; font-weight: 500;
+      border: none; border-radius: 999px;
+      box-shadow: 0 4px 14px rgba(15,30,51,0.20);
+      cursor: pointer;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+      min-height: 48px;
+    }
+    .fb-fab:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(15,30,51,0.25); }
+    .fb-fab:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+    @media (max-width: 600px) {
+      .fb-fab { bottom: var(--s4); right: var(--s4); padding: var(--s3) var(--s4); }
+      .fb-fab .fab-label { display: none; }     /* icon-only on small phones */
+      .fb-fab { padding: 14px; }
+    }
+    @media print { .fb-fab, .fb-overlay, .fb-drawer { display: none !important; } }
+
+    /* Backdrop */
+    .fb-overlay {
+      position: fixed; inset: 0; z-index: 99;
+      background: rgba(20,24,40,0.40);
+      opacity: 0; pointer-events: none;
+      transition: opacity 200ms ease;
+    }
+    .fb-overlay.open { opacity: 1; pointer-events: auto; }
+
+    /* Drawer — bottom sheet on mobile, right-side panel on desktop */
+    .fb-drawer {
+      position: fixed; z-index: 101;
+      background: var(--surface-card);
+      box-shadow: -4px 0 24px rgba(20,24,40,0.10);
+      display: flex; flex-direction: column;
+      transition: transform 280ms cubic-bezier(.2,.8,.2,1);
+    }
+    /* Desktop: slide in from right */
+    @media (min-width: 601px) {
+      .fb-drawer {
+        top: 0; right: 0; bottom: 0;
+        width: 440px; max-width: 90vw;
+        transform: translateX(105%);
+        border-left: 1px solid var(--border);
+      }
+      .fb-drawer.open { transform: translateX(0); }
+    }
+    /* Mobile: slide up from bottom */
+    @media (max-width: 600px) {
+      .fb-drawer {
+        left: 0; right: 0; bottom: 0;
+        max-height: 88vh;
+        border-top-left-radius: var(--r-lg);
+        border-top-right-radius: var(--r-lg);
+        transform: translateY(105%);
+        padding-bottom: env(safe-area-inset-bottom, 0);
+      }
+      .fb-drawer.open { transform: translateY(0); }
+      .fb-drawer::before {
+        content: ""; display: block; width: 36px; height: 4px;
+        background: var(--border-strong); border-radius: 2px;
+        margin: var(--s3) auto var(--s2);
+      }
+    }
+    .fb-drawer header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--s4) var(--s5);
+      border-bottom: 1px solid var(--border);
+    }
+    .fb-drawer h3 { margin: 0; font-size: 17px; }
+    .fb-drawer .fb-close {
+      background: none; border: none; cursor: pointer;
+      font-size: 24px; line-height: 1; color: var(--text-muted);
+      padding: var(--s2); min-width: 36px; min-height: 36px;
+    }
+    .fb-drawer .fb-close:hover { color: var(--text); }
+    .fb-drawer .body { padding: var(--s5); overflow-y: auto; flex: 1; }
+    .fb-drawer label { display: block; font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: var(--s2); }
+    .fb-drawer textarea {
+      width: 100%; min-height: 140px;
+      font: inherit; font-size: 15px; padding: var(--s3);
+      background: var(--bg); color: var(--text);
+      border: 1px solid var(--border-strong); border-radius: var(--r-sm);
+      resize: vertical;
+      transition: border-color 120ms ease, box-shadow 120ms ease;
+    }
+    .fb-drawer textarea:focus {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15,30,51,0.10);
+    }
+    .fb-drawer .hint { font-size: 12px; color: var(--text-subtle); margin: var(--s2) 0 var(--s4); }
+    .fb-drawer footer {
+      padding: var(--s4) var(--s5);
+      border-top: 1px solid var(--border);
+      display: flex; gap: var(--s3); align-items: center; justify-content: flex-end;
+    }
+    .fb-drawer .fb-submit {
+      font: inherit; font-size: 14px; font-weight: 500;
+      padding: var(--s3) var(--s5);
+      background: var(--accent); color: #fff;
+      border: none; border-radius: var(--r-sm); cursor: pointer;
+      transition: background 120ms ease;
+      min-height: 40px;
+    }
+    .fb-drawer .fb-submit:hover { background: var(--accent-hover); }
+    .fb-drawer .fb-submit[disabled] { opacity: 0.5; cursor: not-allowed; }
+    .fb-status {
+      font-size: 13px; padding: var(--s3); border-radius: var(--r-sm);
+      margin-top: var(--s3);
+    }
+    .fb-status.ok    { background: #E8F1EC; color: #1F4F38; border: 1px solid #BCD9C9; }
+    .fb-status.err   { background: #F7E6E1; color: #6B2010; border: 1px solid #E5BFB6; }
+
+    /* ============================================================
+       METHODOLOGY
+       ============================================================ */
+    details.methodology {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 0;
+      overflow: hidden;
+    }
+    details.methodology > summary {
+      padding: var(--s4) var(--s5);
+      cursor: pointer; font-weight: 500;
+      list-style: none;
+      display: flex; align-items: center; justify-content: space-between;
+      color: var(--text);
+    }
+    details.methodology > summary::-webkit-details-marker { display: none; }
+    details.methodology > summary::after {
+      content: "+"; font-size: 22px; color: var(--text-muted);
+      transition: transform 200ms ease; line-height: 1;
+    }
+    details.methodology[open] > summary::after { transform: rotate(45deg); }
+    details.methodology[open] > summary { border-bottom: 1px solid var(--border); }
+    details.methodology .body {
+      padding: var(--s5) var(--s5) var(--s6);
+      max-width: var(--maxw-text); font-size: 14px; color: var(--text-muted);
+    }
+    details.methodology dl { display: grid; grid-template-columns: 200px 1fr; gap: var(--s3) var(--s5); margin: 0; }
+    details.methodology dt { color: var(--text); font-weight: 500; }
+    details.methodology dd { margin: 0; }
+    @media (max-width: 600px) { details.methodology dl { grid-template-columns: 1fr; gap: var(--s1) 0; }
+      details.methodology dt { margin-top: var(--s3); } details.methodology dt:first-child { margin-top: 0; } }
+
+    /* ============================================================
+       DOWNLOADS
+       ============================================================ */
+    .downloads {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: var(--s5);
+      box-shadow: var(--sh-sm);
+    }
+    .downloads-grid {
+      display: grid; gap: var(--s3); margin-top: var(--s4);
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+    .downloads-grid a {
+      display: block; padding: var(--s4);
+      border: 1px solid var(--border); border-radius: var(--r-sm);
+      transition: border-color 120ms ease, background 120ms ease;
+    }
+    .downloads-grid a:hover { border-color: var(--accent); background: var(--accent-soft); }
+    .downloads-grid .name { font-weight: 500; color: var(--text); }
+    .downloads-grid .desc { font-size: 13px; color: var(--text-subtle); margin-top: 4px; }
+
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    footer.site-footer {
+      max-width: var(--maxw);
+      margin: var(--s9) auto 0;
+      padding: var(--s6) var(--s5);
+      border-top: 1px solid var(--border);
+      font-size: 13px; color: var(--text-muted);
+    }
+    footer .privacy {
+      max-width: var(--maxw-text); margin: 0 auto var(--s4);
+      text-align: center; line-height: 1.6;
+    }
+    footer .links {
+      display: flex; justify-content: center; gap: var(--s4); flex-wrap: wrap;
+      margin-bottom: var(--s3);
+    }
+    footer .meta {
+      text-align: center; color: var(--text-subtle); font-size: 12px;
+    }
+
+    /* ============================================================
+       PRINT
+       ============================================================ */
+    @media print {
+      .table-tools, footer.site-footer .links, .no-print { display: none; }
+      body { background: white; }
+      .chart-card, .kpi, .table-card, .downloads, details.methodology { box-shadow: none; break-inside: avoid; }
+      details.methodology { display: block; }
+      details.methodology .body { display: block !important; }
+    }
+
+    /* ============================================================
+       MOTION
+       ============================================================ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <!-- DEMO BANNER — only present in the public landing-site mirror at
+       passporttowealth.app/dashboard-demo. Real per-client dashboards built
+       by the skill don't have this. -->
+  <div role="note" style="background:#FAF3E2;border-bottom:1px solid #C9A75D;color:#5A4516;font:13px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:10px 16px;text-align:center;">
+    <strong style="color:#3D2E0E;">Demo dashboard</strong> &nbsp;·&nbsp; the numbers below are synthetic, generated from a fixed seed. Not anyone's real finances. &nbsp;·&nbsp;
+    <a href="https://passporttowealth.app/" style="color:#5A4516;text-decoration:underline;">Back to passporttowealth.app ↗</a>
+  </div>
+  <header class="brand">
+    <div class="brand-inner">
+      <img src="assets/brand/logo-blue.png" alt="Passport to Wealth" width="120" height="112">
+      <div class="brand-meta">
+        <span>Your private finance dashboard</span>
+        <span class="dot">·</span>
+        <span>Generated <time datetime="2026-05-02T16:37:48.071677+00:00">May 02, 2026</time></span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="sections" aria-label="On this page">
+    <div class="nav-inner">
+      <a href="#overview">Overview</a>
+      <a href="#insights">What I'm seeing</a>
+      <a href="#cashflow">Cashflow</a>
+      <a href="#by-category">By category</a>
+      <a href="#by-month">By month</a>
+      <a href="#transactions">Transactions</a>
+      <a href="#methodology">Methodology</a>
+      <a href="#downloads">Downloads</a>
+    </div>
+  </nav>
+
+  <!-- Hero band: tonal break between summary (above) and deep dives (in <main>).
+       Sits OUTSIDE <main> so the warm-to-white gradient runs full-bleed. -->
+  <div class="hero-band">
+    <section class="hero" id="overview" style="scroll-margin-top: 80px;">
+      <h1>Your Finance Dashboard</h1>
+      <p class="meta">12 months · 2025-01 → 2025-12 · 2 accounts</p>
+    </section>
+
+    <section class="kpi-band" aria-labelledby="kpi-h">
+      <h2 id="kpi-h" class="sr-only" style="position:absolute;left:-9999px;">Key totals</h2>
+      <div class="kpi-grid">
+        <div class="kpi positive">
+          <div class="label">Income</div>
+          <div class="value">$88,657</div>
+          <div class="sub">$7,388 per month avg</div>
+        </div>
+        <div class="kpi negative">
+          <div class="label">Spend</div>
+          <div class="value">$84,962</div>
+          <div class="sub">$7,080 per month avg</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Net</div>
+          <div class="value">$3,695</div>
+          <div class="sub">$308 per month avg</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Savings rate</div>
+          <div class="value">4.2%</div>
+          <div class="sub">net ÷ income, full period</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <main>
+
+    <!-- Insights -->
+    <section class="insights" id="insights" aria-labelledby="insights-h">
+      <h2 id="insights-h">What I'm seeing</h2>
+      <ul id="insights-list">
+        <!-- populated by client-side JS from data.insights -->
+      </ul>
+      <p style="margin: var(--s4) 0 0; font-size: 12px; color: var(--text-muted);">Facts only. Your advisor at Passport to Wealth interprets and recommends — this dashboard does not.</p>
+    </section>
+
+    <!-- Cashflow -->
+    <section id="cashflow" aria-labelledby="cashflow-h">
+      <h2 id="cashflow-h">Cashflow over time</h2>
+      <div class="chart-card">
+        <div class="chart-head">
+          <div>
+            <div class="chart-title">Monthly income, spend, and 3-month rolling net</div>
+            <div class="chart-sub">All values in USD. Transfers between your own accounts excluded.</div>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-cashflow" aria-label="Monthly cashflow chart"></canvas></div>
+      </div>
+    </section>
+
+    <!-- Spend by category -->
+    <section id="by-category" aria-labelledby="cat-h">
+      <h2 id="cat-h">Spend by category</h2>
+      <div class="chart-card">
+        <div class="chart-head">
+          <div>
+            <div class="chart-title">Total spend per category, full period</div>
+            <div class="chart-sub">Hover any bar to see what % of total spend it represents.</div>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-category" aria-label="Spend by category chart"></canvas></div>
+      </div>
+    </section>
+
+    <!-- Monthly category stacked -->
+    <section id="by-month" aria-labelledby="monthly-h">
+      <h2 id="monthly-h">Monthly spend by category</h2>
+      <div class="chart-card">
+        <div class="chart-head">
+          <div>
+            <div class="chart-title">Top categories per month, stacked</div>
+            <div class="chart-sub">Top 7 categories shown by name. Smaller categories grouped as "Other".</div>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-monthly" aria-label="Monthly stacked category chart"></canvas></div>
+      </div>
+    </section>
+
+    <!-- Transactions -->
+    <section id="transactions" aria-labelledby="tx-h">
+      <h2 id="tx-h">Transactions</h2>
+      <div class="table-tools no-print">
+        <input id="tx-search" type="search" placeholder="Search description…" aria-label="Search transactions">
+        <select id="tx-period" aria-label="Filter by time period">
+          <option value="all">All time</option>
+          <option value="30d">Last 30 days</option>
+          <option value="90d">Last 90 days</option>
+          <option value="6mo">Last 6 months</option>
+          <option value="ytd">Year to date</option>
+          <option value="last-year">Last year</option>
+        </select>
+        <select id="tx-category" aria-label="Filter by category"><option value="">All categories</option></select>
+        <select id="tx-account"  aria-label="Filter by account"><option value="">All accounts</option></select>
+        <button id="tx-download" type="button" class="tool-btn" title="Download these rows as CSV">
+          <span aria-hidden="true">↓</span> Download CSV
+        </button>
+      </div>
+      <div class="table-card">
+        <table class="tx" id="tx-table">
+          <thead>
+            <tr>
+              <th data-sort="date">Date</th>
+              <th data-sort="description">Description</th>
+              <th data-sort="category">Category</th>
+              <th data-sort="account">Account</th>
+              <th data-sort="amount" class="amount">Amount</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="tx-foot">
+          <div class="tx-meta" id="tx-meta">—</div>
+          <div class="tx-show-more no-print">
+            <button id="tx-more" type="button" class="tool-btn">Show more</button>
+            <select id="tx-pagesize" aria-label="Rows shown">
+              <option value="10" selected>10 rows</option>
+              <option value="50">50 rows</option>
+              <option value="200">200 rows</option>
+              <option value="all">All rows</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Methodology -->
+    <section id="methodology" aria-labelledby="meth-h">
+      <h2 id="meth-h">Methodology</h2>
+      <details class="methodology">
+        <summary>How was this dashboard built? — click to expand</summary>
+        <div class="body">
+          <p style="margin-top: 0;">Everything here came from files you put in your inbox. No bank-API connections, no third-party data. The pipeline ran locally on your laptop; only the rendered page was uploaded to the host.</p>
+          <dl id="methodology-dl">
+            <!-- populated by JS from data.methodology -->
+          </dl>
+          <p style="margin-bottom: 0;"><a href="https://github.com/passporttowealth/passporttowealth" target="_blank" rel="noopener">Source code on GitHub</a> · Open the categorization rules in the Downloads section below to see exactly which merchants mapped to which categories.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- Downloads -->
+    <section id="downloads" aria-labelledby="dl-h">
+      <h2 id="dl-h">Download your data</h2>
+      <div class="downloads">
+        <p style="margin-top: 0; color: var(--text-muted); font-size: 14px;">Take everything with you. Hand to an accountant, archive, or examine row by row.</p>
+        <div class="downloads-grid">
+          <a href="downloads/transactions_tagged.csv" download>
+            <div class="name">All transactions (CSV)</div>
+            <div class="desc">Every row, with categories and source file</div>
+          </a>
+          <a href="downloads/monthly_actuals.csv" download>
+            <div class="name">Monthly totals (CSV)</div>
+            <div class="desc">Month × category pivot</div>
+          </a>
+          <a href="downloads/rules.yaml" download>
+            <div class="name">Categorization rules</div>
+            <div class="desc">The rule set used to map merchants to categories</div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       PRODUCT FEEDBACK WIDGET — floating button + drawer
+       For improving the dashboard / tool itself. NOT a channel for
+       advisory questions; clients should email their advisor directly
+       for those.
+       ============================================================ -->
+  <button class="fb-fab" id="fb-open" aria-label="Help improve this dashboard">
+    <span aria-hidden="true">💬</span>
+    <span class="fab-label">Help improve this</span>
+  </button>
+  <div class="fb-overlay" id="fb-overlay" hidden></div>
+  <aside class="fb-drawer" id="fb-drawer" role="dialog" aria-modal="true" aria-labelledby="fb-title" hidden>
+    <header>
+      <h3 id="fb-title">Help improve this dashboard</h3>
+      <button class="fb-close" id="fb-close" aria-label="Close">×</button>
+    </header>
+    <div class="body">
+      <label for="fb-text">What could be better?</label>
+      <textarea id="fb-text" placeholder="Tell the team what's working, what isn't, what's missing, or what felt confusing. One line or a longer message — both useful." aria-required="true"></textarea>
+      <p class="hint">This goes to the team that builds this product. Your dashboard data stays private — only the message you type here is shared. <strong>For questions about your finances, please contact your advisor directly.</strong></p>
+      <div id="fb-status"></div>
+    </div>
+    <footer>
+      <button type="button" class="tool-btn" id="fb-cancel">Cancel</button>
+      <button type="button" class="fb-submit" id="fb-submit">Send</button>
+    </footer>
+  </aside>
+
+  <footer class="site-footer">
+    <div class="privacy">
+      This is a public demo dashboard. The numbers above are synthetic — generated from a fixed seed by the project's demo kit, not from anyone's real finances.
+      In a real client install, this dashboard renders on the laptop that produced it. If the user chooses to share with their advisor, the published copy lives behind a passcode and contains the categorized transactions and CSV exports — but never the original source files (bank statements, paystubs, tax documents).
+    </div>
+    <div class="links">
+      <a href="https://www.passporttowealth.com/" target="_blank" rel="noopener">passporttowealth.com</a>
+      <a href="https://github.com/passporttowealth/passporttowealth" target="_blank" rel="noopener">Built with Finance Clarity</a>
+    </div>
+    <div class="meta">© Passport to Wealth · Generated <time datetime="2026-05-02T16:37:48.071677+00:00">May 02, 2026</time> · Data through 2025-12</div>
+  </footer>
+
+  <script id="dashboard-data" type="application/json">{"currency": "USD", "months": ["2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "by_month_in": [5866.44, 5919.69, 5951.74, 5959.21, 5945.05, 5846.44, 11807.8, 11823.94, 11804.14, 5951.48, 5877.56, 5903.3], "by_month_out": [5965.46, 5986.5, 6021.12, 5272.32, 6149.54, 5937.73, 11288.58, 11099.54, 9796.84, 6287.43, 5789.16, 5367.55], "cashflow_3mo_avg": [-99.02, -82.91, -78.4, 183.57, 137.67, 130.37, 74.48, 384.11, 1083.64, 798.58, 586.58, 96.07], "category_totals": [["Housing", 41478.17], ["Travel", 9730.1], ["Insurance", 8375.01], ["Uncategorized", 3406.74], ["Shopping", 3305.26], ["Personal Care", 3214.53], ["Groceries", 2933.25], ["Healthcare", 2640.54], ["Restaurants", 2481.21], ["Utilities", 2343.76], ["Transport", 2273.07], ["SPLIT_AMAZON", 1250.27], ["Subscriptions", 1082.56], ["Entertainment", 447.3]], "monthly_by_category": {"2025-01": {"Housing": 2590.38, "Travel": 1155.85, "Insurance": 570.05, "Uncategorized": 449.77, "Shopping": 181.75, "Personal Care": 204.82, "Groceries": 270.02, "Other": 542.82}, "2025-02": {"Housing": 2698.92, "Travel": 1154.63, "Insurance": 537.99, "Uncategorized": 0, "Shopping": 358.08, "Personal Care": 211.02, "Groceries": 274.38, "Other": 751.48}, "2025-03": {"Housing": 2646.98, "Travel": 1234.36, "Insurance": 568.78, "Uncategorized": 169.41, "Shopping": 314.66, "Personal Care": 221.79, "Groceries": 95.26, "Other": 769.88}, "2025-04": {"Housing": 2567.96, "Travel": 526.89, "Insurance": 562.03, "Uncategorized": 84.5, "Shopping": 450.95, "Personal Care": 211.55, "Groceries": 98.17, "Other": 770.27}, "2025-05": {"Housing": 2717.62, "Travel": 1330.5, "Insurance": 547.55, "Uncategorized": 250.85, "Shopping": 198.47, "Personal Care": 205.1, "Groceries": 258.39, "Other": 641.06}, "2025-06": {"Housing": 2936.28, "Travel": 970.77, "Insurance": 556.77, "Uncategorized": 211.92, "Shopping": 0, "Personal Care": 212.19, "Groceries": 192.19, "Other": 857.61}, "2025-07": {"Housing": 5278.96, "Travel": 1157.7, "Insurance": 1071.66, "Uncategorized": 873.22, "Shopping": 0, "Personal Care": 436.08, "Groceries": 382.9, "Other": 2088.06}, "2025-08": {"Housing": 6057.28, "Travel": 714.74, "Insurance": 1134.62, "Uncategorized": 153.52, "Shopping": 400.2, "Personal Care": 443.7, "Groceries": 395.88, "Other": 1799.6}, "2025-09": {"Housing": 5572.26, "Travel": 0, "Insurance": 1142.42, "Uncategorized": 144.9, "Shopping": 401.02, "Personal Care": 422.94, "Groceries": 538.58, "Other": 1574.72}, "2025-10": {"Housing": 2757.84, "Travel": 666.84, "Insurance": 562.49, "Uncategorized": 278.92, "Shopping": 566.24, "Personal Care": 211.51, "Groceries": 99.67, "Other": 1143.92}, "2025-11": {"Housing": 2989.52, "Travel": 439.72, "Insurance": 567.44, "Uncategorized": 587.26, "Shopping": 99.25, "Personal Care": 213.61, "Groceries": 176.96, "Other": 715.4}, "2025-12": {"Housing": 2664.17, "Travel": 378.1, "Insurance": 553.21, "Uncategorized": 202.47, "Shopping": 334.64, "Personal Care": 220.22, "Groceries": 150.85, "Other": 863.89}}, "top_categories_for_monthly": ["Housing", "Travel", "Insurance", "Uncategorized", "Shopping", "Personal Care", "Groceries", "Other"], "accounts": ["Brokerage", "Checking"], "kpis": {"income_total": 88656.79, "spend_total": 84961.77, "net_total": 3695.02, "income_avg_per_month": 7388.07, "spend_avg_per_month": 7080.15, "net_avg_per_month": 307.92, "savings_rate_pct": 4.2, "n_months": 12}, "transactions": [{"date": "2025-12-31", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2936.9, "category": "Income", "account": "Checking"}, {"date": "2025-12-31", "description": "TRADER JOE'S #154 SF", "amount": -68.89, "category": "Groceries", "account": "Checking"}, {"date": "2025-12-31", "description": "DOORDASH SUSHI ROKU", "amount": -54.9, "category": "Restaurants", "account": "Checking"}, {"date": "2025-12-28", "description": "TARGET 00012345", "amount": -59.23, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-12-25", "description": "NYTIMES DIGITAL SUBSCRIPTION", "amount": -17.32, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-12-25", "description": "TARGET 00012345", "amount": -58.76, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-12-24", "description": "HOME DEPOT 0099", "amount": -196.81, "category": "Shopping", "account": "Checking"}, {"date": "2025-12-23", "description": "WALGREENS #04456", "amount": -29.87, "category": "Healthcare", "account": "Checking"}, {"date": "2025-12-23", "description": "PHILZ COFFEE 24TH ST", "amount": -7.04, "category": "Restaurants", "account": "Checking"}, {"date": "2025-12-22", "description": "AMAZON.COM*PRIME MEMBERSHIP", "amount": -15.67, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-12-20", "description": "EQUINOX FITNESS", "amount": -220.22, "category": "Personal Care", "account": "Checking"}, {"date": "2025-12-19", "description": "AIRBNB * HMTRPDQRS9", "amount": -378.1, "category": "Travel", "account": "Checking"}, {"date": "2025-12-18", "description": "ANTHROPIC CLAUDE PRO", "amount": -19.63, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-12-17", "description": "DR MARTINEZ DENTAL CLINIC", "amount": -232.75, "category": "Healthcare", "account": "Checking"}, {"date": "2025-12-16", "description": "APPLE.COM/BILL", "amount": -35.76, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-12-16", "description": "AMAZON.COM*A2K9P3RT0", "amount": -84.87, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-12-15", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2966.4, "category": "Income", "account": "Checking"}, {"date": "2025-12-14", "description": "NETFLIX.COM", "amount": -17.64, "category": "Entertainment", "account": "Checking"}, {"date": "2025-12-14", "description": "SPOTIFY USA", "amount": -11.67, "category": "Entertainment", "account": "Checking"}, {"date": "2025-12-12", "description": "STATE FARM AUTO INSURANCE", "amount": -147.32, "category": "Insurance", "account": "Checking"}, {"date": "2025-12-12", "description": "RESTAURANT FOREIGN CINEMA", "amount": -109.91, "category": "Restaurants", "account": "Checking"}, {"date": "2025-12-10", "description": "BLUE SHIELD CA HEALTH PREMIUM", "amount": -405.89, "category": "Insurance", "account": "Checking"}, {"date": "2025-12-07", "description": "COMCAST XFINITY INTERNET", "amount": -70.34, "category": "Utilities", "account": "Checking"}, {"date": "2025-12-07", "description": "BART TICKETS", "amount": -10.03, "category": "Transport", "account": "Checking"}, {"date": "2025-12-05", "description": "AT&T MOBILITY", "amount": -89.22, "category": "Utilities", "account": "Checking"}, {"date": "2025-12-05", "description": "PHILZ COFFEE 24TH ST", "amount": -7.66, "category": "Restaurants", "account": "Checking"}, {"date": "2025-12-04", "description": "BURMA SUPERSTAR SF", "amount": -84.48, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-12-03", "description": "CHEVRON 0099", "amount": -49.61, "category": "Transport", "account": "Checking"}, {"date": "2025-12-02", "description": "TRADER JOE'S #154 SF", "amount": -81.96, "category": "Groceries", "account": "Checking"}, {"date": "2025-12-01", "description": "RENT - PARK STREET PROPERTIES", "amount": -2664.17, "category": "Housing", "account": "Checking"}, {"date": "2025-12-01", "description": "HOME DEPOT 0099", "amount": -137.83, "category": "Shopping", "account": "Checking"}, {"date": "2025-11-30", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2942.84, "category": "Income", "account": "Checking"}, {"date": "2025-11-29", "description": "DR MARTINEZ DENTAL CLINIC", "amount": -292.97, "category": "Healthcare", "account": "Checking"}, {"date": "2025-11-27", "description": "BART TICKETS", "amount": -10.63, "category": "Transport", "account": "Checking"}, {"date": "2025-11-26", "description": "UBER *EATS", "amount": -38.36, "category": "Restaurants", "account": "Checking"}, {"date": "2025-11-25", "description": "NYTIMES DIGITAL SUBSCRIPTION", "amount": -17.79, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-11-25", "description": "TARGET 00012345", "amount": -73.58, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-11-23", "description": "TARGET 00012345", "amount": -72.9, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-11-22", "description": "AMAZON.COM*PRIME MEMBERSHIP", "amount": -15.34, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-11-20", "description": "EQUINOX FITNESS", "amount": -213.61, "category": "Personal Care", "account": "Checking"}, {"date": "2025-11-20", "description": "REI CO-OP MOUNTAIN VIEW", "amount": -210.88, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-11-20", "description": "UNITED AIRLINES TKT", "amount": -439.72, "category": "Travel", "account": "Checking"}, {"date": "2025-11-18", "description": "ANTHROPIC CLAUDE PRO", "amount": -20.41, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-11-16", "description": "APPLE.COM/BILL", "amount": -36.14, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-11-15", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2934.72, "category": "Income", "account": "Checking"}, {"date": "2025-11-14", "description": "NETFLIX.COM", "amount": -18.82, "category": "Entertainment", "account": "Checking"}, {"date": "2025-11-14", "description": "SPOTIFY USA", "amount": -12.15, "category": "Entertainment", "account": "Checking"}, {"date": "2025-11-14", "description": "TARGET 00012345", "amount": -77.28, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-11-13", "description": "HERTZ RENT A CAR LAX", "amount": -174.06, "category": "Housing", "account": "Checking"}, {"date": "2025-11-12", "description": "STATE FARM AUTO INSURANCE", "amount": -142.16, "category": "Insurance", "account": "Checking"}, {"date": "2025-11-11", "description": "CHIPOTLE 0298", "amount": -18.44, "category": "Restaurants", "account": "Checking"}, {"date": "2025-11-10", "description": "BLUE SHIELD CA HEALTH PREMIUM", "amount": -425.28, "category": "Insurance", "account": "Checking"}, {"date": "2025-11-09", "description": "WALGREENS #04456", "amount": -27.49, "category": "Healthcare", "account": "Checking"}, {"date": "2025-11-08", "description": "ZARA US 1234", "amount": -99.25, "category": "Shopping", "account": "Checking"}, {"date": "2025-11-08", "description": "HERTZ RENT A CAR LAX", "amount": -199.76, "category": "Housing", "account": "Checking"}, {"date": "2025-11-07", "description": "COMCAST XFINITY INTERNET", "amount": -72.44, "category": "Utilities", "account": "Checking"}, {"date": "2025-11-07", "description": "SAFEWAY STORE 0998", "amount": -87.02, "category": "Groceries", "account": "Checking"}, {"date": "2025-11-06", "description": "TARGET 00012345", "amount": -63.24, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-11-05", "description": "AT&T MOBILITY", "amount": -83.65, "category": "Utilities", "account": "Checking"}, {"date": "2025-11-03", "description": "UBER *EATS", "amount": -50.77, "category": "Restaurants", "account": "Checking"}, {"date": "2025-11-01", "description": "RENT - PARK STREET PROPERTIES", "amount": -2615.7, "category": "Housing", "account": "Checking"}, {"date": "2025-11-01", "description": "TARGET 00012345", "amount": -89.38, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-11-01", "description": "SAFEWAY STORE 0998", "amount": -89.94, "category": "Groceries", "account": "Checking"}, {"date": "2025-10-31", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2953.41, "category": "Income", "account": "Checking"}, {"date": "2025-10-31", "description": "LYFT *RIDE", "amount": -17.2, "category": "Transport", "account": "Checking"}, {"date": "2025-10-31", "description": "BURMA SUPERSTAR SF", "amount": -93.23, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-10-30", "description": "CHEVRON 0099", "amount": -47.02, "category": "Transport", "account": "Checking"}, {"date": "2025-10-26", "description": "HOME DEPOT 0099", "amount": -180.28, "category": "Shopping", "account": "Checking"}, {"date": "2025-10-25", "description": "NYTIMES DIGITAL SUBSCRIPTION", "amount": -16.62, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-10-24", "description": "WALGREENS #04456", "amount": -28.35, "category": "Healthcare", "account": "Checking"}, {"date": "2025-10-23", "description": "STARBUCKS STORE 09221", "amount": -8.23, "category": "Restaurants", "account": "Checking"}, {"date": "2025-10-23", "description": "BURMA SUPERSTAR SF", "amount": -73.06, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-10-23", "description": "AIRBNB * HMTRPDQRS9", "amount": -295.06, "category": "Travel", "account": "Checking"}, {"date": "2025-10-23", "description": "ZARA US 1234", "amount": -90.25, "category": "Shopping", "account": "Checking"}, {"date": "2025-10-22", "description": "AMAZON.COM*PRIME MEMBERSHIP", "amount": -15.56, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-10-22", "description": "DR MARTINEZ DENTAL CLINIC", "amount": -308.0, "category": "Healthcare", "account": "Checking"}, {"date": "2025-10-20", "description": "EQUINOX FITNESS", "amount": -211.51, "category": "Personal Care", "account": "Checking"}, {"date": "2025-10-20", "description": "PHILZ COFFEE 24TH ST", "amount": -5.61, "category": "Restaurants", "account": "Checking"}, {"date": "2025-10-20", "description": "DR MARTINEZ DENTAL CLINIC", "amount": -330.78, "category": "Healthcare", "account": "Checking"}, {"date": "2025-10-18", "description": "ANTHROPIC CLAUDE PRO", "amount": -19.91, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-10-16", "description": "APPLE.COM/BILL", "amount": -34.39, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-10-16", "description": "UNITED AIRLINES TKT", "amount": -371.78, "category": "Travel", "account": "Checking"}, {"date": "2025-10-15", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2998.07, "category": "Income", "account": "Checking"}, {"date": "2025-10-14", "description": "NETFLIX.COM", "amount": -17.42, "category": "Entertainment", "account": "Checking"}, {"date": "2025-10-14", "description": "SPOTIFY USA", "amount": -11.7, "category": "Entertainment", "account": "Checking"}, {"date": "2025-10-12", "description": "STATE FARM AUTO INSURANCE", "amount": -153.43, "category": "Insurance", "account": "Checking"}, {"date": "2025-10-10", "description": "BLUE SHIELD CA HEALTH PREMIUM", "amount": -409.06, "category": "Insurance", "account": "Checking"}, {"date": "2025-10-09", "description": "SAFEWAY STORE 0998", "amount": -99.67, "category": "Groceries", "account": "Checking"}, {"date": "2025-10-09", "description": "ZARA US 1234", "amount": -93.96, "category": "Shopping", "account": "Checking"}, {"date": "2025-10-08", "description": "BURMA SUPERSTAR SF", "amount": -112.63, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-10-07", "description": "COMCAST XFINITY INTERNET", "amount": -67.08, "category": "Utilities", "account": "Checking"}, {"date": "2025-10-06", "description": "DOORDASH SUSHI ROKU", "amount": -55.78, "category": "Restaurants", "account": "Checking"}, {"date": "2025-10-05", "description": "AT&T MOBILITY", "amount": -86.39, "category": "Utilities", "account": "Checking"}, {"date": "2025-10-03", "description": "ZARA US 1234", "amount": -126.44, "category": "Shopping", "account": "Checking"}, {"date": "2025-10-02", "description": "ZARA US 1234", "amount": -75.31, "category": "Shopping", "account": "Checking"}, {"date": "2025-10-01", "description": "RENT - PARK STREET PROPERTIES", "amount": -2757.84, "category": "Housing", "account": "Checking"}, {"date": "2025-10-01", "description": "DOORDASH SUSHI ROKU", "amount": -73.88, "category": "Restaurants", "account": "Checking"}, {"date": "2025-09-30", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2986.15, "category": "Income", "account": "Checking"}, {"date": "2025-09-30", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2986.15, "category": "Income", "account": "Checking"}, {"date": "2025-09-29", "description": "ZARA US 1234", "amount": -105.38, "category": "Shopping", "account": "Checking"}, {"date": "2025-09-29", "description": "SHELL OIL 12345", "amount": -59.29, "category": "Transport", "account": "Checking"}, {"date": "2025-09-29", "description": "CHIPOTLE 0298", "amount": -15.52, "category": "Restaurants", "account": "Checking"}, {"date": "2025-09-29", "description": "ZARA US 1234", "amount": -105.38, "category": "Shopping", "account": "Checking"}, {"date": "2025-09-29", "description": "SHELL OIL 12345", "amount": -59.29, "category": "Transport", "account": "Checking"}, {"date": "2025-09-29", "description": "CHIPOTLE 0298", "amount": -15.52, "category": "Restaurants", "account": "Checking"}, {"date": "2025-09-27", "description": "AMAZON.COM*A2K9P3RT0", "amount": -114.22, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-09-27", "description": "AMAZON.COM*A2K9P3RT0", "amount": -114.22, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-09-26", "description": "CHEVRON 0099", "amount": -55.92, "category": "Transport", "account": "Checking"}, {"date": "2025-09-26", "description": "CHEVRON 0099", "amount": -55.92, "category": "Transport", "account": "Checking"}, {"date": "2025-09-25", "description": "NYTIMES DIGITAL SUBSCRIPTION", "amount": -16.29, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-09-25", "description": "NYTIMES DIGITAL SUBSCRIPTION", "amount": -16.29, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-09-24", "description": "WALGREENS #04456", "amount": -43.65, "category": "Healthcare", "account": "Checking"}, {"date": "2025-09-24", "description": "WALGREENS #04456", "amount": -43.65, "category": "Healthcare", "account": "Checking"}, {"date": "2025-09-23", "description": "BURMA SUPERSTAR SF", "amount": -72.45, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-09-23", "description": "BURMA SUPERSTAR SF", "amount": -72.45, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-09-22", "description": "AMAZON.COM*PRIME MEMBERSHIP", "amount": -15.58, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-09-22", "description": "AMAZON.COM*PRIME MEMBERSHIP", "amount": -15.58, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-09-20", "description": "EQUINOX FITNESS", "amount": -211.47, "category": "Personal Care", "account": "Checking"}, {"date": "2025-09-20", "description": "EQUINOX FITNESS", "amount": -211.47, "category": "Personal Care", "account": "Checking"}, {"date": "2025-09-19", "description": "HERTZ RENT A CAR LAX", "amount": -149.36, "category": "Housing", "account": "Checking"}, {"date": "2025-09-19", "description": "HERTZ RENT A CAR LAX", "amount": -149.36, "category": "Housing", "account": "Checking"}, {"date": "2025-09-18", "description": "ANTHROPIC CLAUDE PRO", "amount": -19.47, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-09-18", "description": "ANTHROPIC CLAUDE PRO", "amount": -19.47, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-09-16", "description": "APPLE.COM/BILL", "amount": -35.74, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-09-16", "description": "WHOLE FOODS MKT 12345 SF", "amount": -202.39, "category": "Groceries", "account": "Checking"}, {"date": "2025-09-16", "description": "APPLE.COM/BILL", "amount": -35.74, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-09-16", "description": "WHOLE FOODS MKT 12345 SF", "amount": -202.39, "category": "Groceries", "account": "Checking"}, {"date": "2025-09-15", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2915.92, "category": "Income", "account": "Checking"}, {"date": "2025-09-15", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2915.92, "category": "Income", "account": "Checking"}, {"date": "2025-09-14", "description": "NETFLIX.COM", "amount": -17.52, "category": "Entertainment", "account": "Checking"}, {"date": "2025-09-14", "description": "SPOTIFY USA", "amount": -11.92, "category": "Entertainment", "account": "Checking"}, {"date": "2025-09-14", "description": "UBER *TRIP SAN FRANCISCO", "amount": -25.33, "category": "Transport", "account": "Checking"}, {"date": "2025-09-14", "description": "TRADER JOE'S #154 SF", "amount": -66.9, "category": "Groceries", "account": "Checking"}, {"date": "2025-09-14", "description": "CHEVRON 0099", "amount": -60.83, "category": "Transport", "account": "Checking"}, {"date": "2025-09-14", "description": "NETFLIX.COM", "amount": -17.52, "category": "Entertainment", "account": "Checking"}, {"date": "2025-09-14", "description": "SPOTIFY USA", "amount": -11.92, "category": "Entertainment", "account": "Checking"}, {"date": "2025-09-14", "description": "UBER *TRIP SAN FRANCISCO", "amount": -25.33, "category": "Transport", "account": "Checking"}, {"date": "2025-09-14", "description": "TRADER JOE'S #154 SF", "amount": -66.9, "category": "Groceries", "account": "Checking"}, {"date": "2025-09-14", "description": "CHEVRON 0099", "amount": -60.83, "category": "Transport", "account": "Checking"}, {"date": "2025-09-13", "description": "UBER *TRIP SAN FRANCISCO", "amount": -27.03, "category": "Transport", "account": "Checking"}, {"date": "2025-09-13", "description": "UBER *TRIP SAN FRANCISCO", "amount": -27.03, "category": "Transport", "account": "Checking"}, {"date": "2025-09-12", "description": "STATE FARM AUTO INSURANCE", "amount": -147.77, "category": "Insurance", "account": "Checking"}, {"date": "2025-09-12", "description": "STATE FARM AUTO INSURANCE", "amount": -147.77, "category": "Insurance", "account": "Checking"}, {"date": "2025-09-10", "description": "BLUE SHIELD CA HEALTH PREMIUM", "amount": -423.44, "category": "Insurance", "account": "Checking"}, {"date": "2025-09-10", "description": "ZARA US 1234", "amount": -95.13, "category": "Shopping", "account": "Checking"}, {"date": "2025-09-10", "description": "BLUE SHIELD CA HEALTH PREMIUM", "amount": -423.44, "category": "Insurance", "account": "Checking"}, {"date": "2025-09-10", "description": "ZARA US 1234", "amount": -95.13, "category": "Shopping", "account": "Checking"}, {"date": "2025-09-09", "description": "SHELL OIL 12345", "amount": -57.63, "category": "Transport", "account": "Checking"}, {"date": "2025-09-09", "description": "SHELL OIL 12345", "amount": -57.63, "category": "Transport", "account": "Checking"}, {"date": "2025-09-08", "description": "CHEVRON 0099", "amount": -55.1, "category": "Transport", "account": "Checking"}, {"date": "2025-09-08", "description": "CHEVRON 0099", "amount": -55.1, "category": "Transport", "account": "Checking"}, {"date": "2025-09-07", "description": "COMCAST XFINITY INTERNET", "amount": -68.43, "category": "Utilities", "account": "Checking"}, {"date": "2025-09-07", "description": "COMCAST XFINITY INTERNET", "amount": -68.43, "category": "Utilities", "account": "Checking"}, {"date": "2025-09-05", "description": "AT&T MOBILITY", "amount": -87.89, "category": "Utilities", "account": "Checking"}, {"date": "2025-09-05", "description": "AT&T MOBILITY", "amount": -87.89, "category": "Utilities", "account": "Checking"}, {"date": "2025-09-01", "description": "RENT - PARK STREET PROPERTIES", "amount": -2636.77, "category": "Housing", "account": "Checking"}, {"date": "2025-09-01", "description": "RENT - PARK STREET PROPERTIES", "amount": -2636.77, "category": "Housing", "account": "Checking"}, {"date": "2025-08-31", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2946.5, "category": "Income", "account": "Checking"}, {"date": "2025-08-31", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2946.5, "category": "Income", "account": "Checking"}, {"date": "2025-08-30", "description": "WALGREENS #04456", "amount": -36.4, "category": "Healthcare", "account": "Checking"}, {"date": "2025-08-30", "description": "WALGREENS #04456", "amount": -36.4, "category": "Healthcare", "account": "Checking"}, {"date": "2025-08-28", "description": "ZARA US 1234", "amount": -122.48, "category": "Shopping", "account": "Checking"}, {"date": "2025-08-28", "description": "STARBUCKS STORE 09221", "amount": -6.98, "category": "Restaurants", "account": "Checking"}, {"date": "2025-08-28", "description": "ZARA US 1234", "amount": -122.48, "category": "Shopping", "account": "Checking"}, {"date": "2025-08-28", "description": "STARBUCKS STORE 09221", "amount": -6.98, "category": "Restaurants", "account": "Checking"}, {"date": "2025-08-26", "description": "BURMA SUPERSTAR SF", "amount": -76.76, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-08-26", "description": "HERTZ RENT A CAR LAX", "amount": -204.38, "category": "Housing", "account": "Checking"}, {"date": "2025-08-26", "description": "AMAZON.COM*A2K9P3RT0", "amount": -101.45, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-08-26", "description": "BURMA SUPERSTAR SF", "amount": -76.76, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-08-26", "description": "HERTZ RENT A CAR LAX", "amount": -204.38, "category": "Housing", "account": "Checking"}, {"date": "2025-08-26", "description": "AMAZON.COM*A2K9P3RT0", "amount": -101.45, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-08-25", "description": "NYTIMES DIGITAL SUBSCRIPTION", "amount": -17.29, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-08-25", "description": "SHELL OIL 12345", "amount": -49.17, "category": "Transport", "account": "Checking"}, {"date": "2025-08-25", "description": "AMAZON.COM*A2K9P3RT0", "amount": -98.66, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-08-25", "description": "NYTIMES DIGITAL SUBSCRIPTION", "amount": -17.29, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-08-25", "description": "SHELL OIL 12345", "amount": -49.17, "category": "Transport", "account": "Checking"}, {"date": "2025-08-25", "description": "AMAZON.COM*A2K9P3RT0", "amount": -98.66, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-08-24", "description": "CVS/PHARMACY #02184", "amount": -30.1, "category": "Healthcare", "account": "Checking"}, {"date": "2025-08-24", "description": "CVS/PHARMACY #02184", "amount": -30.1, "category": "Healthcare", "account": "Checking"}, {"date": "2025-08-23", "description": "HERTZ RENT A CAR LAX", "amount": -189.59, "category": "Housing", "account": "Checking"}, {"date": "2025-08-23", "description": "WHOLE FOODS MKT 12345 SF", "amount": -197.94, "category": "Groceries", "account": "Checking"}, {"date": "2025-08-23", "description": "HERTZ RENT A CAR LAX", "amount": -189.59, "category": "Housing", "account": "Checking"}, {"date": "2025-08-23", "description": "WHOLE FOODS MKT 12345 SF", "amount": -197.94, "category": "Groceries", "account": "Checking"}, {"date": "2025-08-22", "description": "AMAZON.COM*PRIME MEMBERSHIP", "amount": -15.37, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-08-22", "description": "AMAZON.COM*PRIME MEMBERSHIP", "amount": -15.37, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-08-20", "description": "EQUINOX FITNESS", "amount": -221.85, "category": "Personal Care", "account": "Checking"}, {"date": "2025-08-20", "description": "ZARA US 1234", "amount": -77.62, "category": "Shopping", "account": "Checking"}, {"date": "2025-08-20", "description": "EQUINOX FITNESS", "amount": -221.85, "category": "Personal Care", "account": "Checking"}, {"date": "2025-08-20", "description": "ZARA US 1234", "amount": -77.62, "category": "Shopping", "account": "Checking"}, {"date": "2025-08-18", "description": "ANTHROPIC CLAUDE PRO", "amount": -19.67, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-08-18", "description": "DR MARTINEZ DENTAL CLINIC", "amount": -237.69, "category": "Healthcare", "account": "Checking"}, {"date": "2025-08-18", "description": "ANTHROPIC CLAUDE PRO", "amount": -19.67, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-08-18", "description": "DR MARTINEZ DENTAL CLINIC", "amount": -237.69, "category": "Healthcare", "account": "Checking"}, {"date": "2025-08-16", "description": "APPLE.COM/BILL", "amount": -35.46, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-08-16", "description": "APPLE.COM/BILL", "amount": -35.46, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-08-15", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2965.47, "category": "Income", "account": "Checking"}, {"date": "2025-08-15", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2965.47, "category": "Income", "account": "Checking"}, {"date": "2025-08-14", "description": "NETFLIX.COM", "amount": -17.24, "category": "Entertainment", "account": "Checking"}, {"date": "2025-08-14", "description": "SPOTIFY USA", "amount": -12.01, "category": "Entertainment", "account": "Checking"}, {"date": "2025-08-14", "description": "AIRBNB * HMTRPDQRS9", "amount": -357.37, "category": "Travel", "account": "Checking"}, {"date": "2025-08-14", "description": "NETFLIX.COM", "amount": -17.24, "category": "Entertainment", "account": "Checking"}, {"date": "2025-08-14", "description": "SPOTIFY USA", "amount": -12.01, "category": "Entertainment", "account": "Checking"}, {"date": "2025-08-14", "description": "AIRBNB * HMTRPDQRS9", "amount": -357.37, "category": "Travel", "account": "Checking"}, {"date": "2025-08-13", "description": "CHIPOTLE 0298", "amount": -12.62, "category": "Restaurants", "account": "Checking"}, {"date": "2025-08-13", "description": "CHIPOTLE 0298", "amount": -12.62, "category": "Restaurants", "account": "Checking"}, {"date": "2025-08-12", "description": "STATE FARM AUTO INSURANCE", "amount": -143.11, "category": "Insurance", "account": "Checking"}, {"date": "2025-08-12", "description": "STATE FARM AUTO INSURANCE", "amount": -143.11, "category": "Insurance", "account": "Checking"}, {"date": "2025-08-10", "description": "BLUE SHIELD CA HEALTH PREMIUM", "amount": -424.2, "category": "Insurance", "account": "Checking"}, {"date": "2025-08-10", "description": "BLUE SHIELD CA HEALTH PREMIUM", "amount": -424.2, "category": "Insurance", "account": "Checking"}, {"date": "2025-08-07", "description": "COMCAST XFINITY INTERNET", "amount": -72.8, "category": "Utilities", "account": "Checking"}, {"date": "2025-08-07", "description": "COMCAST XFINITY INTERNET", "amount": -72.8, "category": "Utilities", "account": "Checking"}, {"date": "2025-08-05", "description": "AT&T MOBILITY", "amount": -84.77, "category": "Utilities", "account": "Checking"}, {"date": "2025-08-05", "description": "AT&T MOBILITY", "amount": -84.77, "category": "Utilities", "account": "Checking"}, {"date": "2025-08-02", "description": "CHIPOTLE 0298", "amount": -19.74, "category": "Restaurants", "account": "Checking"}, {"date": "2025-08-02", "description": "WALGREENS #04456", "amount": -32.38, "category": "Healthcare", "account": "Checking"}, {"date": "2025-08-02", "description": "CHIPOTLE 0298", "amount": -19.74, "category": "Restaurants", "account": "Checking"}, {"date": "2025-08-02", "description": "WALGREENS #04456", "amount": -32.38, "category": "Healthcare", "account": "Checking"}, {"date": "2025-08-01", "description": "RENT - PARK STREET PROPERTIES", "amount": -2634.67, "category": "Housing", "account": "Checking"}, {"date": "2025-08-01", "description": "RENT - PARK STREET PROPERTIES", "amount": -2634.67, "category": "Housing", "account": "Checking"}, {"date": "2025-07-31", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2981.66, "category": "Income", "account": "Checking"}, {"date": "2025-07-31", "description": "UNITED AIRLINES TKT", "amount": -578.85, "category": "Travel", "account": "Checking"}, {"date": "2025-07-31", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2981.66, "category": "Income", "account": "Checking"}, {"date": "2025-07-31", "description": "UNITED AIRLINES TKT", "amount": -578.85, "category": "Travel", "account": "Checking"}, {"date": "2025-07-30", "description": "REI CO-OP MOUNTAIN VIEW", "amount": -175.2, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-07-30", "description": "REI CO-OP MOUNTAIN VIEW", "amount": -175.2, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-07-29", "description": "RESTAURANT FOREIGN CINEMA", "amount": -130.96, "category": "Restaurants", "account": "Checking"}, {"date": "2025-07-29", "description": "RESTAURANT FOREIGN CINEMA", "amount": -130.96, "category": "Restaurants", "account": "Checking"}, {"date": "2025-07-25", "description": "NYTIMES DIGITAL SUBSCRIPTION", "amount": -17.82, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-07-25", "description": "NYTIMES DIGITAL SUBSCRIPTION", "amount": -17.82, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-07-24", "description": "BART TICKETS", "amount": -11.43, "category": "Transport", "account": "Checking"}, {"date": "2025-07-24", "description": "BART TICKETS", "amount": -11.43, "category": "Transport", "account": "Checking"}, {"date": "2025-07-23", "description": "SHELL OIL 12345", "amount": -42.29, "category": "Transport", "account": "Checking"}, {"date": "2025-07-23", "description": "SHELL OIL 12345", "amount": -42.29, "category": "Transport", "account": "Checking"}, {"date": "2025-07-22", "description": "AMAZON.COM*PRIME MEMBERSHIP", "amount": -14.84, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-07-22", "description": "CHEVRON 0099", "amount": -54.65, "category": "Transport", "account": "Checking"}, {"date": "2025-07-22", "description": "AMAZON.COM*PRIME MEMBERSHIP", "amount": -14.84, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-07-22", "description": "CHEVRON 0099", "amount": -54.65, "category": "Transport", "account": "Checking"}, {"date": "2025-07-20", "description": "EQUINOX FITNESS", "amount": -218.04, "category": "Personal Care", "account": "Checking"}, {"date": "2025-07-20", "description": "UBER *TRIP SAN FRANCISCO", "amount": -26.96, "category": "Transport", "account": "Checking"}, {"date": "2025-07-20", "description": "EQUINOX FITNESS", "amount": -218.04, "category": "Personal Care", "account": "Checking"}, {"date": "2025-07-20", "description": "UBER *TRIP SAN FRANCISCO", "amount": -26.96, "category": "Transport", "account": "Checking"}, {"date": "2025-07-19", "description": "BURMA SUPERSTAR SF", "amount": -82.32, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-07-19", "description": "BURMA SUPERSTAR SF", "amount": -82.32, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-07-18", "description": "ANTHROPIC CLAUDE PRO", "amount": -19.56, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-07-18", "description": "PHILZ COFFEE 24TH ST", "amount": -5.44, "category": "Restaurants", "account": "Checking"}, {"date": "2025-07-18", "description": "ANTHROPIC CLAUDE PRO", "amount": -19.56, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-07-18", "description": "PHILZ COFFEE 24TH ST", "amount": -5.44, "category": "Restaurants", "account": "Checking"}, {"date": "2025-07-17", "description": "STARBUCKS STORE 09221", "amount": -6.7, "category": "Restaurants", "account": "Checking"}, {"date": "2025-07-17", "description": "DOORDASH SUSHI ROKU", "amount": -77.41, "category": "Restaurants", "account": "Checking"}, {"date": "2025-07-17", "description": "STARBUCKS STORE 09221", "amount": -6.7, "category": "Restaurants", "account": "Checking"}, {"date": "2025-07-17", "description": "DOORDASH SUSHI ROKU", "amount": -77.41, "category": "Restaurants", "account": "Checking"}, {"date": "2025-07-16", "description": "APPLE.COM/BILL", "amount": -36.62, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-07-16", "description": "APPLE.COM/BILL", "amount": -36.62, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-07-15", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2922.24, "category": "Income", "account": "Checking"}, {"date": "2025-07-15", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2922.24, "category": "Income", "account": "Checking"}, {"date": "2025-07-14", "description": "NETFLIX.COM", "amount": -17.68, "category": "Entertainment", "account": "Checking"}, {"date": "2025-07-14", "description": "SPOTIFY USA", "amount": -12.43, "category": "Entertainment", "account": "Checking"}, {"date": "2025-07-14", "description": "LYFT *RIDE", "amount": -22.76, "category": "Transport", "account": "Checking"}, {"date": "2025-07-14", "description": "REI CO-OP MOUNTAIN VIEW", "amount": -179.09, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-07-14", "description": "NETFLIX.COM", "amount": -17.68, "category": "Entertainment", "account": "Checking"}, {"date": "2025-07-14", "description": "SPOTIFY USA", "amount": -12.43, "category": "Entertainment", "account": "Checking"}, {"date": "2025-07-14", "description": "LYFT *RIDE", "amount": -22.76, "category": "Transport", "account": "Checking"}, {"date": "2025-07-14", "description": "REI CO-OP MOUNTAIN VIEW", "amount": -179.09, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-07-12", "description": "STATE FARM AUTO INSURANCE", "amount": -143.46, "category": "Insurance", "account": "Checking"}, {"date": "2025-07-12", "description": "STATE FARM AUTO INSURANCE", "amount": -143.46, "category": "Insurance", "account": "Checking"}, {"date": "2025-07-11", "description": "WHOLE FOODS MKT 12345 SF", "amount": -128.82, "category": "Groceries", "account": "Checking"}, {"date": "2025-07-11", "description": "SHELL OIL 12345", "amount": -61.44, "category": "Transport", "account": "Checking"}, {"date": "2025-07-11", "description": "CHEVRON 0099", "amount": -55.19, "category": "Transport", "account": "Checking"}, {"date": "2025-07-11", "description": "WHOLE FOODS MKT 12345 SF", "amount": -128.82, "category": "Groceries", "account": "Checking"}, {"date": "2025-07-11", "description": "SHELL OIL 12345", "amount": -61.44, "category": "Transport", "account": "Checking"}, {"date": "2025-07-11", "description": "CHEVRON 0099", "amount": -55.19, "category": "Transport", "account": "Checking"}, {"date": "2025-07-10", "description": "BLUE SHIELD CA HEALTH PREMIUM", "amount": -392.37, "category": "Insurance", "account": "Checking"}, {"date": "2025-07-10", "description": "CHEVRON 0099", "amount": -51.13, "category": "Transport", "account": "Checking"}, {"date": "2025-07-10", "description": "BLUE SHIELD CA HEALTH PREMIUM", "amount": -392.37, "category": "Insurance", "account": "Checking"}, {"date": "2025-07-10", "description": "CHEVRON 0099", "amount": -51.13, "category": "Transport", "account": "Checking"}, {"date": "2025-07-09", "description": "RESTAURANT FOREIGN CINEMA", "amount": -128.62, "category": "Restaurants", "account": "Checking"}, {"date": "2025-07-09", "description": "TRADER JOE'S #154 SF", "amount": -62.63, "category": "Groceries", "account": "Checking"}, {"date": "2025-07-09", "description": "RESTAURANT FOREIGN CINEMA", "amount": -128.62, "category": "Restaurants", "account": "Checking"}, {"date": "2025-07-09", "description": "TRADER JOE'S #154 SF", "amount": -62.63, "category": "Groceries", "account": "Checking"}, {"date": "2025-07-07", "description": "COMCAST XFINITY INTERNET", "amount": -68.08, "category": "Utilities", "account": "Checking"}, {"date": "2025-07-07", "description": "LYFT *RIDE", "amount": -19.48, "category": "Transport", "account": "Checking"}, {"date": "2025-07-07", "description": "COMCAST XFINITY INTERNET", "amount": -68.08, "category": "Utilities", "account": "Checking"}, {"date": "2025-07-07", "description": "LYFT *RIDE", "amount": -19.48, "category": "Transport", "account": "Checking"}, {"date": "2025-07-05", "description": "AT&T MOBILITY", "amount": -87.51, "category": "Utilities", "account": "Checking"}, {"date": "2025-07-05", "description": "AT&T MOBILITY", "amount": -87.51, "category": "Utilities", "account": "Checking"}, {"date": "2025-07-04", "description": "BART TICKETS", "amount": -12.33, "category": "Transport", "account": "Checking"}, {"date": "2025-07-04", "description": "BART TICKETS", "amount": -12.33, "category": "Transport", "account": "Checking"}, {"date": "2025-07-01", "description": "RENT - PARK STREET PROPERTIES", "amount": -2639.48, "category": "Housing", "account": "Checking"}, {"date": "2025-07-01", "description": "DOORDASH SUSHI ROKU", "amount": -62.7, "category": "Restaurants", "account": "Checking"}, {"date": "2025-07-01", "description": "RENT - PARK STREET PROPERTIES", "amount": -2639.48, "category": "Housing", "account": "Checking"}, {"date": "2025-07-01", "description": "DOORDASH SUSHI ROKU", "amount": -62.7, "category": "Restaurants", "account": "Checking"}, {"date": "2025-06-30", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2913.08, "category": "Income", "account": "Checking"}, {"date": "2025-06-29", "description": "SHELL OIL 12345", "amount": -73.09, "category": "Transport", "account": "Checking"}, {"date": "2025-06-28", "description": "TRADER JOE'S #154 SF", "amount": -95.22, "category": "Groceries", "account": "Checking"}, {"date": "2025-06-26", "description": "TRADER JOE'S #154 SF", "amount": -96.97, "category": "Groceries", "account": "Checking"}, {"date": "2025-06-26", "description": "RESTAURANT FOREIGN CINEMA", "amount": -148.83, "category": "Restaurants", "account": "Checking"}, {"date": "2025-06-26", "description": "UNITED AIRLINES TKT", "amount": -564.29, "category": "Travel", "account": "Checking"}, {"date": "2025-06-26", "description": "CHIPOTLE 0298", "amount": -13.63, "category": "Restaurants", "account": "Checking"}, {"date": "2025-06-26", "description": "HERTZ RENT A CAR LAX", "amount": -159.13, "category": "Housing", "account": "Checking"}, {"date": "2025-06-25", "description": "NYTIMES DIGITAL SUBSCRIPTION", "amount": -16.88, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-06-24", "description": "PHILZ COFFEE 24TH ST", "amount": -8.06, "category": "Restaurants", "account": "Checking"}, {"date": "2025-06-22", "description": "AMAZON.COM*PRIME MEMBERSHIP", "amount": -15.07, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-06-20", "description": "EQUINOX FITNESS", "amount": -212.19, "category": "Personal Care", "account": "Checking"}, {"date": "2025-06-18", "description": "ANTHROPIC CLAUDE PRO", "amount": -19.07, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-06-16", "description": "APPLE.COM/BILL", "amount": -33.76, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-06-15", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2933.36, "category": "Income", "account": "Checking"}, {"date": "2025-06-14", "description": "NETFLIX.COM", "amount": -18.79, "category": "Entertainment", "account": "Checking"}, {"date": "2025-06-14", "description": "SPOTIFY USA", "amount": -12.22, "category": "Entertainment", "account": "Checking"}, {"date": "2025-06-12", "description": "STATE FARM AUTO INSURANCE", "amount": -142.26, "category": "Insurance", "account": "Checking"}, {"date": "2025-06-11", "description": "REI CO-OP MOUNTAIN VIEW", "amount": -211.92, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-06-10", "description": "BLUE SHIELD CA HEALTH PREMIUM", "amount": -414.51, "category": "Insurance", "account": "Checking"}, {"date": "2025-06-10", "description": "LYFT *RIDE", "amount": -24.64, "category": "Transport", "account": "Checking"}, {"date": "2025-06-08", "description": "RESTAURANT FOREIGN CINEMA", "amount": -155.2, "category": "Restaurants", "account": "Checking"}, {"date": "2025-06-07", "description": "COMCAST XFINITY INTERNET", "amount": -71.43, "category": "Utilities", "account": "Checking"}, {"date": "2025-06-07", "description": "UNITED AIRLINES TKT", "amount": -406.48, "category": "Travel", "account": "Checking"}, {"date": "2025-06-05", "description": "AT&T MOBILITY", "amount": -84.51, "category": "Utilities", "account": "Checking"}, {"date": "2025-06-04", "description": "LYFT *RIDE", "amount": -23.33, "category": "Transport", "account": "Checking"}, {"date": "2025-06-01", "description": "RENT - PARK STREET PROPERTIES", "amount": -2777.15, "category": "Housing", "account": "Checking"}, {"date": "2025-06-01", "description": "RESTAURANT FOREIGN CINEMA", "amount": -139.1, "category": "Restaurants", "account": "Checking"}, {"date": "2025-05-31", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2953.11, "category": "Income", "account": "Checking"}, {"date": "2025-05-30", "description": "TRADER JOE'S #154 SF", "amount": -61.93, "category": "Groceries", "account": "Checking"}, {"date": "2025-05-29", "description": "SAFEWAY STORE 0998", "amount": -122.27, "category": "Groceries", "account": "Checking"}, {"date": "2025-05-29", "description": "PHILZ COFFEE 24TH ST", "amount": -5.7, "category": "Restaurants", "account": "Checking"}, {"date": "2025-05-29", "description": "STARBUCKS STORE 09221", "amount": -8.1, "category": "Restaurants", "account": "Checking"}, {"date": "2025-05-27", "description": "WALGREENS #04456", "amount": -41.67, "category": "Healthcare", "account": "Checking"}, {"date": "2025-05-25", "description": "NYTIMES DIGITAL SUBSCRIPTION", "amount": -17.27, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-05-25", "description": "SAFEWAY STORE 0998", "amount": -74.19, "category": "Groceries", "account": "Checking"}, {"date": "2025-05-23", "description": "UBER *TRIP SAN FRANCISCO", "amount": -21.22, "category": "Transport", "account": "Checking"}, {"date": "2025-05-22", "description": "AMAZON.COM*PRIME MEMBERSHIP", "amount": -14.36, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-05-22", "description": "AIRBNB * HMTRPDQRS9", "amount": -409.27, "category": "Travel", "account": "Checking"}, {"date": "2025-05-20", "description": "EQUINOX FITNESS", "amount": -205.1, "category": "Personal Care", "account": "Checking"}, {"date": "2025-05-20", "description": "HOME DEPOT 0099", "amount": -198.47, "category": "Shopping", "account": "Checking"}, {"date": "2025-05-20", "description": "REI CO-OP MOUNTAIN VIEW", "amount": -186.01, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-05-18", "description": "ANTHROPIC CLAUDE PRO", "amount": -20.16, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-05-17", "description": "TARGET 00012345", "amount": -64.84, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-05-16", "description": "APPLE.COM/BILL", "amount": -35.23, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-05-15", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2991.94, "category": "Income", "account": "Checking"}, {"date": "2025-05-14", "description": "NETFLIX.COM", "amount": -17.82, "category": "Entertainment", "account": "Checking"}, {"date": "2025-05-14", "description": "SPOTIFY USA", "amount": -12.52, "category": "Entertainment", "account": "Checking"}, {"date": "2025-05-14", "description": "UBER *EATS", "amount": -31.57, "category": "Restaurants", "account": "Checking"}, {"date": "2025-05-13", "description": "PHILZ COFFEE 24TH ST", "amount": -7.16, "category": "Restaurants", "account": "Checking"}, {"date": "2025-05-12", "description": "STATE FARM AUTO INSURANCE", "amount": -153.35, "category": "Insurance", "account": "Checking"}, {"date": "2025-05-12", "description": "DOORDASH SUSHI ROKU", "amount": -57.7, "category": "Restaurants", "account": "Checking"}, {"date": "2025-05-11", "description": "UBER *EATS", "amount": -35.24, "category": "Restaurants", "account": "Checking"}, {"date": "2025-05-10", "description": "BLUE SHIELD CA HEALTH PREMIUM", "amount": -394.2, "category": "Insurance", "account": "Checking"}, {"date": "2025-05-10", "description": "AMAZON.COM*A2K9P3RT0", "amount": -83.63, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-05-10", "description": "UNITED AIRLINES TKT", "amount": -369.0, "category": "Travel", "account": "Checking"}, {"date": "2025-05-09", "description": "PHILZ COFFEE 24TH ST", "amount": -8.09, "category": "Restaurants", "account": "Checking"}, {"date": "2025-05-07", "description": "COMCAST XFINITY INTERNET", "amount": -66.97, "category": "Utilities", "account": "Checking"}, {"date": "2025-05-07", "description": "HERTZ RENT A CAR LAX", "amount": -185.05, "category": "Housing", "account": "Checking"}, {"date": "2025-05-05", "description": "AT&T MOBILITY", "amount": -87.99, "category": "Utilities", "account": "Checking"}, {"date": "2025-05-05", "description": "UBER *EATS", "amount": -37.02, "category": "Restaurants", "account": "Checking"}, {"date": "2025-05-03", "description": "WALGREENS #04456", "amount": -31.64, "category": "Healthcare", "account": "Checking"}, {"date": "2025-05-01", "description": "RENT - PARK STREET PROPERTIES", "amount": -2532.57, "category": "Housing", "account": "Checking"}, {"date": "2025-05-01", "description": "UNITED AIRLINES TKT", "amount": -552.23, "category": "Travel", "account": "Checking"}, {"date": "2025-04-30", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2980.75, "category": "Income", "account": "Checking"}, {"date": "2025-04-28", "description": "SAFEWAY STORE 0998", "amount": -98.17, "category": "Groceries", "account": "Checking"}, {"date": "2025-04-28", "description": "WALGREENS #04456", "amount": -29.28, "category": "Healthcare", "account": "Checking"}, {"date": "2025-04-26", "description": "AMAZON.COM*A2K9P3RT0", "amount": -82.06, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-04-25", "description": "NYTIMES DIGITAL SUBSCRIPTION", "amount": -16.57, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-04-23", "description": "BART TICKETS", "amount": -12.85, "category": "Transport", "account": "Checking"}, {"date": "2025-04-22", "description": "AMAZON.COM*PRIME MEMBERSHIP", "amount": -15.53, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-04-21", "description": "WALGREENS #04456", "amount": -44.39, "category": "Healthcare", "account": "Checking"}, {"date": "2025-04-20", "description": "EQUINOX FITNESS", "amount": -211.55, "category": "Personal Care", "account": "Checking"}, {"date": "2025-04-18", "description": "ANTHROPIC CLAUDE PRO", "amount": -19.81, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-04-18", "description": "AMAZON.COM*A2K9P3RT0", "amount": -74.71, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-04-18", "description": "UNITED AIRLINES TKT", "amount": -526.89, "category": "Travel", "account": "Checking"}, {"date": "2025-04-16", "description": "APPLE.COM/BILL", "amount": -33.58, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-04-15", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2978.46, "category": "Income", "account": "Checking"}, {"date": "2025-04-14", "description": "NETFLIX.COM", "amount": -18.3, "category": "Entertainment", "account": "Checking"}, {"date": "2025-04-14", "description": "SPOTIFY USA", "amount": -12.57, "category": "Entertainment", "account": "Checking"}, {"date": "2025-04-13", "description": "UBER *EATS", "amount": -51.8, "category": "Restaurants", "account": "Checking"}, {"date": "2025-04-12", "description": "STATE FARM AUTO INSURANCE", "amount": -151.39, "category": "Insurance", "account": "Checking"}, {"date": "2025-04-10", "description": "BLUE SHIELD CA HEALTH PREMIUM", "amount": -410.64, "category": "Insurance", "account": "Checking"}, {"date": "2025-04-07", "description": "COMCAST XFINITY INTERNET", "amount": -69.46, "category": "Utilities", "account": "Checking"}, {"date": "2025-04-07", "description": "CHEVRON 0099", "amount": -60.77, "category": "Transport", "account": "Checking"}, {"date": "2025-04-06", "description": "UBER *EATS", "amount": -41.16, "category": "Restaurants", "account": "Checking"}, {"date": "2025-04-06", "description": "SHELL OIL 12345", "amount": -57.63, "category": "Transport", "account": "Checking"}, {"date": "2025-04-06", "description": "CHEVRON 0099", "amount": -36.3, "category": "Transport", "account": "Checking"}, {"date": "2025-04-05", "description": "AT&T MOBILITY", "amount": -84.41, "category": "Utilities", "account": "Checking"}, {"date": "2025-04-05", "description": "BURMA SUPERSTAR SF", "amount": -84.5, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-04-03", "description": "ZARA US 1234", "amount": -120.45, "category": "Shopping", "account": "Checking"}, {"date": "2025-04-02", "description": "HOME DEPOT 0099", "amount": -176.28, "category": "Shopping", "account": "Checking"}, {"date": "2025-04-02", "description": "BART TICKETS", "amount": -9.09, "category": "Transport", "account": "Checking"}, {"date": "2025-04-02", "description": "HOME DEPOT 0099", "amount": -154.22, "category": "Shopping", "account": "Checking"}, {"date": "2025-04-01", "description": "RENT - PARK STREET PROPERTIES", "amount": -2567.96, "category": "Housing", "account": "Checking"}, {"date": "2025-03-31", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2959.89, "category": "Income", "account": "Checking"}, {"date": "2025-03-28", "description": "DR MARTINEZ DENTAL CLINIC", "amount": -252.93, "category": "Healthcare", "account": "Checking"}, {"date": "2025-03-25", "description": "NYTIMES DIGITAL SUBSCRIPTION", "amount": -17.06, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-03-23", "description": "BURMA SUPERSTAR SF", "amount": -106.08, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-03-23", "description": "AIRBNB * HMTRPDQRS9", "amount": -260.62, "category": "Travel", "account": "Checking"}, {"date": "2025-03-22", "description": "AMAZON.COM*PRIME MEMBERSHIP", "amount": -15.71, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-03-22", "description": "TARGET 00012345", "amount": -63.33, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-03-20", "description": "EQUINOX FITNESS", "amount": -221.79, "category": "Personal Care", "account": "Checking"}, {"date": "2025-03-19", "description": "CHIPOTLE 0298", "amount": -11.42, "category": "Restaurants", "account": "Checking"}, {"date": "2025-03-19", "description": "HOME DEPOT 0099", "amount": -153.87, "category": "Shopping", "account": "Checking"}, {"date": "2025-03-18", "description": "ANTHROPIC CLAUDE PRO", "amount": -20.46, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-03-18", "description": "RESTAURANT FOREIGN CINEMA", "amount": -107.41, "category": "Restaurants", "account": "Checking"}, {"date": "2025-03-16", "description": "APPLE.COM/BILL", "amount": -33.52, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-03-15", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2991.85, "category": "Income", "account": "Checking"}, {"date": "2025-03-15", "description": "CVS/PHARMACY #02184", "amount": -30.52, "category": "Healthcare", "account": "Checking"}, {"date": "2025-03-14", "description": "NETFLIX.COM", "amount": -17.52, "category": "Entertainment", "account": "Checking"}, {"date": "2025-03-14", "description": "SPOTIFY USA", "amount": -12.07, "category": "Entertainment", "account": "Checking"}, {"date": "2025-03-13", "description": "UNITED AIRLINES TKT", "amount": -509.29, "category": "Travel", "account": "Checking"}, {"date": "2025-03-12", "description": "STATE FARM AUTO INSURANCE", "amount": -144.14, "category": "Insurance", "account": "Checking"}, {"date": "2025-03-10", "description": "BLUE SHIELD CA HEALTH PREMIUM", "amount": -424.64, "category": "Insurance", "account": "Checking"}, {"date": "2025-03-08", "description": "CHIPOTLE 0298", "amount": -11.91, "category": "Restaurants", "account": "Checking"}, {"date": "2025-03-07", "description": "COMCAST XFINITY INTERNET", "amount": -73.39, "category": "Utilities", "account": "Checking"}, {"date": "2025-03-07", "description": "WALGREENS #04456", "amount": -42.73, "category": "Healthcare", "account": "Checking"}, {"date": "2025-03-05", "description": "AT&T MOBILITY", "amount": -83.84, "category": "Utilities", "account": "Checking"}, {"date": "2025-03-05", "description": "UNITED AIRLINES TKT", "amount": -464.45, "category": "Travel", "account": "Checking"}, {"date": "2025-03-05", "description": "BART TICKETS", "amount": -12.52, "category": "Transport", "account": "Checking"}, {"date": "2025-03-03", "description": "TRADER JOE'S #154 SF", "amount": -95.26, "category": "Groceries", "account": "Checking"}, {"date": "2025-03-03", "description": "CVS/PHARMACY #02184", "amount": -26.87, "category": "Healthcare", "account": "Checking"}, {"date": "2025-03-01", "description": "RENT - PARK STREET PROPERTIES", "amount": -2646.98, "category": "Housing", "account": "Checking"}, {"date": "2025-03-01", "description": "HOME DEPOT 0099", "amount": -160.79, "category": "Shopping", "account": "Checking"}, {"date": "2025-02-28", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2955.69, "category": "Income", "account": "Checking"}, {"date": "2025-02-25", "description": "NYTIMES DIGITAL SUBSCRIPTION", "amount": -16.82, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-02-25", "description": "TRADER JOE'S #154 SF", "amount": -95.33, "category": "Groceries", "account": "Checking"}, {"date": "2025-02-25", "description": "UBER *EATS", "amount": -48.18, "category": "Restaurants", "account": "Checking"}, {"date": "2025-02-24", "description": "WALGREENS #04456", "amount": -38.31, "category": "Healthcare", "account": "Checking"}, {"date": "2025-02-24", "description": "HOME DEPOT 0099", "amount": -150.1, "category": "Shopping", "account": "Checking"}, {"date": "2025-02-24", "description": "BART TICKETS", "amount": -8.81, "category": "Transport", "account": "Checking"}, {"date": "2025-02-22", "description": "AMAZON.COM*PRIME MEMBERSHIP", "amount": -15.22, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-02-22", "description": "SHELL OIL 12345", "amount": -61.13, "category": "Transport", "account": "Checking"}, {"date": "2025-02-21", "description": "CVS/PHARMACY #02184", "amount": -33.21, "category": "Healthcare", "account": "Checking"}, {"date": "2025-02-20", "description": "EQUINOX FITNESS", "amount": -211.02, "category": "Personal Care", "account": "Checking"}, {"date": "2025-02-19", "description": "CHEVRON 0099", "amount": -46.08, "category": "Transport", "account": "Checking"}, {"date": "2025-02-18", "description": "ANTHROPIC CLAUDE PRO", "amount": -20.75, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-02-18", "description": "WHOLE FOODS MKT 12345 SF", "amount": -179.05, "category": "Groceries", "account": "Checking"}, {"date": "2025-02-18", "description": "ZARA US 1234", "amount": -124.52, "category": "Shopping", "account": "Checking"}, {"date": "2025-02-17", "description": "ZARA US 1234", "amount": -83.46, "category": "Shopping", "account": "Checking"}, {"date": "2025-02-16", "description": "APPLE.COM/BILL", "amount": -36.54, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-02-15", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2964.0, "category": "Income", "account": "Checking"}, {"date": "2025-02-15", "description": "CVS/PHARMACY #02184", "amount": -27.1, "category": "Healthcare", "account": "Checking"}, {"date": "2025-02-14", "description": "NETFLIX.COM", "amount": -17.57, "category": "Entertainment", "account": "Checking"}, {"date": "2025-02-14", "description": "SPOTIFY USA", "amount": -11.64, "category": "Entertainment", "account": "Checking"}, {"date": "2025-02-13", "description": "CHEVRON 0099", "amount": -52.44, "category": "Transport", "account": "Checking"}, {"date": "2025-02-12", "description": "STATE FARM AUTO INSURANCE", "amount": -145.27, "category": "Insurance", "account": "Checking"}, {"date": "2025-02-11", "description": "STARBUCKS STORE 09221", "amount": -6.34, "category": "Restaurants", "account": "Checking"}, {"date": "2025-02-10", "description": "BLUE SHIELD CA HEALTH PREMIUM", "amount": -392.72, "category": "Insurance", "account": "Checking"}, {"date": "2025-02-07", "description": "COMCAST XFINITY INTERNET", "amount": -68.09, "category": "Utilities", "account": "Checking"}, {"date": "2025-02-06", "description": "AMAZON.COM*A2K9P3RT0", "amount": -67.76, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-02-05", "description": "AT&T MOBILITY", "amount": -87.35, "category": "Utilities", "account": "Checking"}, {"date": "2025-02-05", "description": "UBER *EATS", "amount": -33.76, "category": "Restaurants", "account": "Checking"}, {"date": "2025-02-05", "description": "CVS/PHARMACY #02184", "amount": -31.24, "category": "Healthcare", "account": "Checking"}, {"date": "2025-02-05", "description": "AIRBNB * HMTRPDQRS9", "amount": -279.55, "category": "Travel", "account": "Checking"}, {"date": "2025-02-05", "description": "LYFT *RIDE", "amount": -23.14, "category": "Transport", "account": "Checking"}, {"date": "2025-02-04", "description": "UNITED AIRLINES TKT", "amount": -569.61, "category": "Travel", "account": "Checking"}, {"date": "2025-02-04", "description": "AIRBNB * HMTRPDQRS9", "amount": -305.47, "category": "Travel", "account": "Checking"}, {"date": "2025-02-01", "description": "RENT - PARK STREET PROPERTIES", "amount": -2698.92, "category": "Housing", "account": "Checking"}, {"date": "2025-01-31", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2902.5, "category": "Income", "account": "Checking"}, {"date": "2025-01-28", "description": "LYFT *RIDE", "amount": -21.39, "category": "Transport", "account": "Checking"}, {"date": "2025-01-28", "description": "LYFT *RIDE", "amount": -21.09, "category": "Transport", "account": "Checking"}, {"date": "2025-01-27", "description": "AIRBNB * HMTRPDQRS9", "amount": -365.39, "category": "Travel", "account": "Checking"}, {"date": "2025-01-27", "description": "LYFT *RIDE", "amount": -16.52, "category": "Transport", "account": "Checking"}, {"date": "2025-01-26", "description": "TRADER JOE'S #154 SF", "amount": -89.62, "category": "Groceries", "account": "Checking"}, {"date": "2025-01-25", "description": "NYTIMES DIGITAL SUBSCRIPTION", "amount": -17.25, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-01-25", "description": "REI CO-OP MOUNTAIN VIEW", "amount": -139.74, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-01-24", "description": "CHIPOTLE 0298", "amount": -12.75, "category": "Restaurants", "account": "Checking"}, {"date": "2025-01-23", "description": "SAFEWAY STORE 0998", "amount": -76.21, "category": "Groceries", "account": "Checking"}, {"date": "2025-01-23", "description": "UNITED AIRLINES TKT", "amount": -508.82, "category": "Travel", "account": "Checking"}, {"date": "2025-01-22", "description": "AMAZON.COM*PRIME MEMBERSHIP", "amount": -14.54, "category": "SPLIT_AMAZON", "account": "Checking"}, {"date": "2025-01-20", "description": "EQUINOX FITNESS", "amount": -204.82, "category": "Personal Care", "account": "Checking"}, {"date": "2025-01-20", "description": "AIRBNB * HMTRPDQRS9", "amount": -281.64, "category": "Travel", "account": "Checking"}, {"date": "2025-01-18", "description": "ANTHROPIC CLAUDE PRO", "amount": -20.01, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-01-18", "description": "STARBUCKS STORE 09221", "amount": -9.0, "category": "Restaurants", "account": "Checking"}, {"date": "2025-01-16", "description": "APPLE.COM/BILL", "amount": -34.01, "category": "Subscriptions", "account": "Checking"}, {"date": "2025-01-15", "description": "PAYROLL DEPOSIT EXAMPLE CORP", "amount": 2963.94, "category": "Income", "account": "Checking"}, {"date": "2025-01-14", "description": "NETFLIX.COM", "amount": -17.85, "category": "Entertainment", "account": "Checking"}, {"date": "2025-01-14", "description": "SPOTIFY USA", "amount": -11.43, "category": "Entertainment", "account": "Checking"}, {"date": "2025-01-14", "description": "CHIPOTLE 0298", "amount": -15.19, "category": "Restaurants", "account": "Checking"}, {"date": "2025-01-14", "description": "UBER *TRIP SAN FRANCISCO", "amount": -21.75, "category": "Transport", "account": "Checking"}, {"date": "2025-01-13", "description": "SAFEWAY STORE 0998", "amount": -104.19, "category": "Groceries", "account": "Checking"}, {"date": "2025-01-13", "description": "UBER *EATS", "amount": -40.95, "category": "Restaurants", "account": "Checking"}, {"date": "2025-01-13", "description": "UBER *EATS", "amount": -53.24, "category": "Restaurants", "account": "Checking"}, {"date": "2025-01-12", "description": "STATE FARM AUTO INSURANCE", "amount": -141.89, "category": "Insurance", "account": "Checking"}, {"date": "2025-01-12", "description": "BURMA SUPERSTAR SF", "amount": -103.86, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-01-10", "description": "BLUE SHIELD CA HEALTH PREMIUM", "amount": -428.16, "category": "Insurance", "account": "Checking"}, {"date": "2025-01-09", "description": "REI CO-OP MOUNTAIN VIEW", "amount": -206.17, "category": "Uncategorized", "account": "Checking"}, {"date": "2025-01-08", "description": "ZARA US 1234", "amount": -89.57, "category": "Shopping", "account": "Checking"}, {"date": "2025-01-07", "description": "COMCAST XFINITY INTERNET", "amount": -71.23, "category": "Utilities", "account": "Checking"}, {"date": "2025-01-07", "description": "ZARA US 1234", "amount": -92.18, "category": "Shopping", "account": "Checking"}, {"date": "2025-01-05", "description": "AT&T MOBILITY", "amount": -87.01, "category": "Utilities", "account": "Checking"}, {"date": "2025-01-03", "description": "CHEVRON 0099", "amount": -38.87, "category": "Transport", "account": "Checking"}, {"date": "2025-01-03", "description": "CHIPOTLE 0298", "amount": -18.74, "category": "Restaurants", "account": "Checking"}, {"date": "2025-01-01", "description": "RENT - PARK STREET PROPERTIES", "amount": -2590.38, "category": "Housing", "account": "Checking"}], "insights": ["Your biggest spending category is <strong>Housing</strong> at $41,478 \u2014 that's 49% of everything you spent.", "Your largest single transaction was <strong>$2,998</strong> on 2025-10-15 \u2014 \"PAYROLL DEPOSIT EXAMPLE CORP\" (Checking).", "You have <strong>45 subscription charges</strong> in this period \u2014 about $90 per month going to recurring services.", "Your income was <strong>50% up</strong> in the second half of this period vs. the first half ($53,168 vs. $35,489).", "Your highest-spend month was <strong>2025-07</strong> at $11,289, about 59% above your monthly average.", "You saved the most in <strong>2025-09</strong>: $2,007 that month."], "methodology": [["Total transactions ingested", "519 rows"], ["Source files", "demo_brokerage_2025.csv (12), demo_checking_2025.csv (406), duplicate_q3_checking.csv (101)"], ["Accounts", "Brokerage (12), Checking (507)"], ["Reporting currency", "USD"], ["FX source", "European Central Bank reference rates (via Frankfurter API). Used for any non-reporting-currency conversions; per-transaction date."], ["Categorization rules", "75 rules from rules.yaml"], ["Self-transfers detected and excluded", "8 rows (4 pairs)"], ["Other excluded rows", "24 (work expenses, brokerage buys, payments between own cards, etc.)"], ["Uncategorized rows", "31 (shown as 'Uncategorized' on the dashboard; add rules to rules.yaml to fix)"], ["Sanity checks", "Confirmed at 2026-05-02T16:37:48.011389+00:00; all hard floors passed."], ["Sensitive-content gate (OP-1)", "Paystubs and tax documents are skipped by default. Their content is never read unless the user opts in per file."]], "feedback": {"advisor_id": "passporttowealth", "skill_version": "0.0.1-stub", "advisor_email": "feedback@passporttowealth.com", "endpoint_url": "https://passport-feedback.rafaeldf2.workers.dev", "endpoint_token": "n7fQfh_1IYS7pDqsD8O2x0EqMU6l9Mmqu0ZCJWGuqx8"}}</script>
+  <script src="assets/js/chart.umd.min.js"></script>
+  <script>
+  (function(){
+    const data = JSON.parse(document.getElementById('dashboard-data').textContent);
+    const cur  = data.currency || 'USD';
+    const SYM  = ({USD:'$', EUR:'€', GBP:'£'})[cur] || (cur+' ');
+
+    // Brand chart palette pulled from CSS vars (single source of truth).
+    const css  = getComputedStyle(document.documentElement);
+    const PAL  = ['c1','c2','c3','c4','c5','c6','c7','c8'].map(n => css.getPropertyValue('--'+n).trim());
+    const POS  = css.getPropertyValue('--positive').trim();
+    const NEG  = css.getPropertyValue('--negative').trim();
+    const TEXT = css.getPropertyValue('--text').trim();
+    const MUTE = css.getPropertyValue('--text-muted').trim();
+    const SUBT = css.getPropertyValue('--text-subtle').trim();
+    const GRID = css.getPropertyValue('--border').trim();
+
+    const fm  = (v) => (v < 0 ? '-' : '') + SYM + Math.abs(Math.round(v)).toLocaleString();
+    const fm0 = (v) => (v < 0 ? '-' : '') + SYM + Math.abs(v).toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0});
+    const fm2 = (v) => (v < 0 ? '-' : '') + SYM + Math.abs(v).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+    // Short axis-tick formatter (P0-4 from audit): $3.2k / $1.5M / $400.
+    // Tooltips use fm2 for full precision; only the gridline labels abbreviate.
+    const fmShort = (v) => {
+      const a = Math.abs(v); const s = v < 0 ? '-' : '';
+      if (a >= 1_000_000) return s + SYM + (a/1_000_000).toFixed(a >= 10_000_000 ? 0 : 1) + 'M';
+      if (a >= 1_000)     return s + SYM + (a/1_000).toFixed(a >= 10_000 ? 0 : 1) + 'k';
+      return s + SYM + Math.round(a);
+    };
+
+    // Chart.js global defaults — typography + colors aligned with the page
+    Chart.defaults.font.family = '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif';
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = MUTE;
+    Chart.defaults.borderColor = GRID;
+    Chart.defaults.plugins.legend.labels.color = TEXT;
+    Chart.defaults.plugins.legend.labels.boxWidth = 12;
+    Chart.defaults.plugins.legend.labels.boxHeight = 12;
+    Chart.defaults.plugins.legend.labels.padding = 16;
+    Chart.defaults.plugins.tooltip.backgroundColor = '#1D2433';
+    Chart.defaults.plugins.tooltip.titleColor = '#fff';
+    Chart.defaults.plugins.tooltip.bodyColor = '#fff';
+    Chart.defaults.plugins.tooltip.padding = 12;
+    Chart.defaults.plugins.tooltip.cornerRadius = 6;
+    Chart.defaults.plugins.tooltip.displayColors = true;
+    Chart.defaults.plugins.tooltip.boxPadding = 4;
+
+    // ==========================================================
+    // 1. Cashflow chart — bars (income/spend) + line (3-mo net avg)
+    // ==========================================================
+    new Chart(document.getElementById('chart-cashflow'), {
+      type: 'bar',
+      data: {
+        labels: data.months,
+        datasets: [
+          { label: 'Income', backgroundColor: POS, data: data.by_month_in,    borderRadius: 4, order: 2 },
+          { label: 'Spend',  backgroundColor: NEG, data: data.by_month_out.map(v => -v), borderRadius: 4, order: 2 },
+          { label: 'Net (3-month rolling avg)', type: 'line', data: data.cashflow_3mo_avg,
+            borderColor: PAL[0], backgroundColor: 'transparent',
+            borderWidth: 2, borderDash: [6,4], pointRadius: 3, pointBackgroundColor: PAL[0],
+            tension: 0.3, order: 1 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          x: { grid: { display: false }, ticks: { color: SUBT } },
+          y: { grid: { color: GRID, drawBorder: false }, ticks: { callback: (v) => fmShort(v), color: SUBT } }
+        },
+        plugins: {
+          legend: { position: 'top', align: 'end' },
+          tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${fm2(ctx.parsed.y)}` } }
+        }
+      }
+    });
+
+    // ==========================================================
+    // 2. Spend by category — horizontal bars, top 12
+    // ==========================================================
+    const cats = data.category_totals.slice(0, 12);
+    const catTotal = cats.reduce((s, [, v]) => s + v, 0) || 1;
+    new Chart(document.getElementById('chart-category'), {
+      type: 'bar',
+      data: {
+        labels: cats.map(([c]) => c),
+        datasets: [{
+          data: cats.map(([, v]) => v),
+          backgroundColor: cats.map((_, i) => PAL[i % PAL.length]),
+          borderRadius: 4, barThickness: 18,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          x: { grid: { color: GRID, drawBorder: false }, ticks: { callback: (v) => fmShort(v), color: SUBT } },
+          y: { grid: { display: false }, ticks: { color: TEXT, font: { size: 13 } } }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: {
+            label: (ctx) => `${fm2(ctx.parsed.x)} (${(ctx.parsed.x / catTotal * 100).toFixed(1)}% of spend)`
+          } }
+        }
+      }
+    });
+
+    // ==========================================================
+    // 3. Monthly stacked bar by category
+    // ==========================================================
+    const stacked = data.monthly_by_category;  // {month: {cat: amount}}
+    const topCats = data.top_categories_for_monthly || [];
+    const stackDatasets = topCats.map((cat, i) => ({
+      label: cat,
+      data: data.months.map(m => Math.abs((stacked[m] || {})[cat] || 0)),
+      backgroundColor: PAL[i % PAL.length],
+      borderRadius: 2, borderSkipped: false,
+    }));
+    new Chart(document.getElementById('chart-monthly'), {
+      type: 'bar',
+      data: { labels: data.months, datasets: stackDatasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          x: { stacked: true, grid: { display: false }, ticks: { color: SUBT } },
+          y: { stacked: true, grid: { color: GRID, drawBorder: false }, ticks: { callback: (v) => fmShort(v), color: SUBT } }
+        },
+        plugins: {
+          legend: { position: 'bottom', align: 'start' },
+          tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${fm2(ctx.parsed.y)}` } }
+        }
+      }
+    });
+
+    // ==========================================================
+    // INSIGHTS — render bullet list from data.insights
+    // ==========================================================
+    const ulI = document.getElementById('insights-list');
+    (data.insights || []).forEach(text => {
+      const li = document.createElement('li');
+      li.innerHTML = text;  // server-side built — already escaped, may include <strong>
+      ulI.appendChild(li);
+    });
+
+    // ==========================================================
+    // METHODOLOGY — render dl from data.methodology
+    // ==========================================================
+    const dl = document.getElementById('methodology-dl');
+    (data.methodology || []).forEach(([dt, dd]) => {
+      const dtEl = document.createElement('dt'); dtEl.textContent = dt; dl.appendChild(dtEl);
+      const ddEl = document.createElement('dd'); ddEl.textContent = dd; dl.appendChild(ddEl);
+    });
+
+    // ==========================================================
+    // TRANSACTIONS TABLE — filter (search/category/account/time-period),
+    // sort, paginate (default 10), download filtered CSV
+    // ==========================================================
+    let txData = data.transactions.slice();
+    let sortKey = 'date'; let sortDesc = true;
+    let pageSize = 10;
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function periodCutoff(value) {
+      // Returns ISO date string YYYY-MM-DD. The "now" anchor is the latest
+      // transaction date in the dataset (not real-world today) — keeps demo
+      // and historical reports sensible.
+      if (value === 'all' || !value) return null;
+      const dates = txData.map(t => t.date).sort();
+      const last = dates[dates.length - 1];
+      if (!last) return null;
+      const d = new Date(last + 'T00:00:00Z');
+      const wind = (days) => { const c = new Date(d); c.setUTCDate(c.getUTCDate() - days); return c.toISOString().slice(0,10); };
+      switch (value) {
+        case '30d':       return wind(30);
+        case '90d':       return wind(90);
+        case '6mo':       return wind(180);
+        case 'ytd':       return d.getUTCFullYear() + '-01-01';
+        case 'last-year': return (d.getUTCFullYear() - 1) + '-01-01';
+        default: return null;
+      }
+    }
+
+    function periodEnd(value) {
+      // For 'last-year', also clamp the upper end to Dec 31 of last year.
+      if (value !== 'last-year') return null;
+      const dates = txData.map(t => t.date).sort();
+      const last = dates[dates.length - 1];
+      if (!last) return null;
+      const d = new Date(last + 'T00:00:00Z');
+      return (d.getUTCFullYear() - 1) + '-12-31';
+    }
+
+    function currentView() {
+      const search = document.getElementById('tx-search').value.toLowerCase();
+      const cat    = document.getElementById('tx-category').value;
+      const acct   = document.getElementById('tx-account').value;
+      const period = document.getElementById('tx-period').value;
+      const cutoff = periodCutoff(period);
+      const upper  = periodEnd(period);
+      let view = txData.filter(t =>
+        (!search || t.description.toLowerCase().includes(search)) &&
+        (!cat    || t.category === cat) &&
+        (!acct   || t.account  === acct) &&
+        (!cutoff || t.date >= cutoff) &&
+        (!upper  || t.date <= upper)
+      );
+      view.sort((a,b) => {
+        const av = a[sortKey], bv = b[sortKey];
+        const cmp = (av < bv) ? -1 : (av > bv) ? 1 : 0;
+        return sortDesc ? -cmp : cmp;
+      });
+      return view;
+    }
+
+    function render() {
+      const view = currentView();
+      const limit = (pageSize === 'all') ? view.length : Math.min(pageSize, view.length);
+      const tbody = document.querySelector('#tx-table tbody');
+      tbody.innerHTML = view.slice(0, limit).map(t =>
+        `<tr><td>${t.date}</td><td>${escapeHtml(t.description)}</td>` +
+        `<td><span class="cat-pill">${escapeHtml(t.category)}</span></td>` +
+        `<td>${escapeHtml(t.account)}</td>` +
+        `<td class="amount ${t.amount < 0 ? 'neg' : 'pos'}">${fm2(t.amount)}</td></tr>`
+      ).join('');
+      document.getElementById('tx-meta').textContent =
+        `Showing ${limit.toLocaleString()} of ${view.length.toLocaleString()} matching · ${txData.length.toLocaleString()} total`;
+      // Sort indicators
+      document.querySelectorAll('#tx-table th').forEach(th => {
+        th.classList.remove('sorted','asc','desc');
+        if (th.dataset.sort === sortKey) th.classList.add('sorted', sortDesc ? 'desc' : 'asc');
+      });
+      // Show-more button: hidden when already showing all matching rows
+      const more = document.getElementById('tx-more');
+      const allShown = (pageSize === 'all') || limit >= view.length;
+      more.disabled = allShown;
+      more.textContent = allShown ? 'All shown' : `Show ${Math.min(view.length - limit, 50)} more`;
+    }
+
+    function populateFilters() {
+      const cats  = [...new Set(txData.map(t => t.category))].sort();
+      const accts = [...new Set(txData.map(t => t.account))].sort();
+      const cs = document.getElementById('tx-category');
+      const as = document.getElementById('tx-account');
+      cats.forEach(c  => { const o = document.createElement('option'); o.value = c; o.textContent = c; cs.appendChild(o); });
+      accts.forEach(a => { const o = document.createElement('option'); o.value = a; o.textContent = a; as.appendChild(o); });
+    }
+
+    document.querySelectorAll('#tx-table th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const k = th.dataset.sort;
+        if (sortKey === k) sortDesc = !sortDesc; else { sortKey = k; sortDesc = true; }
+        render();
+      });
+    });
+    ['tx-search','tx-category','tx-account','tx-period'].forEach(id =>
+      document.getElementById(id).addEventListener('input', render));
+
+    document.getElementById('tx-pagesize').addEventListener('change', e => {
+      const v = e.target.value;
+      pageSize = (v === 'all') ? 'all' : parseInt(v, 10);
+      render();
+    });
+    document.getElementById('tx-more').addEventListener('click', () => {
+      if (pageSize === 'all') return;
+      pageSize = Math.min(pageSize + 50, 500);
+      render();
+    });
+
+    // Download CSV of the currently-filtered view (browser-side).
+    document.getElementById('tx-download').addEventListener('click', () => {
+      const view = currentView();
+      const head = ['date','description','category','account','amount'];
+      const csv  = [head.join(',')]
+        .concat(view.map(t => head.map(k => {
+          const v = String(t[k] ?? '');
+          return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+        }).join(',')))
+        .join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url;
+      const stamp = new Date().toISOString().slice(0,10);
+      a.download = `transactions-filtered-${stamp}.csv`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    populateFilters();
+    render();
+
+    // ==========================================================
+    // STICKY NAV — active-section highlighting + shadow-on-stuck
+    // ==========================================================
+    const navLinks = document.querySelectorAll('nav.sections a');
+    const linkBySection = {};
+    navLinks.forEach(a => { linkBySection[a.getAttribute('href').slice(1)] = a; });
+
+    const sectionsToWatch = Object.keys(linkBySection)
+      .map(id => document.getElementById(id))
+      .filter(Boolean);
+
+    // CAREFUL: do NOT use Element.scrollIntoView here, even with block:'nearest'.
+    // Most browsers walk up to the page's vertical scroll context and nudge
+    // window.scrollY, which re-fires this IntersectionObserver, which re-calls
+    // scrollIntoView — feedback loop that "fights" the user's scroll.
+    // Instead, drive only the nav strip's horizontal scrollLeft directly.
+    const navInner = document.querySelector('nav.sections .nav-inner');
+    const setActive = (id) => {
+      navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
+      const link = linkBySection[id];
+      if (link && navInner) {
+        const target = link.offsetLeft - (navInner.clientWidth - link.offsetWidth) / 2;
+        const max = navInner.scrollWidth - navInner.clientWidth;
+        navInner.scrollLeft = Math.max(0, Math.min(target, max));
+      }
+    };
+
+    if ('IntersectionObserver' in window && sectionsToWatch.length) {
+      const io = new IntersectionObserver((entries) => {
+        // Pick the topmost section currently in view.
+        const visible = entries.filter(e => e.isIntersecting)
+          .sort((a,b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible.length) setActive(visible[0].target.id);
+      }, { rootMargin: '-100px 0px -55% 0px', threshold: 0 });
+      sectionsToWatch.forEach(s => io.observe(s));
+    }
+
+    // Drop-shadow on the nav once the page has scrolled past the brand header.
+    const navEl = document.querySelector('nav.sections');
+    const stuckObs = new IntersectionObserver(([e]) => {
+      navEl.classList.toggle('stuck', e.intersectionRatio < 1);
+    }, { threshold: [1] });
+    // Sentinel: a 1px element just above the nav.
+    const sentinel = document.createElement('div');
+    sentinel.style.cssText = 'position:absolute;top:0;height:1px;width:100%;';
+    navEl.parentNode.insertBefore(sentinel, navEl);
+    stuckObs.observe(sentinel);
+
+    // ==========================================================
+    // FEEDBACK WIDGET — open/close + submit
+    // ==========================================================
+    const fbConfig = data.feedback || {};
+    const fbOpen   = document.getElementById('fb-open');
+    const fbClose  = document.getElementById('fb-close');
+    const fbCancel = document.getElementById('fb-cancel');
+    const fbDrawer = document.getElementById('fb-drawer');
+    const fbOverlay = document.getElementById('fb-overlay');
+    const fbText   = document.getElementById('fb-text');
+    const fbStatus = document.getElementById('fb-status');
+    const fbSubmit = document.getElementById('fb-submit');
+
+    function openDrawer() {
+      fbDrawer.hidden = false; fbOverlay.hidden = false;
+      // double rAF so the transition runs from the initial transform
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        fbDrawer.classList.add('open'); fbOverlay.classList.add('open');
+      }));
+      setTimeout(() => fbText.focus(), 280);
+    }
+    function closeDrawer() {
+      fbDrawer.classList.remove('open'); fbOverlay.classList.remove('open');
+      setTimeout(() => { fbDrawer.hidden = true; fbOverlay.hidden = true; fbStatus.innerHTML=''; }, 280);
+    }
+    fbOpen.addEventListener('click', openDrawer);
+    [fbClose, fbCancel, fbOverlay].forEach(el => el.addEventListener('click', closeDrawer));
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !fbDrawer.hidden) closeDrawer(); });
+
+    async function submitFeedback() {
+      const msg = fbText.value.trim();
+      if (!msg) { fbStatus.className = 'fb-status err'; fbStatus.textContent = 'Please type something first.'; return; }
+      fbSubmit.disabled = true; fbStatus.className = ''; fbStatus.textContent = '';
+      const payload = {
+        v: 1,
+        ts: new Date().toISOString(),
+        client_id: fbConfig.client_id || 'web-' + (location.host || 'unknown'),
+        advisor_id: fbConfig.advisor_id || 'passporttowealth',
+        skill_version: fbConfig.skill_version || '0.0.1-stub',
+        platform: 'web ' + (navigator.userAgent || '?').slice(0, 80),
+        message: msg,
+        context_level: 'a',
+        context: { source: 'dashboard-widget' },
+      };
+      const endpoint = fbConfig.endpoint_url;
+      const advisorMailto = fbConfig.advisor_email;
+      try {
+        if (endpoint) {
+          const headers = { 'Content-Type': 'application/json' };
+          if (fbConfig.endpoint_token) headers['Authorization'] = 'Bearer ' + fbConfig.endpoint_token;
+          const r = await fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(payload) });
+          if (!r.ok) throw new Error('endpoint returned ' + r.status);
+          fbStatus.className = 'fb-status ok';
+          fbStatus.textContent = '✓ Sent. Thanks — every note helps.';
+          fbText.value = '';
+          setTimeout(closeDrawer, 1800);
+        } else if (advisorMailto) {
+          // No HTTP endpoint configured → fall back to opening the user's mail client.
+          const subject = encodeURIComponent('Product feedback — Finance Clarity dashboard');
+          const body    = encodeURIComponent(msg + '\n\n--\nSent from the dashboard feedback widget.');
+          location.href = `mailto:${advisorMailto}?subject=${subject}&body=${body}`;
+          fbStatus.className = 'fb-status ok';
+          fbStatus.textContent = 'Opened your email — click send to deliver it.';
+        } else {
+          fbStatus.className = 'fb-status err';
+          fbStatus.textContent = "No delivery channel is configured for product feedback. The dashboard still works — this just means notes can't reach the team yet.";
+        }
+      } catch (err) {
+        fbStatus.className = 'fb-status err';
+        fbStatus.textContent = "Couldn't send: " + err.message + '. Try again in a moment.';
+      } finally {
+        fbSubmit.disabled = false;
+      }
+    }
+    fbSubmit.addEventListener('click', submitFeedback);
+  })();
+  </script>
+</body>
+</html>
