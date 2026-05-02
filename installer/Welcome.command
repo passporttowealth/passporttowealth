@@ -3,9 +3,11 @@
 # Welcome.command — Passport to Wealth Finance Clarity bootstrap installer (macOS).
 #
 # Run by the client after they download from https://passporttowealth.app/.
-# Provisions Xcode CLT, Homebrew, Python 3.11, jq, Claude Code, the here-now
-# publishing skill, the finance-clarity-build skill, and the workspace at
-# ~/Documents/my-finances. Drops a START-HERE shortcut on the Desktop.
+# Provisions Xcode CLT, uv (Python toolchain — replaces Homebrew Python +
+# venv + pip), Python 3.11 via uv, jq (via Homebrew if needed), Claude Code,
+# the here-now publishing skill, the finance-clarity-build skill, and the
+# workspace at ~/Documents/my-finances. Drops a START-HERE shortcut on the
+# Desktop.
 #
 # Full design: dev/finance-clarity-build-spec.md §4. Windows mirror: Welcome.ps1.
 #
@@ -319,11 +321,13 @@ else
   ok_paced "Developer tools installed"
 fi
 
-# 2b. Homebrew — required for python@3.11 + jq
-if command -v brew >/dev/null 2>&1; then
-  ok_paced "Homebrew already installed"
-else
-  say "Installing Homebrew (Mac will ask for your password)..."
+# 2b. Homebrew — only needed for jq (one binary, no Python dep). Skipped
+# entirely if both brew and jq are already present. uv (next step) replaces
+# Homebrew's role for Python provisioning.
+NEED_BREW=0
+if ! command -v jq >/dev/null 2>&1; then NEED_BREW=1; fi
+if [ "$NEED_BREW" = "1" ] && ! command -v brew >/dev/null 2>&1; then
+  say "Installing Homebrew (Mac will ask for your password) — needed to fetch jq..."
   log "installing homebrew"
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" \
     >>"$INSTALL_LOG" 2>&1 || { fail "Homebrew install failed — see $INSTALL_LOG"; exit 1; }
@@ -334,55 +338,73 @@ else
     eval "$(/usr/local/bin/brew shellenv)"
   fi
   ok_paced "Homebrew installed"
+elif command -v brew >/dev/null 2>&1; then
+  ok_paced "Homebrew already installed"
 fi
 
-# 2c. Python 3.11 (we pin to 3.11 because some upstream deps lag on 3.13/3.14).
-# Always resolve PYTHON311 to an absolute path — Step 6 diagnostics use `test -x`
-# which only works for filesystem paths, not bare command names.
-PYTHON311=""
-for candidate in python3.11 /opt/homebrew/opt/python@3.11/bin/python3.11 /usr/local/opt/python@3.11/bin/python3.11; do
-  if [ -x "$candidate" ]; then
-    PYTHON311="$candidate"; break
-  fi
-  resolved="$(command -v "$candidate" 2>/dev/null || true)"
-  if [ -n "$resolved" ] && [ -x "$resolved" ]; then
-    PYTHON311="$resolved"; break
-  fi
-done
-if [ -n "$PYTHON311" ]; then
-  ok_paced "Python 3.11 already installed"
+# 2c. uv — single 10MB binary that replaces our previous brew/python/venv/pip
+# chain. One install action (this) instead of four (Homebrew, brew Python,
+# python -m venv, pip install). Astral's installer drops it at ~/.local/bin/uv.
+UV_BIN="${HOME}/.local/bin/uv"
+if command -v uv >/dev/null 2>&1; then
+  UV_BIN="$(command -v uv)"
+  ok_paced "uv already installed"
 else
-  say "Installing Python 3.11..."
-  run_quiet "Python 3.11 installed" brew install python@3.11 || exit 1
-  PYTHON311="$(brew --prefix python@3.11)/bin/python3.11"
+  say "Installing uv (Python toolchain)..."
+  log "installing uv"
+  curl -LsSf https://astral.sh/uv/install.sh 2>>"$INSTALL_LOG" | sh >>"$INSTALL_LOG" 2>&1 \
+    || { fail "uv install failed — see $INSTALL_LOG"; exit 1; }
+  if [ ! -x "$UV_BIN" ]; then
+    fail "uv installer ran but $UV_BIN not found — see $INSTALL_LOG"
+    exit 1
+  fi
+  # Make uv findable for the rest of this script + future shell sessions.
+  export PATH="${HOME}/.local/bin:${PATH}"
+  ok_paced "uv installed"
 fi
 
-# 2d. jq — needed by here-now publish script + our wrappers
+# 2d. Python 3.11 (we pin to 3.11 because some upstream deps lag on 3.13/3.14).
+# uv downloads a managed, isolated CPython — no system Python involved, no
+# Homebrew taps, no PATH games. PYTHON311 resolves to an absolute path inside
+# uv's managed install directory so Step 6 `test -x` works correctly.
+say "Provisioning Python 3.11..."
+"$UV_BIN" python install 3.11 >>"$INSTALL_LOG" 2>&1 \
+  || { fail "uv python install 3.11 failed — see $INSTALL_LOG"; exit 1; }
+PYTHON311="$("$UV_BIN" python find 3.11 2>>"$INSTALL_LOG" | head -1)"
+if [ -z "$PYTHON311" ] || [ ! -x "$PYTHON311" ]; then
+  fail "uv installed Python 3.11 but couldn't resolve its path — see $INSTALL_LOG"
+  exit 1
+fi
+ok_paced "Python 3.11 ready ($PYTHON311)"
+
+# 2e. jq — needed by here-now publish script + our wrappers. Tiny, no Python
+# dep. Only reason we still need Homebrew (see 2b above).
 if command -v jq >/dev/null 2>&1; then
   ok_paced "jq already installed"
 else
   run_quiet "jq installed" brew install jq || exit 1
 fi
 
-# 2e. Workspace venv + Python deps. Workspace is created on first use; create
-# its parent now so the venv has somewhere to live.
+# 2f. Workspace venv + Python deps. uv handles both in one operation per call.
+# `uv venv` creates ~/Documents/my-finances/.venv pointing at the managed
+# Python from 2d; `uv pip install --python` installs into that venv without
+# needing source-activation.
 mkdir -p "$WS"
 if [ -x "$WS/.venv/bin/python" ]; then
   ok_paced "Workspace Python environment already set up"
 else
   say "Creating workspace Python environment..."
-  "$PYTHON311" -m venv "$WS/.venv" >>"$INSTALL_LOG" 2>&1 || { fail "venv creation failed"; exit 1; }
+  "$UV_BIN" venv --python "$PYTHON311" "$WS/.venv" >>"$INSTALL_LOG" 2>&1 \
+    || { fail "uv venv failed — see $INSTALL_LOG"; exit 1; }
   ok_paced "Workspace Python environment ready"
 fi
 
-# Install / update Python deps from requirements.txt (downloaded with the skill repo).
-# At this point the skill may not be installed yet (step 2g handles that), so use
-# a known-good list inline.
+# Install / update Python deps. uv resolves + installs in one shot, far faster
+# than pip. Inline list (skill repo's requirements.txt may not be on disk yet).
 say "Installing Python dependencies..."
-"$WS/.venv/bin/pip" install --quiet --upgrade pip >>"$INSTALL_LOG" 2>&1 || true
-"$WS/.venv/bin/pip" install --quiet \
+"$UV_BIN" pip install --python "$WS/.venv/bin/python" --quiet \
   "openpyxl~=3.1" "pdfplumber~=0.11" "PyYAML~=6.0" "chardet~=5.2" "reportlab~=4.4" \
-  >>"$INSTALL_LOG" 2>&1 || { fail "Python deps install failed"; exit 1; }
+  >>"$INSTALL_LOG" 2>&1 || { fail "Python deps install failed — see $INSTALL_LOG"; exit 1; }
 ok_paced "Python dependencies installed"
 
 # 2f. Claude Code CLI — required to run the assistant
@@ -800,7 +822,7 @@ check_file() {
   else fail "$label (missing: $path)"; DIAGNOSTIC_FAILS=$((DIAGNOSTIC_FAILS + 1)); fi
 }
 
-check       "Homebrew installed"             command -v brew
+check       "uv installed"                   test -x "$UV_BIN"
 check       "Python 3.11 installed"          test -x "$PYTHON311"
 check       "jq installed"                   command -v jq
 check       "Claude Code installed"          command -v claude

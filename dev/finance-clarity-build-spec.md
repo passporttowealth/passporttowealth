@@ -99,12 +99,13 @@ Violating any of these is a skill defect. The skill should fail loudly rather th
 
 | Dependency | Where | Purpose | Required? |
 |---|---|---|---|
-| Homebrew | `/opt/homebrew` (Apple Silicon) or `/usr/local` (Intel) | Package manager for installs below | Yes (Mac only) |
-| Python 3.11+ | `brew install python@3.11` | Pipeline runtime | Yes |
-| `openpyxl`, `pdfplumber`, `pyyaml`, `chardet` | venv inside `my-finances/.venv/` | Pipeline libraries | Yes |
+| `uv` | `~/.local/bin/uv` (single binary, ~10 MB, installed via `curl -LsSf https://astral.sh/uv/install.sh | sh`) | Python toolchain — handles managed-Python install, venv creation, and dep resolution in one binary. Replaces the previous brew/python/venv/pip chain. | Yes |
+| Python 3.11+ | `uv python install 3.11` (managed install in `~/.local/share/uv/python/`) | Pipeline runtime | Yes |
+| `openpyxl`, `pdfplumber`, `pyyaml`, `chardet`, `reportlab` | venv inside `my-finances/.venv/`, populated via `uv pip install --python` | Pipeline libraries | Yes |
 | Claude Code | per official installer | The CLI the user interacts with | Yes |
-| `jq` | `brew install jq` | Required by `here-now` publish script | Yes |
-| `here-now` skill | Bundled or auto-installed via `npx skills add` | Publishing | Yes |
+| `jq` | `brew install jq` (Homebrew is the only remaining brew dep — invoked lazily, only if jq is missing) | Required by `here-now` publish script | Yes |
+| Homebrew | `/opt/homebrew` (Apple Silicon) or `/usr/local` (Intel) | Only needed to fetch jq if it's not already present. Skipped entirely if `command -v jq` succeeds. | Conditional |
+| `here-now` skill | Auto-installed via `npx skills add heredotnow/skill --skill here-now -g` | Publishing | Yes |
 | `~/.herenow/credentials` | `chmod 600` | here.now API key | Yes |
 
 No CDN dependencies. No npm install at runtime. The site template's chart library and fonts are bundled at skill-install time.

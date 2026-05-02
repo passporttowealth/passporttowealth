@@ -15,12 +15,12 @@ The whole `demo-script.md` Phase 0 assumes the user already has Terminal literac
 
 ### B1.1 — Single bootstrap installer · **P0 · M**
 **Problem:** Five separate installs (Claude Code, Python, `openpyxl`, here.now creds, folder scaffold) each with their own failure mode. Non-technical users abandon at install #2.
-**Recommendation:** Ship one shell script — `install-finance-clarity.command` (Mac double-clickable) — that:
-1. Detects/installs Homebrew (asks for password once)
-2. `brew install python@3.11 jq` (jq is required by here-now skill)
-3. Installs Claude Code via the official one-liner
-4. Creates `~/Desktop/my-finances/` with the four canonical subfolders empty
-5. Creates a `requirements.txt` and runs `pip install -r requirements.txt` in a venv inside the folder
+**Recommendation:** Ship one shell script — `Welcome.command` (Mac double-clickable) — that:
+1. Installs `uv` via `curl -LsSf https://astral.sh/uv/install.sh | sh` (single 10MB binary; replaces what used to be Homebrew + brew Python + venv + pip — four prompts collapsed to one)
+2. `uv python install 3.11` + `uv venv` + `uv pip install` (one toolchain owns Python provisioning)
+3. `brew install jq` *only if jq is missing* — Homebrew is now a conditional dep, not mandatory (jq is the only thing left that needs it)
+4. Installs Claude Code via the official one-liner
+5. Creates `~/Documents/my-finances/` with the four canonical subfolders empty
 6. Prompts for the here.now API key (paste once) and writes it to `~/.herenow/credentials` with `chmod 600`
 7. Drops a `START-HERE.command` into `my-finances/` that opens Terminal in that folder and runs `claude`
 8. Logs every step to `install.log` so failures are debuggable remotely

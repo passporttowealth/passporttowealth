@@ -820,18 +820,53 @@ class TestPipelineHealth(unittest.TestCase):
 
     def test_installer_python311_resolved_to_absolute_path(self):
         """Dry-run regression: 'Python 3.11 installed' diagnostic returned
-        a false ✗ when Python was already on PATH. Step 2c was assigning
-        PYTHON311='python3.11' (bare command name); Step 6 then ran
-        `test -x "$PYTHON311"` which only works for filesystem paths.
-
-        Fix: Step 2c must resolve the candidate to an absolute path before
-        storing it, so the diagnostic check works."""
+        a false ✗ when Python was already on PATH. After the uv migration,
+        PYTHON311 is set from `uv python find 3.11` which always returns
+        an absolute path inside uv's managed install dir. The Step 6
+        `test -x "$PYTHON311"` diagnostic stays valid as a result."""
         cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
-        # The fix uses `command -v` to resolve the path, then validates with -x
-        self.assertIn('command -v "$candidate"', cmd,
-            "Step 2c should use `command -v` to resolve PYTHON311 to a real path")
-        self.assertIn('PYTHON311="$resolved"', cmd,
-            "Step 2c should store the resolved path, not the bare candidate name")
+        # PYTHON311 is set from uv python find, which returns an absolute path
+        self.assertIn('"$UV_BIN" python find 3.11', cmd,
+            "Step 2d should resolve PYTHON311 via `uv python find 3.11`")
+        # And the diagnostic still uses test -x to validate it
+        self.assertIn('check       "Python 3.11 installed"          test -x "$PYTHON311"', cmd,
+            "Step 6 diagnostic should validate PYTHON311 with test -x")
+        # PYTHON311 is validated for executable-ness right after resolution
+        self.assertIn('if [ -z "$PYTHON311" ] || [ ! -x "$PYTHON311" ]; then', cmd,
+            "Step 2d must validate PYTHON311 is non-empty and executable")
+
+    def test_installer_uses_uv_for_python_provisioning(self):
+        """Strategic #1 — replace `brew install python@3.11 + venv + pip
+        install` with uv (one binary, one toolchain). uv handles managed
+        Python install, venv creation, and dep resolution. Removes the
+        Homebrew dependency for Python entirely; brew is now only invoked
+        if jq is missing."""
+        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        # uv installer is fetched from astral.sh
+        self.assertIn("https://astral.sh/uv/install.sh", cmd,
+            "must install uv from astral.sh/uv/install.sh")
+        # uv is used for: Python install, venv create, dep install
+        self.assertIn('"$UV_BIN" python install 3.11', cmd,
+            "must use uv to install Python 3.11")
+        self.assertIn('"$UV_BIN" venv --python "$PYTHON311"', cmd,
+            "must use `uv venv` (not python -m venv)")
+        self.assertIn('"$UV_BIN" pip install', cmd,
+            "must use `uv pip install` (not the venv's pip)")
+        # The old brew-python paths are gone
+        self.assertNotIn("brew install python@3.11", cmd,
+            "should NOT install Python via Homebrew anymore")
+        self.assertNotIn('"$PYTHON311" -m venv', cmd,
+            "should NOT create venv via `python -m venv` anymore")
+        self.assertNotIn('"$WS/.venv/bin/pip" install', cmd,
+            "should NOT install deps via the venv's pip anymore")
+        # Homebrew is now lazy — only if jq is missing
+        self.assertIn("NEED_BREW=0", cmd,
+            "Homebrew install should be gated on whether jq is needed")
+        self.assertIn('if ! command -v jq >/dev/null 2>&1; then NEED_BREW=1; fi', cmd,
+            "should only need brew when jq is missing")
+        # Step 6 diagnostic checks uv (mandatory) instead of brew
+        self.assertIn('check       "uv installed"                   test -x "$UV_BIN"', cmd,
+            "Step 6 must check uv, not Homebrew")
 
     def test_installer_fx_prewarm_streams_progress_to_tty(self):
         """Dry-run regression: 'Pre-warming exchange-rate cache (last 24
