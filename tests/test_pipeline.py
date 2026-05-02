@@ -733,7 +733,7 @@ class TestPipelineHealth(unittest.TestCase):
             "must fall back to AUTO_MODE when no controlling tty")
         # The rebind must come BEFORE the consent gate's read
         rebind_idx = cmd.find("exec </dev/tty")
-        consent_idx = cmd.find("Type %sI accept%s")
+        consent_idx = cmd.find('Type "I accept" to continue')
         self.assertLess(rebind_idx, consent_idx,
             "stdin rebind must happen before the consent prompt")
         # B9.12: INTERACTIVE flag captured ONCE — not re-tested via [ -t 0 ]
@@ -796,7 +796,7 @@ class TestPipelineHealth(unittest.TestCase):
         ps1 = (REPO / "installer" / "legacy" / "Welcome.ps1").read_text(encoding="utf-8")
 
         # Mac: count pause_for_user calls BEFORE the consent read prompt.
-        consent_idx = cmd.find("Type %sI accept%s to continue")
+        consent_idx = cmd.find('Type "I accept" to continue')
         self.assertGreater(consent_idx, 0, "consent prompt must exist")
         pre_consent = cmd[:consent_idx]
         # Subtract function definition (1) + auto-mode check inside the fn (1)

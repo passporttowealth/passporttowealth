@@ -98,8 +98,14 @@ pause_for_user() {
   if [ "$AUTO_MODE" = "1" ] || [ "$INTERACTIVE" = "0" ]; then
     return 0
   fi
-  printf '\n'
-  read -r -p "$(printf '%sPress Enter to continue%s ' "$DIM" "$RESET")" _
+  # Print the prompt as a STANDALONE line via printf (stdout) instead of
+  # using `read -p`. Two reasons: (1) bash's `read -p` writes to stderr
+  # with quirky flushing on some macOS terminals so the prompt can fail
+  # to appear, and (2) DIM ANSI (\033[2m) is borderline-invisible on
+  # several Mac Terminal themes. We use BOLD + a leading "▶" marker to
+  # be unmissable, on its own line, then read empty input.
+  printf '\n%s▶ Press Enter to continue%s\n' "$BOLD" "$RESET"
+  read -r _
 }
 
 INSTALL_LOG="${HOME}/Library/Logs/passport-to-wealth-install.log"
@@ -247,7 +253,8 @@ say_paced "  2. You understand this is ${BOLD}prototype${RESET} software and you
 say         "     your original financial records as the source of truth."
 say
 while true; do
-  read -r -p "$(printf 'Type %sI accept%s to continue, or %sno%s to cancel: ' "$BOLD" "$RESET" "$BOLD" "$RESET")" consent
+  printf '%s▶ Type "I accept" to continue, or "no" to cancel:%s ' "$BOLD" "$RESET"
+  read -r consent
   consent_lc=$(printf '%s' "$consent" | tr '[:upper:]' '[:lower:]' | xargs)
   case "$consent_lc" in
     "i accept"|"i agree"|"accept"|"agree"|"yes")
@@ -288,7 +295,11 @@ while true; do
 done
 
 say
-read -r -p "Press Enter to begin the install (or Ctrl-C to cancel)... " _
+# Same visibility fix as pause_for_user: print prompt as a line, then
+# `read` without -p. `read -p` plus DIM/BOLD ANSI is invisible on some
+# Mac Terminal themes.
+printf '%s▶ Press Enter to begin the install (or Ctrl-C to cancel)%s\n' "$BOLD" "$RESET"
+read -r _
 
 # ── Pre-flight (OP-11) ────────────────────────────────────────────────────────
 say
@@ -534,7 +545,8 @@ say
 say "${DIM}If you don't have either, please call your advisor — this is the"
 say "one step I can't do without you.${RESET}"
 say
-read -r -p "Type 1 or 2: " auth_choice
+printf '%s▶ Type 1 or 2:%s ' "$BOLD" "$RESET"
+read -r auth_choice
 
 case "$auth_choice" in
   1)
@@ -556,7 +568,8 @@ case "$auth_choice" in
     ;;
   2)
     say
-    read -r -s -p "Paste your Anthropic API key (won't be shown): " api_key
+    printf '%s▶ Paste your Anthropic API key (won'\''t be shown):%s ' "$BOLD" "$RESET"
+    read -r -s api_key
     say
     api_key="$(printf '%s' "$api_key" | tr -d '[:space:]')"
     if [[ ! "$api_key" =~ ^sk-ant- ]]; then
@@ -643,7 +656,8 @@ DOCS_REAL="$(cd ~/Documents && pwd -P)"
 if [[ "$DOCS_REAL" == */Mobile\ Documents/* ]] && [[ "$WS" == "$HOME/Documents/"* ]]; then
   warn "Your Documents folder syncs to iCloud."
   say "${DIM}For privacy, I can put your finance folder somewhere that doesn't sync.${RESET}"
-  read -r -p "Move workspace to ~/finance-workspace/ instead of Documents? [Y/n]: " RELOCATE
+  printf '%s▶ Move workspace to ~/finance-workspace/ instead of Documents? [Y/n]:%s ' "$BOLD" "$RESET"
+  read -r RELOCATE
   case "$(printf '%s' "$RELOCATE" | tr '[:upper:]' '[:lower:]' | xargs)" in
     ""|y|yes)
       NEW_WS="$HOME/finance-workspace"
