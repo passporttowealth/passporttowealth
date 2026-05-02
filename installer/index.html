@@ -759,6 +759,7 @@
       main { padding: 36px 20px 48px; }
       .brand { margin-bottom: 56px; }
       .hero h1 { font-size: 36px; }
+      .hero-br { display: none; }   /* let the H1 wrap naturally on mobile instead of forced break */
       .hero .lede { font-size: 18px; margin-bottom: 32px; }
       .install-block { padding: 16px 18px; }
       .install-block code { font-size: 12px; padding-right: 0; padding-bottom: 44px; }
@@ -798,7 +799,7 @@
     </div>
 
     <header class="hero">
-      <h1>Your crossborder finances,<br><span class="h1-accent">the easy way.</span></h1>
+      <h1>Your crossborder finances, <br class="hero-br"><span class="h1-accent">the easy way.</span></h1>
       <p class="lede">Let your AI assistant sort your files and build you the right dashboard. Multi-currency, multi-account, multi-country.</p>
     </header>
 
