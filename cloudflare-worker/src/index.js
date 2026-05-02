@@ -1,25 +1,38 @@
 // passport-feedback — Cloudflare Worker
-// Receives product-feedback POSTs from published dashboards and creates a
-// GitHub issue under the configured repo. One deployment serves all clients.
+// Two endpoints, both POST, both bearer-gated:
+//   /              feedback events from published dashboards (creates a
+//                  GitHub issue under the configured repo).
+//   /install       anonymous install_started telemetry from install.sh +
+//                  install.ps1 (counts daily installs by platform in KV).
+//   /install/stats GET — admin-gated read of the daily counters.
 //
 // Secrets (set via `wrangler secret put`):
 //   GITHUB_TOKEN           — fine-grained PAT, Issues: read/write on the repo
 //   FEEDBACK_BEARER_TOKEN  — shared anti-abuse gate (visible in dashboard HTML
-//                            by design; the real defense is the GitHub PAT
-//                            being server-side only)
+//                            + install scripts by design; the real defense
+//                            for sensitive ops is GITHUB_TOKEN being
+//                            server-side only)
 //
 // Vars (in wrangler.toml):
 //   GITHUB_OWNER, GITHUB_REPO, ALLOWED_ADVISOR_ID, ISSUE_LABEL,
 //   ALLOWED_ORIGIN_SUFFIX
 //
-// Privacy: this Worker sees feedback message bodies. Cloudflare observability
-// is off in wrangler.toml so message bodies don't sit in Cloudflare logs.
-// The Worker NEVER stores anything itself — every request is fire-and-forget.
+// KV bindings:
+//   FCB_METRICS — install-event counters (daily rollup per platform).
+//
+// Privacy: feedback events see message bodies; install events see ZERO PII
+// (no IP, no name, no machine ID — just platform + build_stamp + advisor_id).
+// Cloudflare observability is off so neither stream sits in CF logs.
 
 const MAX_MESSAGE_LEN = 10_000;
 
+// 90-day retention on install counters keeps KV from growing unbounded.
+const INSTALL_COUNTER_TTL_SECONDS = 90 * 24 * 60 * 60;
+
 export default {
   async fetch(request, env) {
+    const url = new URL(request.url);
+    const path = url.pathname;
     const origin = request.headers.get("Origin") || "";
     const corsHeaders = buildCorsHeaders(origin, env);
 
@@ -28,11 +41,28 @@ export default {
       return new Response(null, { status: 204, headers: corsHeaders });
     }
 
+    // Route: /install — anonymous telemetry POST
+    if (path === "/install") {
+      if (request.method !== "POST") {
+        return jsonResponse(405, { error: "method_not_allowed" }, corsHeaders);
+      }
+      return handleInstallEvent(request, env, corsHeaders);
+    }
+
+    // Route: /install/stats — admin GET (requires GITHUB_TOKEN as bearer)
+    if (path === "/install/stats") {
+      if (request.method !== "GET") {
+        return jsonResponse(405, { error: "method_not_allowed" }, corsHeaders);
+      }
+      return handleInstallStats(request, env, corsHeaders);
+    }
+
+    // Route: / (default) — feedback events
     if (request.method !== "POST") {
       return jsonResponse(405, { error: "method_not_allowed" }, corsHeaders);
     }
 
-    // Bearer-token gate
+    // Bearer-token gate (feedback path)
     if (env.FEEDBACK_BEARER_TOKEN) {
       const auth = request.headers.get("Authorization") || "";
       const presented = auth.startsWith("Bearer ") ? auth.slice(7) : "";
@@ -139,6 +169,100 @@ function jsonResponse(status, data, extraHeaders = {}) {
 
 function truncate(s, n) {
   return s.length > n ? s.slice(0, n - 1) + "…" : s;
+}
+
+// ── Install telemetry handlers ───────────────────────────────────────────────
+
+// POST /install — anonymous install-start ping. Schema:
+//   { v: 1, event: "install_started", platform: "mac"|"win",
+//     build_stamp: "20260502214500", advisor_id: "passporttowealth" }
+//
+// PRIVACY: we store a daily counter per platform in KV. Nothing else.
+// We deliberately do NOT log:
+//   - client IP (cf-connecting-ip header is ignored)
+//   - user-agent
+//   - any PII fields
+//   - the raw event body
+async function handleInstallEvent(request, env, corsHeaders) {
+  // Bearer-token gate (same anti-abuse token as feedback path; visible in
+  // install.sh by design — it's a soft gate, not a secret).
+  if (env.FEEDBACK_BEARER_TOKEN) {
+    const auth = request.headers.get("Authorization") || "";
+    const presented = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+    if (presented !== env.FEEDBACK_BEARER_TOKEN) {
+      return jsonResponse(401, { error: "unauthorized" }, corsHeaders);
+    }
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse(400, { error: "invalid_json" }, corsHeaders);
+  }
+
+  if (!body || body.v !== 1 || body.event !== "install_started") {
+    return jsonResponse(400, { error: "invalid_schema" }, corsHeaders);
+  }
+  if (env.ALLOWED_ADVISOR_ID && body.advisor_id !== env.ALLOWED_ADVISOR_ID) {
+    return jsonResponse(403, { error: "advisor_mismatch" }, corsHeaders);
+  }
+
+  // Sanitize platform to a fixed allowlist
+  const platform = (body.platform === "mac" || body.platform === "win") ? body.platform : "unknown";
+  const day = new Date().toISOString().slice(0, 10);  // "2026-05-02"
+  const key = `installs:${platform}:${day}`;
+
+  if (!env.FCB_METRICS) {
+    return jsonResponse(500, { error: "kv_not_bound" }, corsHeaders);
+  }
+
+  const cur = parseInt((await env.FCB_METRICS.get(key)) || "0", 10);
+  await env.FCB_METRICS.put(key, String(cur + 1), {
+    expirationTtl: INSTALL_COUNTER_TTL_SECONDS,
+  });
+
+  return jsonResponse(200, { received: true, key }, corsHeaders);
+}
+
+// GET /install/stats?days=30 — admin-gated read of the daily counters.
+// Auth: requires GITHUB_TOKEN as bearer (admin-only). Returns:
+//   { days, totals: { mac: N, win: N }, by_day: { "2026-05-02": { mac: N, win: N }, ... } }
+async function handleInstallStats(request, env, corsHeaders) {
+  // Admin gate: must present the GITHUB_TOKEN to read aggregated stats.
+  // (More restrictive than the install endpoint's anti-abuse bearer.)
+  if (!env.GITHUB_TOKEN) {
+    return jsonResponse(500, { error: "admin_token_not_configured" }, corsHeaders);
+  }
+  const auth = request.headers.get("Authorization") || "";
+  const presented = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+  if (presented !== env.GITHUB_TOKEN) {
+    return jsonResponse(401, { error: "unauthorized" }, corsHeaders);
+  }
+  if (!env.FCB_METRICS) {
+    return jsonResponse(500, { error: "kv_not_bound" }, corsHeaders);
+  }
+
+  const url = new URL(request.url);
+  const days = Math.max(1, Math.min(90, parseInt(url.searchParams.get("days") || "30", 10)));
+
+  const totals = { mac: 0, win: 0, unknown: 0 };
+  const byDay = {};
+  const now = new Date();
+
+  for (let d = 0; d < days; d++) {
+    const date = new Date(now);
+    date.setUTCDate(date.getUTCDate() - d);
+    const day = date.toISOString().slice(0, 10);
+    byDay[day] = { mac: 0, win: 0, unknown: 0 };
+    for (const platform of ["mac", "win", "unknown"]) {
+      const v = parseInt((await env.FCB_METRICS.get(`installs:${platform}:${day}`)) || "0", 10);
+      byDay[day][platform] = v;
+      totals[platform] += v;
+    }
+  }
+
+  return jsonResponse(200, { days, totals, by_day: byDay }, corsHeaders);
 }
 
 function renderIssueBody(b) {

@@ -13,6 +13,13 @@ ISSUE_LABEL = "client-feedback"
 # Browser POSTs from {slug}.here.now will work; everything else gets rejected.
 ALLOWED_ORIGIN_SUFFIX = ".here.now"
 
+# KV namespace for install-event counters (Layer 2 telemetry — anonymous
+# install_started pings from install.sh + install.ps1). Daily rollups by
+# platform; 90-day expiry per key. No PII, no IP, just counts.
+[[kv_namespaces]]
+binding = "FCB_METRICS"
+id = "26eca96d62724b968eeefb17f7cd51e4"
+
 # Observability — Cloudflare-managed log retention. Off by default for privacy
 # (we don't want feedback message bodies sitting in Cloudflare logs).
 [observability]

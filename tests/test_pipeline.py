@@ -1077,6 +1077,105 @@ class TestPipelineHealth(unittest.TestCase):
         self.assertNotIn('right-click', html.lower(),
             "right-click → Open instructions should be removed")
 
+    def test_installer_posts_anonymous_install_started_ping(self):
+        """Layer 2 telemetry — install.sh and install.ps1 POST an anonymous
+        install_started event to the passport-feedback Cloudflare Worker
+        so we can count daily installs by platform. Guards:
+
+        - Honors FCB_NO_ANALYTICS=1 opt-out
+        - POSTs in background (non-blocking)
+        - Disclosed in the Anthropic-terms consent gate
+        - Sends only platform + build_stamp + advisor_id (no IP, no name,
+          no machine ID)
+        """
+        sh = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
+        # Mac side
+        self.assertIn('FCB_NO_ANALYTICS:-0', sh,
+            "install.sh must check FCB_NO_ANALYTICS env var for opt-out")
+        self.assertIn('"event":"install_started"', sh,
+            "install.sh must POST install_started event")
+        self.assertIn('"platform":"mac"', sh,
+            "install.sh must report platform=mac")
+        self.assertIn("https://passport-feedback.rafaeldf2.workers.dev/install", sh,
+            "install.sh must POST to /install on the Worker")
+        # Background so install isn't blocked on telemetry network — the curl
+        # POST to passport-feedback must end in a lone backgrounding `&`
+        # (after the redirect, followed by space/comment/newline — not `&&`).
+        self.assertRegex(sh, r"(?m)2>&1\s+&(?:\s|#|$)",
+            "telemetry POST must be backgrounded with `&` after the log redirect")
+        # Disclosed in consent
+        self.assertIn("anonymous", sh.lower(),
+            "consent gate must use the word 'anonymous'")
+        self.assertIn("FCB_NO_ANALYTICS", sh,
+            "consent gate must mention the opt-out env var")
+
+        # Windows side
+        ps1 = (REPO / "installer" / "install.ps1").read_text(encoding="utf-8")
+        self.assertIn('$env:FCB_NO_ANALYTICS', ps1,
+            "install.ps1 must check FCB_NO_ANALYTICS for opt-out")
+        self.assertIn('event = "install_started"', ps1,
+            "install.ps1 must POST install_started")
+        self.assertIn('platform = "win"', ps1,
+            "install.ps1 must report platform=win")
+        self.assertIn("https://passport-feedback.rafaeldf2.workers.dev/install", ps1,
+            "install.ps1 must POST to /install")
+        self.assertIn("Start-Job", ps1,
+            "telemetry POST must run as a background job in PowerShell")
+
+    def test_worker_install_endpoint_validates_schema(self):
+        """The Worker /install handler must validate the schema and reject:
+        - non-POST methods
+        - wrong/missing bearer token
+        - schemas missing v=1 or event!='install_started'
+        - advisor_id mismatch
+
+        Plus it must store counts in KV and never log IP/UA. This test
+        reads the Worker source for those guards."""
+        worker = (REPO / "cloudflare-worker" / "src" / "index.js").read_text(encoding="utf-8")
+
+        # /install routes go to the right handler
+        self.assertIn('if (path === "/install")', worker,
+            "Worker must route /install distinct from feedback")
+        self.assertIn("handleInstallEvent", worker,
+            "Worker must define handleInstallEvent function")
+        self.assertIn("handleInstallStats", worker,
+            "Worker must define handleInstallStats function for /install/stats GET")
+
+        # Schema validation
+        self.assertIn('body.v !== 1', worker,
+            "must reject events with wrong schema version")
+        self.assertIn('body.event !== "install_started"', worker,
+            "must reject events that aren't install_started")
+
+        # Platform sanitization — mac/win only, anything else becomes "unknown"
+        self.assertIn('"mac" || body.platform === "win"', worker,
+            "platform must be sanitized to a fixed allowlist")
+
+        # KV storage with TTL (90-day retention)
+        self.assertIn("FCB_METRICS.put", worker, "must write to KV")
+        self.assertIn("expirationTtl", worker, "must set TTL on KV writes")
+        self.assertIn("INSTALL_COUNTER_TTL_SECONDS", worker,
+            "must use the named TTL constant for retention")
+
+        # Privacy: explicitly does NOT use cf-connecting-ip or user-agent for these events
+        # (We assert by absence — those headers are never read in the install path)
+        install_handler_start = worker.find("async function handleInstallEvent")
+        install_handler_end = worker.find("async function handleInstallStats", install_handler_start)
+        self.assertGreater(install_handler_start, 0)
+        self.assertGreater(install_handler_end, install_handler_start)
+        install_handler = worker[install_handler_start:install_handler_end]
+        self.assertNotIn("cf-connecting-ip", install_handler.lower(),
+            "install event handler must NOT log client IP")
+        self.assertNotIn("user-agent", install_handler.lower(),
+            "install event handler must NOT log user-agent")
+
+        # Stats endpoint is admin-gated by GITHUB_TOKEN (more restrictive than
+        # the install endpoint's anti-abuse bearer)
+        stats_handler_start = worker.find("async function handleInstallStats")
+        stats_handler = worker[stats_handler_start:stats_handler_start + 2000]
+        self.assertIn("env.GITHUB_TOKEN", stats_handler,
+            "/install/stats must require GITHUB_TOKEN as bearer (admin gate)")
+
     def test_install_ps1_exists_with_winget_provisioning(self):
         """B9.16 — first version of the Windows installer. Same UX patterns
         as install.sh (Anthropic terms gate, paced sections, visible

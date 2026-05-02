@@ -545,6 +545,27 @@ Code from email: ______
 - New `.coming-soon-chip` CSS class (reusable for any future Coming-soon sections).
 - Section IDs renumbered (sec-01..sec-06). Section nav updated. Prototype-modal Privacy anchor moved to #sec-06.
 
+### B9.17 — Install-start telemetry (anonymous, opt-out): Cloudflare Worker /install + KV counters · ✅ **DONE**
+**Found by:** user question "is it possible to track number of installations? how do other software products manage this?" — investigated three layers, shipped Layer 1 (dashboards we already had) + Layer 2 (this), deferred Layer 3 (success/failure outcomes) to future work.
+**Why this exists:** Without telemetry we can't tell the difference between "no one installed today" and "ten people installed but six quit at the consent gate." We need the install-start count to size the next problem.
+**What changed:**
+- New Cloudflare KV namespace `FCB_METRICS` (id `26eca96d62724b968eeefb17f7cd51e4`) bound in `cloudflare-worker/wrangler.toml`. 90-day TTL per key keeps it bounded.
+- Worker rewritten to URL-route: `POST /` (existing feedback path), `POST /install` (new — anonymous telemetry), `GET /install/stats?days=N` (new — admin-gated read). Two new functions: `handleInstallEvent` (validates schema, sanitizes platform to mac/win/unknown, increments daily counter `installs:{platform}:{day}` in KV) and `handleInstallStats` (sums counters across N days, returns totals + by-day breakdown).
+- Both installers POST after the consent gate, in background (so the install isn't blocked on telemetry network):
+  - `install.sh`: backgrounded `curl ... &` with stderr → install log.
+  - `install.ps1`: `Start-Job` so it runs in a background PowerShell job.
+- Opt-out: set `FCB_NO_ANALYTICS=1` (mac) or `$env:FCB_NO_ANALYTICS = "1"` (win) before running.
+- Disclosed in the Anthropic data-terms consent block on both sides — the same gate that already exists for the AI data-terms consent.
+**Privacy guarantees (this is the whole point):**
+- The Worker never reads `cf-connecting-ip` (the only IP-like header Cloudflare exposes). Verified by absence in source.
+- The Worker never reads user-agent.
+- `[observability]` is `enabled = false` in `wrangler.toml` so Cloudflare doesn't cache request bodies in its own logs.
+- The body has exactly four fields: `v`, `event`, `platform`, `build_stamp`, `advisor_id`. No name. No machine ID. No file paths. No IP.
+- KV stores integers only — `installs:mac:2026-05-02 = 7`. The advisor sees aggregate counts, not events.
+**Tests:** `test_installer_posts_anonymous_install_started_ping` (both installers POST, both honor opt-out, both disclose, both background) + `test_worker_install_endpoint_validates_schema` (Worker routes correctly, validates schema, sanitizes platform, writes to KV with TTL, never reads IP/UA, admin gate on /install/stats). 66 tests pass.
+**Verified live:** Worker deployed, all four cases tested with curl (good POST → 200 with key, bad schema → 400, wrong bearer → 401, GET with admin token → counts back). Test KV entries deleted after.
+**Layer 3 (deferred):** outcome tracking — `install_succeeded` / `install_failed` with the `failed_step` label. Wait until we have ≥10 active clients so the failure modes are real, not theoretical. The Worker already routes to `/install`, so adding `/install/outcome` is additive when the time comes.
+
 ### B9.16 — Windows installer v0 (install.ps1) · ✅ **DONE**
 **Found by:** task #60 (originally "Port real install logic + B9.7 email-code flow to Welcome.ps1") + user request to ship the first Windows-compatible install.
 **What changed:**

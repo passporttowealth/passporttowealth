@@ -237,6 +237,11 @@ say_paced "  • Sensitive files (paystubs, tax documents) are skipped by defaul
 say         "    this skill, so their contents are not sent to Claude unless you"
 say         "    explicitly ask."
 say
+say "${DIM}One more note: this installer sends an anonymous \"install started\" event to"
+say "Passport to Wealth so we know how many clients are onboarding. No IP, no name,"
+say "no machine ID — just \"a Mac install happened today.\" Opt out by setting"
+say "FCB_NO_ANALYTICS=1 before running.${RESET}"
+say
 say "If you do not accept Anthropic's terms, please ${BOLD}stop here${RESET} and contact"
 say "your advisor — we can talk about alternatives."
 say
@@ -300,6 +305,26 @@ say
 # Mac Terminal themes.
 printf '%s▶ Press Enter to begin the install (or Ctrl-C to cancel)%s\n' "$BOLD" "$RESET"
 read -r _
+
+# ── Anonymous install-start ping (Layer 2 telemetry) ──────────────────────────
+# Tells Passport to Wealth a non-personal "an install started today on
+# {mac|win}" event so we know how many clients are onboarding. NO IP, NO
+# name, NO machine ID — just platform + the build_stamp + advisor_id.
+# Opt out by setting FCB_NO_ANALYTICS=1 before running.
+# Disclosed in the Anthropic data-terms gate above.
+if [ "${FCB_NO_ANALYTICS:-0}" != "1" ]; then
+  PING_BUILD_STAMP="$(date -u +%Y%m%d%H%M%S)"
+  PING_BODY=$(printf '{"v":1,"event":"install_started","platform":"mac","build_stamp":"%s","advisor_id":"passporttowealth"}' "$PING_BUILD_STAMP")
+  curl -sS -o /dev/null -m 5 -X POST \
+    -H "Authorization: Bearer n7fQfh_1IYS7pDqsD8O2x0EqMU6l9Mmqu0ZCJWGuqx8" \
+    -H "Content-Type: application/json" \
+    -d "$PING_BODY" \
+    https://passport-feedback.rafaeldf2.workers.dev/install \
+    >>"$INSTALL_LOG" 2>&1 &  # background; don't block install on telemetry
+  log "install_started telemetry posted (build=$PING_BUILD_STAMP)"
+else
+  log "install_started telemetry skipped — FCB_NO_ANALYTICS=1"
+fi
 
 # ── Pre-flight (OP-11) ────────────────────────────────────────────────────────
 say

@@ -208,6 +208,11 @@ Write-SayPaced "  - Sensitive files (paystubs, tax documents) are skipped by def
 Write-Say      "    this skill, so their contents are not sent to Claude unless you"
 Write-Say      "    explicitly ask."
 Write-Say ""
+Write-Host "$DIM   One more note: this installer sends an anonymous 'install started' event$RESET"
+Write-Host "$DIM   to Passport to Wealth so we know how many clients are onboarding. No IP,$RESET"
+Write-Host "$DIM   no name, no machine ID - just 'a Windows install happened today.' Opt out$RESET"
+Write-Host "$DIM   by setting `$env:FCB_NO_ANALYTICS=`"1`" before running.$RESET"
+Write-Say ""
 Write-Say "If you do not accept Anthropic's terms, please stop here and contact"
 Write-Say "your advisor - we can talk about alternatives."
 Write-Say ""
@@ -259,6 +264,44 @@ while (-not $consentDone) {
 Write-Say ""
 Write-Host "$BOLD$([char]9654) Press Enter to begin the install (or Ctrl+C to cancel)$RESET"
 [void](Read-Host)
+
+# ── Anonymous install-start ping (Layer 2 telemetry) ─────────────────────────
+# Tells Passport to Wealth a non-personal "an install started today on win"
+# event so we know how many clients are onboarding. NO IP, NO name, NO machine
+# ID — just platform + the build_stamp + advisor_id. Opt out by setting
+# $env:FCB_NO_ANALYTICS="1" before running. Disclosed in the consent gate above.
+if ($env:FCB_NO_ANALYTICS -ne "1") {
+    $pingBuild = (Get-Date).ToUniversalTime().ToString("yyyyMMddHHmmss")
+    $pingBody = @{
+        v = 1
+        event = "install_started"
+        platform = "win"
+        build_stamp = $pingBuild
+        advisor_id = "passporttowealth"
+    } | ConvertTo-Json -Compress
+    try {
+        # Background job so we don't block install on telemetry network calls
+        Start-Job -ScriptBlock {
+            param($body)
+            try {
+                Invoke-RestMethod -Uri "https://passport-feedback.rafaeldf2.workers.dev/install" `
+                    -Method POST `
+                    -Headers @{
+                        "Authorization" = "Bearer n7fQfh_1IYS7pDqsD8O2x0EqMU6l9Mmqu0ZCJWGuqx8"
+                        "Content-Type" = "application/json"
+                    } `
+                    -Body $body `
+                    -TimeoutSec 5 `
+                    -ErrorAction SilentlyContinue | Out-Null
+            } catch { }
+        } -ArgumentList $pingBody | Out-Null
+        Write-Log "install_started telemetry posted (build=$pingBuild)"
+    } catch {
+        Write-Log "install_started telemetry post failed: $_"
+    }
+} else {
+    Write-Log "install_started telemetry skipped — FCB_NO_ANALYTICS=1"
+}
 
 # ── Step 1/5: Pre-flight (OP-11) ─────────────────────────────────────────────
 Write-Say ""
