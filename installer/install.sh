@@ -774,15 +774,47 @@ hr
 say "${GREEN}${BOLD}✓ Your workspace is ready.${RESET}"
 hr
 say
-say "Anytime you want to use it:"
-say
-say "  ${BOLD}1.${RESET} Open ${BOLD}Terminal${RESET} (⌘+Space → type ${BOLD}Terminal${RESET} → Enter)"
-say "  ${BOLD}2.${RESET} Type:  ${BOLD}claude${RESET}"
-say "  ${BOLD}3.${RESET} Tell it ${BOLD}\"build my report\"${RESET} or ${BOLD}\"refresh my finances\"${RESET}"
-say
-say "Drop your bank statements and other files in:"
-say "  ${BOLD}$WS/inbox/${RESET}"
-say
-say "${DIM}The skill knows where your workspace is — no need to navigate to it.${RESET}"
-say
 log "install completed"
+
+# In-process seamless handoff: ask if the user wants to start now. Default
+# Y so a single Enter keeps momentum. On Y we `cd` into the workspace and
+# `exec` claude with --add-dir (pre-allows file access in the workspace) and
+# a friendly initial prompt drawn from the skill's own framing. This replaces
+# what the old START-HERE.command + .skill-launcher.sh used to do, but with
+# zero artifacts on the user's machine — it all happens inside the install
+# script's own bash subshell, which exec's into claude in the same Terminal
+# window the user pasted the curl command into.
+#
+# AUTO_MODE / non-interactive runs skip the prompt and print the manual
+# instructions instead.
+if [ "$AUTO_MODE" = "1" ] || [ "$INTERACTIVE" = "0" ]; then
+  printf '\n%s▶ Anytime you want to use it: open Terminal and type "claude"%s\n' "$BOLD" "$RESET"
+  printf '   Drop financial files in: %s%s/inbox/%s\n\n' "$BOLD" "$WS" "$RESET"
+  exit 0
+fi
+
+printf '\n%s▶ Want to start now? [Y/n]%s ' "$BOLD" "$RESET"
+read -r START_ANSWER
+case "$(printf '%s' "$START_ANSWER" | tr '[:upper:]' '[:lower:]' | xargs)" in
+  ""|y|yes)
+    log "starting claude with primer prompt"
+    export FCB_WORKSPACE="$WS"
+    cd "$WS" || true
+    exec 3>&-                # release the install-log fd before exec
+    exec claude --add-dir "$WS" "Welcome. Drop your financial files into $WS/inbox/ and say 'build my report' when you're ready."
+    # exec replaces this process — nothing below runs.
+    ;;
+  *)
+    say
+    say "OK. Anytime you want to use it:"
+    say "  ${BOLD}1.${RESET} Open ${BOLD}Terminal${RESET} (⌘+Space → type ${BOLD}Terminal${RESET} → Enter)"
+    say "  ${BOLD}2.${RESET} Type:  ${BOLD}claude${RESET}"
+    say "  ${BOLD}3.${RESET} Tell it ${BOLD}\"build my report\"${RESET} or ${BOLD}\"refresh my finances\"${RESET}"
+    say
+    say "Drop your bank statements and other files in:"
+    say "  ${BOLD}$WS/inbox/${RESET}"
+    say
+    say "${DIM}The skill knows where your workspace is — no need to navigate to it.${RESET}"
+    say
+    ;;
+esac

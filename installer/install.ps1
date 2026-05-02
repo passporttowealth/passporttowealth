@@ -684,15 +684,38 @@ Write-Hr
 Write-Host "  $([char]10003) Your workspace is ready." -ForegroundColor Green
 Write-Hr
 Write-Say ""
-Write-Say "Anytime you want to use it:"
-Write-Say ""
-Write-SayPaced "  1. Open PowerShell (press Win, type PowerShell, hit Enter)"
-Write-SayPaced "  2. Type:  claude"
-Write-SayPaced "  3. Tell it 'build my report' or 'refresh my finances'"
-Write-Say ""
-Write-Say "Drop your bank statements and other files in:"
-Write-Host "  $Global:Workspace\inbox\" -ForegroundColor White
-Write-Say ""
-Write-Host "$DIM   The skill knows where your workspace is - no need to navigate to it.$RESET"
-Write-Say ""
 Write-Log "install completed"
+
+# In-process seamless handoff: ask if the user wants to start now. Default
+# Y so a single Enter keeps momentum. On Y we cd into the workspace + invoke
+# claude with --add-dir + an initial prompt. Mirrors install.sh.
+if ($Global:AutoMode -or -not $Global:Interactive) {
+    Write-Host "$BOLD$([char]9654) Anytime you want to use it: open PowerShell and type 'claude'$RESET"
+    Write-Host "   Drop financial files in: $Global:Workspace\inbox\"
+    Write-Say ""
+    exit 0
+}
+
+$startAnswer = (Read-VisiblePrompt "Want to start now? [Y/n]").ToString().Trim().ToLowerInvariant()
+if ($startAnswer -in @("", "y", "yes")) {
+    Write-Log "starting claude with primer prompt"
+    $env:FCB_WORKSPACE = $Global:Workspace
+    Set-Location $Global:Workspace
+    $primer = "Welcome. Drop your financial files into $Global:Workspace\inbox\ and say 'build my report' when you're ready."
+    # PowerShell doesn't have an `exec`. Calling claude directly will run it
+    # in the foreground; when the user exits claude they're back at the
+    # PowerShell prompt that launched the install command.
+    & claude --add-dir $Global:Workspace $primer
+} else {
+    Write-Say ""
+    Write-Say "OK. Anytime you want to use it:"
+    Write-SayPaced "  1. Open PowerShell (press Win, type PowerShell, hit Enter)"
+    Write-SayPaced "  2. Type:  claude"
+    Write-SayPaced "  3. Tell it 'build my report' or 'refresh my finances'"
+    Write-Say ""
+    Write-Say "Drop your bank statements and other files in:"
+    Write-Host "  $Global:Workspace\inbox\" -ForegroundColor White
+    Write-Say ""
+    Write-Host "$DIM   The skill knows where your workspace is - no need to navigate to it.$RESET"
+    Write-Say ""
+}

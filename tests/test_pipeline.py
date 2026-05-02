@@ -624,23 +624,31 @@ class TestPipelineHealth(unittest.TestCase):
             "must not exit 1 on diagnostic failure (B9.10 — warnings only)")
 
     def test_installer_ends_with_clear_reentry_instructions(self):
-        """B9.10 — replaces the old 'Want to start now?' seamless handoff.
-        With START-HERE removed, end-of-install just tells the user how to
-        re-enter: open Terminal, type `claude`, ask for a report. No prompt,
-        no exec into a launcher (because there is no launcher)."""
+        """End-of-install hands off cleanly. Two paths:
+
+        (a) [Y/n] handoff — "Want to start now?" prompt, default Y. On Y the
+            script `cd`s to the workspace and `exec`s claude with --add-dir
+            and a primer prompt. This is in-process (no launcher script
+            artifact — that was removed in B9.10).
+        (b) Manual re-entry — if the user picks N, AUTO_MODE is set, or
+            stdin isn't a TTY, print the "open Terminal, type claude"
+            instructions and exit cleanly.
+        """
         cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
-        # The old prompt is gone
-        self.assertNotIn("Want to start now?", cmd,
-            "old 'Want to start now?' prompt should be removed")
+        # Handoff path: prompt + exec claude inline (no launcher script)
+        self.assertIn("Want to start now?", cmd,
+            "end-of-install should offer the seamless handoff prompt")
+        self.assertIn('exec claude --add-dir "$WS"', cmd,
+            "Y path must exec claude directly (no launcher script)")
         self.assertNotIn('exec "$WORKSPACE_LAUNCHER"', cmd,
-            "old workspace-launcher exec should be removed")
-        # The new instructions are present
+            "old workspace-launcher exec should still be gone (B9.10)")
+        # Manual-instructions fallback also present
         self.assertIn("Open ${BOLD}Terminal", cmd,
-            "end-of-install must instruct user to open Terminal")
+            "N path / non-interactive must show manual re-entry instructions")
         self.assertIn("claude", cmd,
-            "end-of-install must show the `claude` command")
+            "manual instructions must show the `claude` command")
         self.assertIn("build my report", cmd,
-            "end-of-install must show an example prompt")
+            "manual instructions must show an example prompt")
         # No exit auto-close (this is the user's own terminal in curl-pipe mode)
         self.assertNotIn("close_terminal_window_after_countdown", cmd,
             "auto-close terminal helper should be removed (B9.10)")
