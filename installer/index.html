@@ -624,6 +624,15 @@
     .footer-copy a { white-space: nowrap; }
     footer a { color: var(--color-text-muted); text-decoration: none; }
     footer a:hover { color: var(--color-accent); text-decoration: underline; }
+    .build-stamp {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-text-faint);
+      background: rgba(15, 30, 51, 0.04);
+      padding: 1px 6px;
+      border-radius: 3px;
+      letter-spacing: 0.02em;
+    }
     @media (max-width: 700px) {
       footer {
         flex-direction: column;
@@ -767,7 +776,19 @@
     /* ── Responsive ───────────────────────────────────────────────────────── */
     @media (max-width: 700px) {
       main { padding: 36px 20px 48px; }
-      .brand { margin-bottom: 56px; }
+      /* Sticky header on mobile — brand row + Prototype pill stay pinned at
+         the top so the user always has access to the modal + brand context
+         while scrolling. Cream background + subtle bottom border so the
+         underlying content doesn't bleed through. */
+      .brand {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: var(--color-bg);
+        margin: 0 -20px 56px;
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--color-border);
+      }
       .hero h1 { font-size: 36px; }
       .hero-br { display: none; }   /* let the H1 wrap naturally on mobile instead of forced break */
       .hero .lede { font-size: 18px; margin-bottom: 32px; }
@@ -1016,9 +1037,9 @@
     </div>
 
     <footer>
-      <span class="footer-copy">© 2026 <a href="https://www.passporttowealth.com/" target="_blank" rel="noopener">Passport to Wealth</a> · Updated <time datetime="{{BUILD_DATE_ISO}}">{{BUILD_DATE_HUMAN}}</time></span>
+      <span class="footer-copy">© 2026 <a href="https://www.passporttowealth.com/" target="_blank" rel="noopener">Passport to Wealth</a> · <button class="pill-link" data-open-prototype-modal style="background: none; border: none; color: var(--color-text-muted); padding: 0; cursor: pointer; font: inherit; text-decoration: underline; text-underline-offset: 2px;">Prototype</button></span>
       <span class="footer-links">
-        <button class="pill-link" data-open-prototype-modal style="background: none; border: none; color: var(--color-text-muted); padding: 0; cursor: pointer; font: inherit; text-decoration: underline; text-underline-offset: 2px;">Prototype</button>
+        <code class="build-stamp" title="Build timestamp (UTC)">Build {{BUILD_STAMP}}</code>
         ·
         <a href="https://github.com/passporttowealth/passporttowealth" target="_blank" rel="noopener">Read the code ↗</a>
       </span>
