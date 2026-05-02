@@ -25,9 +25,9 @@ If anything's a no, don't send the install link. Resolve first.
 
 The link is the same for every client (v1 — per-client signed links are v2; see `dev/backlog.md` Epic 6.5):
 
-> `https://rafaeldavid.github.io/passporttowealth/`
+> `https://passporttowealth.app/`
 
-Or the brand-friendly redirect once `passporttowealth.studio/welcome` is set up.
+(`www.passporttowealth.app` redirects to the apex, so either form works in client emails.)
 
 Suggested email template (paste into your client mail):
 
@@ -38,7 +38,7 @@ Hi {name},
 
 Here's the install link for the financial dashboard we discussed:
 
-  https://rafaeldavid.github.io/passporttowealth/
+  https://passporttowealth.app/
 
 A few things upfront:
 

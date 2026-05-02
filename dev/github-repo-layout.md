@@ -10,8 +10,8 @@ passporttowealth/
 ├── CHANGELOG.md                       ← Version notes per release tag (read by the self-update flow)
 │
 ├── installer/                         ← What the client downloads
-│   ├── Welcome.command                ← The bootstrap script. Has to be raw-downloadable.
-│   ├── index.html                     ← GitHub Pages landing page (download button + Gatekeeper instructions + screenshot)
+│   ├── Welcome.command                ← The bootstrap script. Bundled with the landing page on here.now.
+│   ├── index.html                     ← Landing page (deployed to here.now → https://passporttowealth.app/)
 │   ├── assets/
 │   │   ├── gatekeeper-step-1.png      ← Screenshot of the "cannot be opened" dialog
 │   │   ├── gatekeeper-step-2.png      ← Screenshot of right-click → Open
@@ -56,7 +56,7 @@ passporttowealth/
 │       ├── ERROR_CODES.md             ← FCB-00xx through FCB-11xx with cause + remediation
 │       └── test-fixtures/             ← Three pre-built unsorted "client folders" for end-to-end tests
 │
-├── docs/                              ← What the advisor reads (and what's hosted via GitHub Pages for the landing)
+├── docs/                              ← What the advisor reads
 │   ├── advisor-onboarding.md          ← How Rafa hands a client the install link, what to confirm first
 │   ├── client-quickstart.md           ← The three-paragraph "what to expect" the advisor can paste into an email
 │   ├── troubleshooting.md             ← Per-error-code playbook the advisor reads against incoming support bundles
@@ -76,7 +76,7 @@ passporttowealth/
 │   ├── workflows/
 │   │   ├── ci.yml                     ← Run `scripts/run_fixture.sh` against the test fixtures on every PR
 │   │   ├── lint-user-strings.yml      ← OP-8 banned-words check on every PR
-│   │   └── pages.yml                  ← Build + deploy `installer/index.html` to GitHub Pages
+│   │   └── pages.yml                  ← Backup deploy of `installer/` to GitHub Pages (canonical landing is here.now)
 │   ├── ISSUE_TEMPLATE/
 │   │   ├── bug.md                     ← For Rafa / dev only, not advertised to clients
 │   │   └── feature.md
@@ -89,13 +89,26 @@ passporttowealth/
 
 ## Distribution mechanics
 
-### What the client downloads
-`https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.command`
+### What the client sees
+`https://passporttowealth.app/` (also reachable via `www.passporttowealth.app`, which 301s to the apex). The landing page is `installer/index.html`, deployed to here.now via the here-now skill. The `installer/Welcome.{command,bat,ps1}` files are bundled into the same publish, so the download buttons on the landing page point at relative paths (`Welcome.command`, etc.) on the same origin — no GitHub raw URL dependency.
 
-But they don't see that URL — they see the GitHub Pages landing page (with the screenshots) and click "Download for Mac." The href under that button is the raw URL above.
+### How the landing page gets there
+The here-now publish slug behind `passporttowealth.app` is `sandy-delta-dc3r`. To update:
+
+```bash
+STAGE=$(mktemp -d)
+cp installer/index.html "$STAGE/"
+cp -RL installer/assets "$STAGE/"
+cp installer/Welcome.command installer/Welcome.bat installer/Welcome.ps1 "$STAGE/"
+~/.claude/skills/here-now/scripts/publish.sh "$STAGE" \
+  --slug sandy-delta-dc3r \
+  --client passporttowealth-landing
+```
+
+(Stage to a temp dir first because `installer/assets/brand/` is a symlink — `cp -RL` dereferences it before publish.) Propagation is ≤60s globally via Cloudflare KV. The `.github/workflows/pages.yml` workflow also builds a backup mirror to GitHub Pages on every push to `main` — same content, second URL, used only if here.now is unreachable.
 
 ### What the installer pulls down
-At install time, `Welcome.command` `git clone`s the repo (or `curl`s a tarball of the latest release) into `~/Documents/my-finances/.skill/`, then symlinks the skill into the right Claude Code skills directory. This way the workspace contains its own pinned copy of the skill and self-update is just a `git fetch && git checkout {new-tag}`.
+At install time, `Welcome.command` `git clone`s the repo (or `curl`s a tarball of the latest release) into `~/Documents/my-finances/.skill/`, then symlinks the skill into the right Claude Code skills directory. This way the workspace contains its own pinned copy of the skill and self-update is just a `git fetch && git checkout {new-tag}`. The skill code itself stays in GitHub (auditable, versioned); only the landing page + installer launchers are mirrored to here.now for the brand-friendly download URL.
 
 ### Self-update
 On every START-HERE launch, the skill checks `https://api.github.com/repos/rafaeldavid/passporttowealth/releases/latest` against the local pinned version. If newer, prompts the user once: "I have an update. Install now? (~30 seconds)". Updates only run on consent.
@@ -125,11 +138,11 @@ These never get committed:
 
 ## What to set up in the repo first (before any code)
 
-1. **Initialize the repo** with `README.md`, `LICENSE`, `SECURITY.md`, `.gitignore` (using the patterns above).
-2. **Enable GitHub Pages** on `main` branch, source `installer/` (or `/docs` if Pages prefers that) so the landing page goes live at `https://rafaeldavid.github.io/passporttowealth/`.
-3. **Buy + configure the brand domain** (`passporttowealth.studio` or another brand-aligned subdomain) and point a CNAME at the GitHub Pages URL.
-4. **Stub the landing page** (`installer/index.html`) with placeholder copy + the Gatekeeper instructions block. Real screenshots can come once Arielle's brand pack is in.
-5. **Move the planning docs** from `finance_services/dev/` into the repo's `dev/` folder so everything lives in one place.
-6. **Wire the CI workflows** (lint, fixture run) before any meaningful skill code lands — keeps the door closed on regressions from day one.
+1. **Initialize the repo** with `README.md`, `LICENSE`, `SECURITY.md`, `.gitignore` (using the patterns above). ✅ done
+2. **Publish the landing page to here.now** at slug `sandy-delta-dc3r` (see *Distribution mechanics* above for the publish command). ✅ done
+3. **Attach `passporttowealth.app` (apex + www)** as a custom domain on the here.now slug via `POST /api/v1/domains` and `POST /api/v1/links` (see `~/.claude/skills/here-now/SKILL.md`). ✅ done — live at `https://passporttowealth.app/`
+4. **Stub the landing page** (`installer/index.html`) with placeholder copy + the Gatekeeper instructions block. ✅ done — real screenshots in `installer/assets/`
+5. **Move the planning docs** from `finance_services/dev/` into the repo's `dev/` folder so everything lives in one place. ✅ done
+6. **Wire the CI workflows** (lint, fixture run, Pages backup deploy) before any meaningful skill code lands — keeps the door closed on regressions from day one.
 
 After that, items in `backlog.md` Epic order: bootstrap installer (B1.x), then file ingestion (E2.x), and so on.

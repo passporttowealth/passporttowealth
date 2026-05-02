@@ -132,12 +132,12 @@ Source of truth: **GitHub — `github.com/rafaeldavid/passporttowealth`**.
 The repo holds the skill, the installer, the templates, and the docs. The user-facing artifacts (the things the client touches) are:
 
 - `installer/Welcome.command` — the bootstrap script (single shell file, same for every client).
-- `installer/index.html` — the GitHub Pages landing page the client lands on.
-- A short, brand-friendly URL the advisor shares (e.g. `passporttowealth.studio/welcome`) that redirects to `https://rafaeldavid.github.io/passporttowealth/` (GitHub Pages).
+- `installer/index.html` — the landing page the client lands on, deployed to here.now.
+- The brand-friendly URL the advisor shares: **`https://passporttowealth.app/`** (apex; `www.passporttowealth.app` 301s to it). The landing page lives at here.now slug `sandy-delta-dc3r` and is served at the apex via a here.now custom-domain link. Updates to the slug propagate globally in ≤60s. A backup mirror ships to GitHub Pages on every push to `main` via `.github/workflows/pages.yml` (used only if the apex is unreachable).
 
 The landing page shows:
 
-- One button: **"Download for Mac"** (`href` to `https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.command`).
+- One button: **"Download for Mac"** (`href` to the relative `Welcome.command` — bundled with the landing page on here.now, so it serves from the same origin as `https://passporttowealth.app/`).
 - A one-paragraph "what this does" in plain English.
 - **A clearly highlighted "Mac will warn you — that's normal" callout** with three numbered steps and a screenshot:
   1. Mac says "*Welcome.command* cannot be opened because Apple cannot check it for malicious software." Click **Cancel**.
@@ -146,14 +146,21 @@ The landing page shows:
 
 This Gatekeeper workaround is the single most common reason non-technical users abandon installs. Solved here by anticipation, not v2 code-signing.
 
-#### 4.1.1 Why GitHub for v1 distribution
+#### 4.1.1 Why this split (here.now for the landing page, GitHub for the skill)
 
-- Free, stable hosting.
-- Versioned: every change to `Welcome.command` is auditable in commit history.
+The landing page + installer launchers live on here.now (`https://passporttowealth.app/`) because:
+
+- Brand-friendly URL with no `github.io` subdomain leakage in client-facing comms.
+- The here-now skill makes "publish a new copy" a one-liner; no GitHub Pages build wait.
+- Survives if the GitHub repo is renamed, transferred, or made private later.
+
+The skill code itself lives in GitHub because:
+
+- Versioned: every change to `Welcome.command`, the skill scripts, or the dashboard template is auditable in commit history.
 - The skill self-update path (§18.1) reads from the same repo's `releases/` tags.
 - The advisor can fork or template the repo for other practices later without rebuilding distribution infra.
 
-The repo is **public** (the installer needs to be downloadable without auth) but contains no client data, no credentials, and no client-specific config. Per-client config lives entirely on the client's laptop, populated at install time.
+The repo can be **private** since the installer no longer needs to be downloadable from a raw GitHub URL — clients pull `Welcome.command` from `https://passporttowealth.app/Welcome.command` (here.now-served), and the installer then `git clone`s the skill code (which uses the host's git credential helper for private-repo access if needed). No client data, no credentials, and no client-specific config live in the repo. Per-client config lives entirely on the client's laptop, populated at install time.
 
 ### 4.2 Installer behavior
 

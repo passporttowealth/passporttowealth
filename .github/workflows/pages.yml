@@ -1,4 +1,4 @@
-name: Deploy installer landing page to GitHub Pages
+name: Deploy backup landing page mirror to GitHub Pages
 
 on:
   push:
@@ -33,9 +33,10 @@ jobs:
           # symlink that points back to assets/brand/ (single source of truth).
           cp installer/index.html _site/
           if [ -d installer/assets ]; then cp -RL installer/assets _site/; fi
-          # Make the installers downloadable directly from Pages too
-          # (raw.githubusercontent.com is the canonical source, but Pages-served
-          # copies survive even if the repo is renamed/transferred — useful belt-and-suspenders).
+          # Make the installers downloadable directly from Pages too.
+          # Canonical landing is https://passporttowealth.app/ (here.now, slug sandy-delta-dc3r).
+          # This Pages deploy is a belt-and-suspenders backup mirror in case the apex
+          # is unreachable (DNS issue, here.now outage, custom-domain mishap).
           cp installer/Welcome.command _site/ 2>/dev/null || true
           cp installer/Welcome.bat _site/ 2>/dev/null || true
           cp installer/Welcome.ps1 _site/ 2>/dev/null || true

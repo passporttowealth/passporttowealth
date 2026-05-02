@@ -11,7 +11,7 @@ What the client downloads. Everything else in the repo (the skill, the templates
 | `Welcome.command` | macOS | Bash bootstrap script. Self-relaunches in Terminal when double-clicked from Finder. |
 | `Welcome.bat` | Windows | Tiny CMD wrapper that hands off to `Welcome.ps1` with execution-policy bypass for that one process. |
 | `Welcome.ps1` | Windows | The real Windows installer logic, in PowerShell. Mirrors the macOS flow step-for-step. **Must live in the same folder as `Welcome.bat`.** |
-| `index.html` | both | GitHub Pages landing page. Detects the visitor's OS and shows the right download button + the right "OS will warn you" instructions (Gatekeeper for Mac, SmartScreen for Windows). |
+| `index.html` | both | Landing page (served at `https://passporttowealth.app/` via here.now). Detects the visitor's OS and shows the right download button + the right "OS will warn you" instructions (Gatekeeper for Mac, SmartScreen for Windows). |
 | `assets/` | both | Screenshots for the landing page (Gatekeeper steps, SmartScreen steps), Passport to Wealth logo. |
 
 ## Why two files for Windows
@@ -25,18 +25,36 @@ The landing page makes this clear: Windows users are told to download both files
 
 ## Distribution URLs
 
-- **Landing page** (what the advisor shares — same URL for everyone, OS-detected): `https://rafaeldavid.github.io/passporttowealth/`
-- **Direct downloads** (what the landing buttons point to):
-  - Mac: `https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.command`
-  - Windows: `https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.bat`
-  - Windows (companion): `https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.ps1`
-- **Brand-friendly URL** (recommended): point a CNAME from `passporttowealth.studio/welcome` (or similar) to the GitHub Pages URL. See [`docs/advisor-onboarding.md`](../docs/advisor-onboarding.md).
+- **Landing page** (what the advisor shares — same URL for everyone, OS-detected): `https://passporttowealth.app/`
+- **Direct downloads** (what the landing buttons point to — relative paths, served from the same here.now bundle as the landing page):
+  - Mac: `https://passporttowealth.app/Welcome.command`
+  - Windows: `https://passporttowealth.app/Welcome.bat`
+  - Windows (companion): `https://passporttowealth.app/Welcome.ps1`
+- **`www.passporttowealth.app`** redirects to the apex (`passporttowealth.app`).
+- **Backup mirror**: the `.github/workflows/pages.yml` workflow also builds a copy of the landing page + installers to GitHub Pages on every push to `main`. Not the canonical URL — keep advertising `passporttowealth.app` — but useful belt-and-suspenders if here.now is ever down or the apex DNS changes.
+
+## Publishing the landing page
+
+The landing page lives in this folder (`installer/index.html` + `installer/Welcome.{command,bat,ps1}` + `installer/assets/`) and is published to here.now via:
+
+```bash
+# from a temp staging dir so symlinks under installer/assets/brand are dereferenced
+STAGE=$(mktemp -d)
+cp installer/index.html "$STAGE/"
+cp -RL installer/assets "$STAGE/"
+cp installer/Welcome.command installer/Welcome.bat installer/Welcome.ps1 "$STAGE/"
+~/.claude/skills/here-now/scripts/publish.sh "$STAGE" \
+  --slug sandy-delta-dc3r \
+  --client passporttowealth-landing
+```
+
+The slug `sandy-delta-dc3r` is the original here.now slug behind `passporttowealth.app`; updates to that slug propagate to the apex automatically (≤60s via Cloudflare KV). To attach a new domain or remove this one, use `/api/v1/domains` (see `~/.claude/skills/here-now/SKILL.md`).
 
 ## Sharing with a client
 
-Send the brand-friendly URL. The landing page handles platform detection — the client doesn't need to know whether they're on Mac or Windows. Tell them to expect their OS's "unknown developer" warning; the landing page shows them how to get past it.
+Send `https://passporttowealth.app/`. The landing page handles platform detection — the client doesn't need to know whether they're on Mac or Windows. Tell them to expect their OS's "unknown developer" warning; the landing page shows them how to get past it.
 
-Do **not** send the raw download URL directly; the landing page is what walks them through the OS warning, and that step is the most common abandonment point on both platforms.
+Do **not** send the direct download URLs (e.g. `passporttowealth.app/Welcome.command`); the landing page is what walks them through the OS warning, and that step is the most common abandonment point on both platforms.
 
 ## Updating the installer
 

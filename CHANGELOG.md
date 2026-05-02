@@ -8,6 +8,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Version
 
 ## [Unreleased]
 
+- **Landing page now live at `https://passporttowealth.app/`** (apex; `www.` 301s to it). Deployed to here.now (slug `sandy-delta-dc3r`) via the here-now skill instead of GitHub Pages. Download buttons now use relative URLs (`Welcome.command`, `Welcome.bat`, `Welcome.ps1`) served from the same here.now bundle — removes the dependency on `raw.githubusercontent.com` and means the GitHub repo no longer has to stay public for the installer to be reachable. The `.github/workflows/pages.yml` workflow still ships a backup mirror to GitHub Pages on every push to `main`. Docs updated: README, installer/README, docs/advisor-onboarding, dev/github-repo-layout, dev/finance-clarity-build-spec.
 - Restructured: removed commercial / engagement-level docs (`project-overview`, `kickoff-agenda`, `mnda-template`) from the repo. Renamed `engagement/development/` → `dev/`. Repo now contains only product, skill, docs, and dev-planning artifacts.
 - Initial repository scaffold.
 - Product / dev planning docs: demo script, full skill spec, backlog, repo layout.

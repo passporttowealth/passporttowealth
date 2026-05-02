@@ -22,11 +22,11 @@ See [`docs/advisor-onboarding.md`](docs/advisor-onboarding.md) for how to send a
 
 | Path | What's there |
 |---|---|
-| `installer/` | What the client downloads — `Welcome.command` and the GitHub Pages landing page that hosts it. |
+| `installer/` | What the client downloads — `Welcome.command` and the landing page (served at `https://passporttowealth.app/` via here.now) that hosts it. |
 | `skill/` | The `finance-clarity-build` Claude Code skill: prompts, scripts, dashboard templates, error-code reference. |
 | `docs/` | Advisor-facing operational docs (onboarding, troubleshooting, design system, privacy notes). |
 | `dev/` | Product / dev planning — demo script, full skill spec, backlog, this repo's layout doc. |
-| `.github/` | CI workflows (lint, fixture run, Pages deploy) and issue templates. |
+| `.github/` | CI workflows (lint, fixture run, Pages backup deploy) and issue templates. |
 
 ## How it works (in one paragraph)
 
