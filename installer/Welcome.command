@@ -90,18 +90,28 @@ run_quiet() {
   fi
 }
 
+# Pre-consent text is dense and important (privacy disclosures, what the
+# user is agreeing to). Dry-run feedback: it dumps in <1 second and the
+# user can't keep up. Split into three logical sections, each followed by
+# pause_for_user so the user controls when to advance. Within each section,
+# emphasis lines use say_paced so the eye gets a beat between bullets.
+# --auto bypasses everything (existing behavior).
+
+# ── Section 1: welcome + what-the-user-does preview ──────────────────────────
 clear
 hr
 say "${BOLD}Welcome — let's set up your private finance workspace.${RESET}"
 hr
 say
 say "I'll do all the technical bits. You'll only need to:"
-say "  1. Type your Mac password once (when Mac asks)."
-say "  2. Sign in to your AI assistant."
-say "  3. Sign up for the service that hosts your private dashboard."
 say
+say_paced "  1. Type your Mac password once (when Mac asks)."
+say_paced "  2. Sign in to your AI assistant."
+say_paced "  3. Sign up for the service that hosts your private dashboard."
+say
+pause_for_user
 
-# ── Prototype notice (always visible — not dimmed) ────────────────────────────
+# ── Section 2: prototype notice (always visible — not dimmed) ────────────────
 say
 hr
 say "${YELLOW}${BOLD}⚠  PROTOTYPE — pre-release software${RESET}"
@@ -111,14 +121,15 @@ say "This is a ${BOLD}pilot tool${RESET} for clients of Passport to Wealth, unde
 say "active development. Use it as a complement to — not a replacement for —"
 say "your existing financial records."
 say
-say "  • Expect bugs and incomplete features."
-say "  • ${BOLD}Always keep your original bank exports and statements.${RESET}"
-say "  • Do not delete source files based on what the dashboard shows."
-say "  • If anything looks wrong, tell your advisor — don't assume the"
-say "    dashboard is correct."
+say_paced "  • Expect bugs and incomplete features."
+say_paced "  • ${BOLD}Always keep your original bank exports and statements.${RESET}"
+say_paced "  • Do not delete source files based on what the dashboard shows."
+say_paced "  • If anything looks wrong, tell your advisor — don't assume the"
+say         "    dashboard is correct."
 say
+pause_for_user
 
-# ── Anthropic data-terms consent gate (required before any install action) ────
+# ── Section 3: Anthropic data-terms consent gate (OP-13) ─────────────────────
 hr
 say "${BOLD}Before we continue — about the AI assistant${RESET}"
 hr
@@ -134,22 +145,23 @@ say "long${RESET}, ${BOLD}whether your conversations are used to train models${R
 say "you can change those settings — is described in their official"
 say "documentation. Please review it before continuing:"
 say
-say "  • Privacy hub:           ${BOLD}https://privacy.anthropic.com/${RESET}"
-say "  • Privacy policy:        ${BOLD}https://www.anthropic.com/legal/privacy${RESET}"
-say "  • Consumer (Pro/Max):    ${BOLD}https://www.anthropic.com/legal/consumer-terms${RESET}"
-say "  • Commercial (API key):  ${BOLD}https://www.anthropic.com/legal/commercial-terms${RESET}"
-say "  • Trust & security:      ${BOLD}https://trust.anthropic.com/${RESET}"
+say_paced "  • Privacy hub:           ${BOLD}https://privacy.anthropic.com/${RESET}"
+say_paced "  • Privacy policy:        ${BOLD}https://www.anthropic.com/legal/privacy${RESET}"
+say_paced "  • Consumer (Pro/Max):    ${BOLD}https://www.anthropic.com/legal/consumer-terms${RESET}"
+say_paced "  • Commercial (API key):  ${BOLD}https://www.anthropic.com/legal/commercial-terms${RESET}"
+say_paced "  • Trust & security:      ${BOLD}https://trust.anthropic.com/${RESET}"
 say
 say "Things to know — and to manage in your Anthropic account settings:"
-say "  • You can opt out of having your conversations used to improve Claude."
-say "  • You can delete your conversation history at any time."
-say "  • Sensitive files (paystubs, tax documents) are skipped by default by"
-say "    this skill, so their contents are not sent to Claude unless you"
-say "    explicitly ask."
+say_paced "  • You can opt out of having your conversations used to improve Claude."
+say_paced "  • You can delete your conversation history at any time."
+say_paced "  • Sensitive files (paystubs, tax documents) are skipped by default by"
+say         "    this skill, so their contents are not sent to Claude unless you"
+say         "    explicitly ask."
 say
 say "If you do not accept Anthropic's terms, please ${BOLD}stop here${RESET} and contact"
 say "your advisor — we can talk about alternatives."
 say
+pause_for_user
 
 # NOTE (B9.1): we deliberately do NOT auto-open the privacy hub in a
 # browser here. Auto-opening mid-flow snaps focus away from this Terminal
@@ -157,9 +169,9 @@ say
 # the URLs printed above — the user clicks if they want to read first.
 
 say "${BOLD}By typing 'I accept' below you confirm:${RESET}"
-say "  1. You accept Anthropic's data-handling terms (linked above)."
-say "  2. You understand this is ${BOLD}prototype${RESET} software and you will keep"
-say "     your original financial records as the source of truth."
+say_paced "  1. You accept Anthropic's data-handling terms (linked above)."
+say_paced "  2. You understand this is ${BOLD}prototype${RESET} software and you will keep"
+say         "     your original financial records as the source of truth."
 say
 while true; do
   read -r -p "$(printf 'Type %sI accept%s to continue, or %sno%s to cancel: ' "$BOLD" "$RESET" "$BOLD" "$RESET")" consent

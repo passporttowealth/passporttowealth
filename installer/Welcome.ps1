@@ -46,18 +46,26 @@ function Write-Log {
     Add-Content -Path $LogPath -Value "[$ts] $msg"
 }
 
+# Pre-consent text is dense and important. Mac-mirror: split into 3
+# logical sections, each followed by Pause-ForUser so the user controls
+# when to advance. Within each section, emphasis lines use Write-SayPaced
+# so the eye gets a beat between bullets. --Auto bypasses everything.
+
+# ── Section 1: welcome + what-the-user-does preview ──────────────────────────
 Clear-Host
 Write-Hr
 Write-Host "Welcome - let's set up your private finance workspace." -ForegroundColor White
 Write-Hr
 Write-Say ""
 Write-Say "I'll do all the technical bits. You'll only need to:"
-Write-Say "  1. Allow Windows to run the installer when it asks."
-Write-Say "  2. Sign in to your AI assistant."
-Write-Say "  3. Sign up for the service that hosts your private dashboard."
 Write-Say ""
+Write-SayPaced "  1. Allow Windows to run the installer when it asks."
+Write-SayPaced "  2. Sign in to your AI assistant."
+Write-SayPaced "  3. Sign up for the service that hosts your private dashboard."
+Write-Say ""
+Pause-ForUser
 
-# ── Prototype notice ──────────────────────────────────────────────────────────
+# ── Section 2: prototype notice ──────────────────────────────────────────────
 Write-Say ""
 Write-Hr
 Write-Host "  ⚠  PROTOTYPE - pre-release software" -ForegroundColor Yellow
@@ -67,14 +75,15 @@ Write-Say "This is a pilot tool for clients of Passport to Wealth, under"
 Write-Say "active development. Use it as a complement to - not a replacement"
 Write-Say "for - your existing financial records."
 Write-Say ""
-Write-Say "  - Expect bugs and incomplete features."
-Write-Say "  - Always keep your original bank exports and statements."
-Write-Say "  - Do not delete source files based on what the dashboard shows."
-Write-Say "  - If anything looks wrong, tell your advisor - don't assume the"
-Write-Say "    dashboard is correct."
+Write-SayPaced "  - Expect bugs and incomplete features."
+Write-SayPaced "  - Always keep your original bank exports and statements."
+Write-SayPaced "  - Do not delete source files based on what the dashboard shows."
+Write-SayPaced "  - If anything looks wrong, tell your advisor - don't assume the"
+Write-Say      "    dashboard is correct."
 Write-Say ""
+Pause-ForUser
 
-# ── Anthropic data-terms consent gate (OP-13) ─────────────────────────────────
+# ── Section 3: Anthropic data-terms consent gate (OP-13) ─────────────────────
 Write-Hr
 Write-Host "Before we continue - about the AI assistant" -ForegroundColor White
 Write-Hr
@@ -90,22 +99,23 @@ Write-Say "whether your conversations are used to train models, and how you can"
 Write-Say "change those settings - is described in their official documentation."
 Write-Say "Please review it before continuing:"
 Write-Say ""
-Write-Host "  - Privacy hub:           https://privacy.anthropic.com/" -ForegroundColor White
-Write-Host "  - Privacy policy:        https://www.anthropic.com/legal/privacy" -ForegroundColor White
-Write-Host "  - Consumer (Pro/Max):    https://www.anthropic.com/legal/consumer-terms" -ForegroundColor White
-Write-Host "  - Commercial (API key):  https://www.anthropic.com/legal/commercial-terms" -ForegroundColor White
-Write-Host "  - Trust & security:      https://trust.anthropic.com/" -ForegroundColor White
+Write-SayPaced "  - Privacy hub:           https://privacy.anthropic.com/"
+Write-SayPaced "  - Privacy policy:        https://www.anthropic.com/legal/privacy"
+Write-SayPaced "  - Consumer (Pro/Max):    https://www.anthropic.com/legal/consumer-terms"
+Write-SayPaced "  - Commercial (API key):  https://www.anthropic.com/legal/commercial-terms"
+Write-SayPaced "  - Trust & security:      https://trust.anthropic.com/"
 Write-Say ""
 Write-Say "Things to know - and to manage in your Anthropic account settings:"
-Write-Say "  - You can opt out of having your conversations used to improve Claude."
-Write-Say "  - You can delete your conversation history at any time."
-Write-Say "  - Sensitive files (paystubs, tax documents) are skipped by default by"
-Write-Say "    this skill, so their contents are not sent to Claude unless you"
-Write-Say "    explicitly ask."
+Write-SayPaced "  - You can opt out of having your conversations used to improve Claude."
+Write-SayPaced "  - You can delete your conversation history at any time."
+Write-SayPaced "  - Sensitive files (paystubs, tax documents) are skipped by default by"
+Write-Say      "    this skill, so their contents are not sent to Claude unless you"
+Write-Say      "    explicitly ask."
 Write-Say ""
 Write-Say "If you do not accept Anthropic's terms, please stop here and contact"
 Write-Say "your advisor - we can talk about alternatives."
 Write-Say ""
+Pause-ForUser
 
 # NOTE (B9.1): we deliberately do NOT auto-open the privacy hub here.
 # Auto-opening mid-flow snaps focus away from Terminal and confuses users
@@ -113,9 +123,9 @@ Write-Say ""
 # can click if they want to read first.
 
 Write-Say "By typing 'I accept' below you confirm:"
-Write-Say "  1. You accept Anthropic's data-handling terms (linked above)."
-Write-Say "  2. You understand this is prototype software and you will keep"
-Write-Say "     your original financial records as the source of truth."
+Write-SayPaced "  1. You accept Anthropic's data-handling terms (linked above)."
+Write-SayPaced "  2. You understand this is prototype software and you will keep"
+Write-Say      "     your original financial records as the source of truth."
 Write-Say ""
 
 while ($true) {

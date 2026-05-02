@@ -664,6 +664,50 @@ class TestPipelineHealth(unittest.TestCase):
             "Welcome.ps1 must support -Auto / --auto flag")
         self.assertIn("AutoMode", ps1, "Welcome.ps1 must implement Auto bypass")
 
+    def test_installer_pre_consent_block_is_paced(self):
+        """Dry-run feedback: the opening (welcome + 3-step preview, prototype
+        warning, Anthropic data-terms summary) was the most important block
+        to actually read, but it dumped in <1 second because it lived above
+        the consent gate where pacing helpers weren't called yet.
+
+        Fix: split the pre-consent text into 3 logical sections, each
+        followed by pause_for_user / Pause-ForUser. So the user sees:
+        section → ENTER → section → ENTER → section → ENTER → consent.
+
+        This test enforces ≥3 pause invocations BEFORE the consent prompt
+        (vs. the older test which just counted total invocations across
+        the whole script).
+        """
+        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        ps1 = (REPO / "installer" / "Welcome.ps1").read_text(encoding="utf-8")
+
+        # Mac: count pause_for_user calls BEFORE the consent read prompt.
+        consent_idx = cmd.find("Type %sI accept%s to continue")
+        self.assertGreater(consent_idx, 0, "consent prompt must exist")
+        pre_consent = cmd[:consent_idx]
+        # Subtract function definition (1) + auto-mode check inside the fn (1)
+        invocations = pre_consent.count("pause_for_user") - 2
+        self.assertGreaterEqual(invocations, 3,
+            f"Welcome.command should pause ≥3 times before consent gate "
+            f"(found {invocations} after subtracting fn-def + internal check)")
+
+        # Windows: count Pause-ForUser calls before the consent Read-Host.
+        consent_idx_ps1 = ps1.find("Type 'I accept' to continue")
+        self.assertGreater(consent_idx_ps1, 0, "consent prompt must exist in ps1")
+        pre_consent_ps1 = ps1[:consent_idx_ps1]
+        # Subtract function definition (1) + auto-mode check inside the fn (1)
+        invocations_ps1 = pre_consent_ps1.count("Pause-ForUser") - 2
+        self.assertGreaterEqual(invocations_ps1, 3,
+            f"Welcome.ps1 should pause ≥3 times before consent gate "
+            f"(found {invocations_ps1} after subtracting fn-def + internal check)")
+
+        # And: the section-1 emphasis lines (the 3 numbered preview steps)
+        # should use the paced helper, not the instant one.
+        self.assertIn('say_paced "  1. Type your Mac password', cmd,
+            "Section 1 numbered preview steps should use say_paced")
+        self.assertIn('Write-SayPaced "  1. Allow Windows', ps1,
+            "Section 1 numbered preview steps should use Write-SayPaced")
+
     def test_installer_uses_in_agent_email_code_flow(self):
         """B9.7 invariant: Step 4's primary path is the in-agent email-code
         flow (POST /api/auth/agent/request-code → verify-code), with manual
