@@ -281,6 +281,65 @@
       margin-left: 12px;
       letter-spacing: 0.06em;
     }
+
+    /* ── Book-cover layout (Learn from the best section) ────────────────── */
+    .book-row {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 28px;
+      align-items: start;
+      margin-top: 20px;
+    }
+    .book-cover {
+      display: block;
+      width: 180px;
+      height: auto;
+      border-radius: 4px;
+      box-shadow: 0 4px 16px rgba(15, 30, 51, 0.15),
+                  0 1px 3px rgba(15, 30, 51, 0.08);
+    }
+    .book-meta {
+      font-size: 13px;
+      color: var(--color-text-muted);
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+    .book-meta strong { color: var(--color-text); display: block; margin-bottom: 4px; }
+    .book-meta a { font-size: 12px; }
+    @media (max-width: 700px) {
+      .book-row { grid-template-columns: 1fr; gap: 20px; }
+      .book-cover { width: 140px; margin: 0 auto; }
+    }
+
+    /* ── Compatibility badge (egregore-style "Works with X") ────────────── */
+    .compat-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+      padding: 10px 14px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--color-text-muted);
+    }
+    .compat-badge .compat-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-gold);
+      flex-shrink: 0;
+    }
+    .compat-badge strong {
+      color: var(--color-text);
+      font-weight: 600;
+    }
+    .compat-badge .compat-soon {
+      color: var(--color-text-faint);
+      font-size: 12px;
+    }
     section .section-lede {
       font-size: 18px;
       color: var(--color-text-muted);
@@ -716,8 +775,9 @@
     <a href="#sec-02" data-target="sec-02"><span class="num">02</span>Have a conversation</a>
     <a href="#sec-03" data-target="sec-03"><span class="num">03</span>See your numbers</a>
     <a href="#sec-04" data-target="sec-04"><span class="num">04</span>Ask for new analysis</a>
-    <a href="#sec-05" data-target="sec-05"><span class="num">05</span>Share if you want</a>
-    <a href="#sec-06" data-target="sec-06"><span class="num">06</span>Privacy</a>
+    <a href="#sec-05" data-target="sec-05"><span class="num">05</span>Learn from the best</a>
+    <a href="#sec-06" data-target="sec-06"><span class="num">06</span>Share if you want</a>
+    <a href="#sec-07" data-target="sec-07"><span class="num">07</span>Privacy</a>
   </aside>
 
   <main>
@@ -757,6 +817,11 @@
     <p class="terminal-hint" id="hint-win" hidden>
       First time? Open PowerShell: press <kbd>Win</kbd>, type <kbd>PowerShell</kbd>, hit <kbd>Enter</kbd>. Then paste the line above and press <kbd>Enter</kbd> again.
     </p>
+
+    <div class="compat-badge" aria-label="Compatibility">
+      <span class="compat-dot" aria-hidden="true"></span>
+      <span><strong>Works with Claude</strong> · <span class="compat-soon">additional agent compatibility coming soon</span></span>
+    </div>
 
     <!-- ── 01 — Drop your files ────────────────────────────────────────── -->
     <section id="sec-01">
@@ -858,9 +923,38 @@
 <span class="ai"><span class="ai-strong">Coming soon</span> — custom comparisons across any category, any window.</span></pre>
     </section>
 
-    <!-- ── 05 — Share if you want ──────────────────────────────────────── -->
+    <!-- ── 05 — Learn from the best (coming soon) ────────────────────── -->
     <section id="sec-05">
-      <h2><span class="num">05</span>Share if you want</h2>
+      <h2><span class="num">05</span>Learn from the best<span class="coming-soon-chip">Coming soon</span></h2>
+      <p class="section-lede">Ask plain-English questions about cross-border money. Get answers grounded in <em>The Expat Money Playbook</em> by Arielle Tucker — Certified Financial Planner™ and IRS Enrolled Agent, US expat in Switzerland.</p>
+      <div class="book-row">
+        <div>
+          <a href="https://www.amazon.com/Expat-Money-Playbook-Arielle-Tucker/dp/1394415958" target="_blank" rel="noopener">
+            <img class="book-cover" src="assets/expat-money-playbook-cover.jpg" alt="The Expat Money Playbook by Arielle Tucker — book cover" width="180" height="271">
+          </a>
+          <p class="book-meta">
+            <strong>The Expat Money Playbook</strong>
+            Unlocking Your Passport to Wealth · by Arielle Tucker, CFP® and EA · published by Wiley.
+            <a href="https://www.amazon.com/Expat-Money-Playbook-Arielle-Tucker/dp/1394415958" target="_blank" rel="noopener">View on Amazon ↗</a>
+          </p>
+        </div>
+        <pre class="term"><span class="you">how do I keep my US retirement accounts compliant from Switzerland?</span>
+<span class="ai"><span class="ai-strong">Coming soon</span> — I'll be able to ground answers in the Playbook's</span>
+<span class="ai">chapters on cross-border investing and IRS compliance for expats.</span>
+<span class="blank"></span>
+<span class="you">what should I plan before moving abroad next year?</span>
+<span class="ai"><span class="ai-strong">Coming soon</span> — pre-move financial-planning checklist drawn from</span>
+<span class="ai">Tucker's framework for the "unknown unknowns" that derail expats.</span>
+<span class="blank"></span>
+<span class="you">walk me through estate planning across two countries</span>
+<span class="ai"><span class="ai-strong">Coming soon</span> — estate considerations that differ for Americans</span>
+<span class="ai">living abroad, with the Playbook as the source of truth.</span></pre>
+      </div>
+    </section>
+
+    <!-- ── 06 — Share if you want ──────────────────────────────────────── -->
+    <section id="sec-06">
+      <h2><span class="num">06</span>Share if you want</h2>
       <p class="section-lede">Want your advisor to see it? Or read it on your phone? One sentence puts it on a private URL behind a passcode the assistant generates for you.</p>
       <pre class="term"><span class="you">share my dashboard</span>
 <span class="ai">Quick setup since this is your first share — what email should I use?</span>
@@ -876,9 +970,9 @@
 <span class="ai">Want me to email both to your address? <span class="ai-strong">[Y/n]</span></span></pre>
     </section>
 
-    <!-- ── 06 — Privacy ────────────────────────────────────────────────── -->
-    <section class="privacy" id="sec-06">
-      <h2><span class="num">06</span>Privacy, by default</h2>
+    <!-- ── 07 — Privacy ────────────────────────────────────────────────── -->
+    <section class="privacy" id="sec-07">
+      <h2><span class="num">07</span>Privacy, by default</h2>
       <ul>
         <li>
           <strong>Local first.</strong>
@@ -931,7 +1025,7 @@
         <li><strong>Pre-release software.</strong> Active development by Passport to Wealth. Expect bugs and incomplete features.</li>
         <li><strong>Always keep your originals.</strong> The dashboard is a view, not a system of record. Don't delete bank exports based on what it shows.</li>
         <li><strong>Tell your advisor if something looks wrong.</strong> Don't assume the dashboard is correct. Flag anything that doesn't match your records.</li>
-        <li><strong>Privacy intact.</strong> Files stay on your laptop by default. See the <a href="#sec-06">Privacy section</a> above for details.</li>
+        <li><strong>Privacy intact.</strong> Files stay on your laptop by default. See the <a href="#sec-07">Privacy section</a> above for details.</li>
       </ul>
       <div class="modal-actions">
         <button class="secondary" data-open-feedback-modal>Leave feedback</button>
