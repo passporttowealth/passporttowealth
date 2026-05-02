@@ -664,6 +664,77 @@ class TestPipelineHealth(unittest.TestCase):
             "Welcome.ps1 must support -Auto / --auto flag")
         self.assertIn("AutoMode", ps1, "Welcome.ps1 must implement Auto bypass")
 
+    def test_installer_traps_sigint_with_step_logging(self):
+        """Issue E3 — Ctrl-C used to exit silently with no log line, leaving
+        advisors blind to where users abandoned. Now there's a SIGINT/SIGTERM
+        trap that logs which step the user cancelled at, prints a friendly
+        re-run message, and exits with conventional code 130.
+
+        Also enforces that CURRENT_STEP is updated at each step heading
+        (not stuck at 'pre-consent' for the whole install)."""
+        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        # The trap is wired
+        self.assertIn("trap on_interrupt INT TERM", cmd,
+            "Welcome.command must trap INT and TERM")
+        self.assertIn("on_interrupt()", cmd,
+            "Welcome.command must define the trap handler")
+        # The handler logs + emits a re-run nudge
+        self.assertIn('log "user_interrupt at step=', cmd,
+            "trap handler must log which step was interrupted")
+        self.assertIn("exit 130", cmd,
+            "trap handler must exit with conventional Ctrl-C exit code")
+        # CURRENT_STEP is updated at each Step heading (1-6) so the log line is useful
+        for step_label in ("1/6 pre-flight", "2/6 installing tools",
+                           "3/6 Claude sign-in", "4/6 publishing-host",
+                           "5/6 workspace setup", "6/6 final diagnostics"):
+            self.assertIn(f'CURRENT_STEP="{step_label}', cmd,
+                f"CURRENT_STEP should be set to '{step_label}…' at that step")
+
+    def test_installer_diagnostic_failure_does_not_dead_end(self):
+        """Issue E1 — the previous installer always exit 1'd on any diagnostic
+        failure, even a single false-positive. Combined with Issue D's
+        false-positive on the Python 3.11 check, real installs got blocked
+        for no reason. Now: if the workspace launcher is in place + executable,
+        diagnostic failures are demoted to a warning and the seamless handoff
+        continues. Only a missing/non-executable launcher blocks."""
+        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        # The new gating: branches on launcher presence, not on count alone
+        self.assertIn('if [ -x "$WS/.skill-launcher.sh" ]; then', cmd,
+            "diagnostic-fail handling must branch on launcher presence")
+        # Demoted-to-warning copy is in place
+        self.assertIn("diagnostic check(s) reported issues", cmd,
+            "demoted path should describe failures as 'issues', not 'failed'")
+        self.assertIn("Workspace launcher is in place, so I'll continue", cmd,
+            "demoted path should explicitly tell the user we're continuing")
+        # Hard-fail path still exists for the genuinely-broken case
+        self.assertIn("workspace launcher is missing — install can't continue", cmd,
+            "missing-launcher path must still hard-fail")
+        # And the success path still says "All diagnostics passed" (now in else)
+        self.assertIn('ok_paced "All diagnostics passed"', cmd,
+            "success path should still confirm")
+
+    def test_installer_auto_closes_terminal_window(self):
+        """Issue E2 — when the install ends without the seamless handoff
+        (user picked 'n', or launcher was missing), Terminal.app passively
+        shows '[Process completed]' and the window sits there. Users read
+        that as broken. Now the script counts down + osascript-closes the
+        window so the exit feels intentional. Apple_Terminal only — leaves
+        iTerm/Alacritty/Warp alone."""
+        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        self.assertIn("close_terminal_window_after_countdown()", cmd,
+            "must define the auto-close helper")
+        # Apple_Terminal detection — don't try to close iTerm/Warp/etc
+        self.assertIn('"${TERM_PROGRAM:-}" = "Apple_Terminal"', cmd,
+            "auto-close must gate on TERM_PROGRAM=Apple_Terminal")
+        self.assertIn("tell application \"Terminal\" to close", cmd,
+            "must use osascript to close the Terminal window")
+        # Helper is invoked at the end (not just defined)
+        self.assertIn("close_terminal_window_after_countdown 5", cmd,
+            "helper must be invoked at end-of-install with a countdown")
+        # AUTO_MODE bypass — CI / scripted runs shouldn't try to close
+        self.assertIn('if [ "$AUTO_MODE" = "1" ] || [ ! -t 1 ]; then return 0; fi', cmd,
+            "auto-close must bypass in AUTO_MODE and when not on a TTY")
+
     def test_installer_pre_consent_block_is_paced(self):
         """Dry-run feedback: the opening (welcome + 3-step preview, prototype
         warning, Anthropic data-terms summary) was the most important block

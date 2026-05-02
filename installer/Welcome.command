@@ -68,6 +68,45 @@ exec 3>>"$INSTALL_LOG"
 
 log() { printf '[%s] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" >&3; }
 
+# Track which phase we're in so a Ctrl-C / SIGTERM can log "cancelled at X".
+# Updated at each Step heading. Initial value covers "before pre-flight" so an
+# interrupt during the consent gate still logs something useful.
+CURRENT_STEP="pre-consent"
+
+# Issue E3 — SIGINT/SIGTERM trap. The previous installer exited silently on
+# Ctrl-C with no log line, leaving advisors blind to where users abandoned.
+# This trap also catches SIGTERM (e.g. user closes the Terminal window mid-run).
+on_interrupt() {
+  printf '\n'
+  warn "Cancelled by you during: ${CURRENT_STEP}"
+  log "user_interrupt at step=${CURRENT_STEP}"
+  say "${DIM}Re-run me any time — most steps are idempotent.${RESET}"
+  exit 130   # conventional exit code for "terminated by Ctrl-C"
+}
+trap on_interrupt INT TERM
+
+# Issue E2 — Terminal-window auto-close. After the install is fully done and
+# the user has either declined the seamless handoff (or auto-mode skipped it),
+# Terminal.app passively shows "[Process completed]" and the window sits there.
+# Users read that as broken. Count down + osascript-close so it feels intentional.
+# Only fires when running inside Apple Terminal (TERM_PROGRAM check) — iTerm,
+# Alacritty, Warp and other emulators are left alone.
+close_terminal_window_after_countdown() {
+  local secs="${1:-5}"
+  if [ "$AUTO_MODE" = "1" ] || [ ! -t 1 ]; then return 0; fi
+  printf '\n'
+  local i="$secs"
+  while [ "$i" -gt 0 ]; do
+    printf '\r%sClosing this window in %d…%s ' "$DIM" "$i" "$RESET"
+    sleep 1
+    i=$((i - 1))
+  done
+  printf '\n'
+  if [ "${TERM_PROGRAM:-}" = "Apple_Terminal" ]; then
+    osascript -e 'tell application "Terminal" to close (every window whose name contains "Setting up your finance workspace")' 2>/dev/null || true
+  fi
+}
+
 # Workspace location — overridable via FCB_WORKSPACE for testing.
 # Default is ~/Documents/my-finances (adjusted later if iCloud-synced).
 WS="${FCB_WORKSPACE:-${HOME}/Documents/my-finances}"
@@ -200,6 +239,7 @@ read -r -p "Press Enter to begin the install (or Ctrl-C to cancel)... " _
 # ── Pre-flight (OP-11) ────────────────────────────────────────────────────────
 say
 hr
+CURRENT_STEP="1/6 pre-flight checks"
 say "${BOLD}Step 1 of 6 — Checking your Mac${RESET}"
 hr
 
@@ -257,6 +297,7 @@ say
 
 # ── Runtime provisioning ─────────────────────────────────────────────────────
 hr
+CURRENT_STEP="2/6 installing tools"
 say "${BOLD}Step 2 of 6 — Installing the tools your dashboard needs${RESET}"
 hr
 say
@@ -389,6 +430,7 @@ fi
 # ── AI assistant auth (§4.3) ──────────────────────────────────────────────────
 say
 hr
+CURRENT_STEP="3/6 Claude sign-in"
 say "${BOLD}Step 3 of 6 — Signing in to your AI assistant${RESET}"
 hr
 say
@@ -470,6 +512,7 @@ pause_for_user  # B9.3 — gate before publishing-host signup
 # fallback for when the email-code flow fails (e.g. spam-filtered code).
 say
 hr
+CURRENT_STEP="4/6 publishing-host signup"
 say "${BOLD}Step 4 of 6 — Setting up your private dashboard host${RESET}"
 hr
 say
@@ -628,6 +671,7 @@ fi
 # ── Finalize ──────────────────────────────────────────────────────────────────
 say
 hr
+CURRENT_STEP="5/6 workspace setup"
 say "${BOLD}Step 5 of 6 — Setting up your finance workspace${RESET}"
 hr
 say
@@ -735,6 +779,7 @@ ok_paced "START-HERE shortcut on Desktop"
 
 say
 hr
+CURRENT_STEP="6/6 final diagnostics"
 say "${BOLD}Step 6 of 6 — Final check${RESET}"
 hr
 say
@@ -773,11 +818,26 @@ check       "Pipeline scripts importable"    \
   "$WS/.venv/bin/python" -c "import sys; sys.path.insert(0, '$SKILL_INSTALL_DIR/skill/scripts'); import _lib, classify, normalize, categorize, build_site"
 
 if [ "$DIAGNOSTIC_FAILS" -gt 0 ]; then
-  fail "$DIAGNOSTIC_FAILS diagnostic check(s) failed — see $INSTALL_LOG for details."
-  fail "Re-run me, or contact your advisor with the log file attached."
-  exit 1
+  # Issue E1 — don't dead-end the user over a single false-positive diagnostic.
+  # The workspace launcher being in place + executable is a strong signal the
+  # install actually worked. Demote diagnostic failures to a warning and let
+  # the seamless handoff continue. Only block (exit 1) if the launcher itself
+  # is missing — at that point the install genuinely cannot proceed.
+  if [ -x "$WS/.skill-launcher.sh" ]; then
+    warn "$DIAGNOSTIC_FAILS diagnostic check(s) reported issues — see $INSTALL_LOG."
+    warn "Workspace launcher is in place, so I'll continue. If anything misbehaves,"
+    warn "re-run me or share the log with your advisor."
+    log "diagnostic_failures_demoted count=$DIAGNOSTIC_FAILS launcher_present=true"
+  else
+    fail "$DIAGNOSTIC_FAILS diagnostic check(s) failed — see $INSTALL_LOG for details."
+    fail "The workspace launcher is missing — install can't continue."
+    fail "Re-run me, or contact your advisor with the log file attached."
+    log "diagnostic_failures_blocking count=$DIAGNOSTIC_FAILS launcher_present=false"
+    exit 1
+  fi
+else
+  ok_paced "All diagnostics passed"
 fi
-ok_paced "All diagnostics passed"
 
 say
 hr
@@ -803,6 +863,7 @@ case "$(printf '%s' "$START_ANSWER" | tr '[:upper:]' '[:lower:]' | xargs)" in
       log "completed; launching workspace"
       exec 3>&-                          # release the install-log fd before exec
       exec "$WORKSPACE_LAUNCHER"
+      # exec replaces this process — nothing below runs on the Y path.
     else
       # Defensive fallback — Step 5e always provisions the launcher, so this
       # branch only fires if the install was interrupted or someone deleted
@@ -816,6 +877,9 @@ case "$(printf '%s' "$START_ANSWER" | tr '[:upper:]' '[:lower:]' | xargs)" in
     say "Double-click ${BOLD}START-HERE${RESET} on your Desktop whenever you want to use it."
     ;;
 esac
-say "You can close this window now."
-say
-log "install completed"
+log "install completed; closing terminal window"
+# Issue E2 — auto-close the install Terminal window so the user doesn't end up
+# staring at "[Process completed]" wondering what happened. The seamless-handoff
+# (Y) path exec'd above and never reaches here. The (n / launcher-missing)
+# paths land here and need an active close to feel intentional.
+close_terminal_window_after_countdown 5
