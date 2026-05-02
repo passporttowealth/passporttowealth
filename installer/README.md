@@ -1,73 +1,110 @@
 # Installer
 
-> **⚠ Prototype.** Both Mac and Windows installers are v0 skeletons — they print the planned flow but the actual installs are stubbed. Track real implementation in `dev/backlog.md` Epic 1.
+> **⚠ Prototype.** Mac install path is the reference implementation; Windows is at v0 parity (B9.16). Track outstanding work in [`dev/backlog.md`](../dev/backlog.md).
 
-What the client downloads. Everything else in the repo (the skill, the templates, the docs) is provisioned silently by the installer once the user double-clicks it.
+What the client sees and runs. The full install is a one-line command they paste into their terminal — nothing lands in their `Downloads` folder.
 
 ## Files
 
-| File | Platform | Purpose |
-|---|---|---|
-| `Welcome.command` | macOS | Bash bootstrap script. Self-relaunches in Terminal when double-clicked from Finder. |
-| `Welcome.bat` | Windows | Tiny CMD wrapper that hands off to `Welcome.ps1` with execution-policy bypass for that one process. |
-| `Welcome.ps1` | Windows | The real Windows installer logic, in PowerShell. Mirrors the macOS flow step-for-step. **Must live in the same folder as `Welcome.bat`.** |
-| `index.html` | both | Landing page (served at `https://passporttowealth.app/` via here.now). Detects the visitor's OS and shows the right download button + the right "OS will warn you" instructions (Gatekeeper for Mac, SmartScreen for Windows). |
-| `assets/` | both | Screenshots for the landing page (Gatekeeper steps, SmartScreen steps), Passport to Wealth logo. |
-
-## Why two files for Windows
-
-Batch (`.bat`) is what double-clicks reliably from File Explorer; PowerShell (`.ps1`) is what we want for actual installer logic. The pair-of-files pattern is industry standard:
-
-- The `.bat` is a 30-line wrapper that does one thing: launches `powershell.exe -ExecutionPolicy Bypass -File Welcome.ps1`. This bypasses the system-wide PowerShell execution-policy lockdown for **this one process only** without changing any user setting.
-- The `.ps1` does all real work and gets all the structured-data, error-handling, and UX affordances we'd otherwise lack in batch.
-
-The landing page makes this clear: Windows users are told to download both files into the same folder.
+| File | Purpose |
+|---|---|
+| `install.sh` | **Canonical Mac installer.** Streamed via `curl … \| bash` from `passporttowealth.app/install`. ~800 lines. Provisions uv, Python 3.11, jq, Node, Claude Code, here-now skill, finance-clarity-build skill, workspace at `~/Documents/my-finances/`. |
+| `install.ps1` | **Canonical Windows installer.** Streamed via `irm … \| iex` from `passporttowealth.app/install.ps1`. Same flow as `install.sh`; tools via winget + npm. |
+| `install` | Tiny bash shim served at `passporttowealth.app/install` that exec-fetches `install.sh` from GitHub raw. The branded short URL. |
+| `index.html` | Landing page, deployed to here.now (slug `sandy-delta-dc3r`) at `https://passporttowealth.app/`. |
+| `dashboard-demo/` | Live public mirror of the dashboard, built from the synthetic demo-kit fixture by the real pipeline. Served at `https://passporttowealth.app/dashboard-demo/`. See ["The demo dashboard"](#the-demo-dashboard) below. |
+| `assets/` | Landing-page imagery: world-map watermark, the book cover, Gatekeeper/SmartScreen screenshots, and `assets/brand/` (real-file copies of the brand pack — see ["Brand assets"](#brand-assets-three-copies-keep-them-in-sync) below). |
+| `publish-landing.sh` | **Use this to publish the landing page.** Substitutes `{{BUILD_STAMP}}` in a temp build dir, then publishes to here.now. Don't invoke the here-now skill against `installer/` directly — the timestamp would render literally. |
+| `legacy/` | Archived `Welcome.command` / `.bat` / `.ps1` from the file-download era. Kept as a fallback for clients who absolutely cannot open Terminal/PowerShell. Not advertised on the landing page. |
 
 ## Distribution URLs
 
-- **Landing page** (what the advisor shares — same URL for everyone, OS-detected): `https://passporttowealth.app/`
-- **Direct downloads** (what the landing buttons point to — relative paths, served from the same here.now bundle as the landing page):
-  - Mac: `https://passporttowealth.app/Welcome.command`
-  - Windows: `https://passporttowealth.app/Welcome.bat`
-  - Windows (companion): `https://passporttowealth.app/Welcome.ps1`
-- **`www.passporttowealth.app`** redirects to the apex (`passporttowealth.app`).
-- **Backup mirror**: the `.github/workflows/pages.yml` workflow also builds a copy of the landing page + installers to GitHub Pages on every push to `main`. Not the canonical URL — keep advertising `passporttowealth.app` — but useful belt-and-suspenders if here.now is ever down or the apex DNS changes.
+- **Landing page** (what advisors share): `https://passporttowealth.app/`
+- **Install (Mac)**: `curl -fsSL https://passporttowealth.app/install | bash`
+- **Install (Windows)**: `irm https://passporttowealth.app/install.ps1 | iex`
+- **Live demo dashboard**: `https://passporttowealth.app/dashboard-demo/`
+- **`www.passporttowealth.app`** redirects to the apex.
+- **Backup mirror**: `.github/workflows/pages.yml` builds a copy of the landing page to GitHub Pages on every push to `main`. Belt-and-suspenders only — keep advertising `passporttowealth.app`.
 
 ## Publishing the landing page
 
-The landing page lives in this folder (`installer/index.html` + `installer/Welcome.{command,bat,ps1}` + `installer/assets/`) and is published to here.now via:
-
 ```bash
-# from a temp staging dir so symlinks under installer/assets/brand are dereferenced
-STAGE=$(mktemp -d)
-cp installer/index.html "$STAGE/"
-cp -RL installer/assets "$STAGE/"
-cp installer/Welcome.command installer/Welcome.bat installer/Welcome.ps1 "$STAGE/"
-~/.claude/skills/here-now/scripts/publish.sh "$STAGE" \
-  --slug sandy-delta-dc3r \
-  --client passporttowealth-landing
+bash installer/publish-landing.sh
 ```
 
-The slug `sandy-delta-dc3r` is the original here.now slug behind `passporttowealth.app`; updates to that slug propagate to the apex automatically (≤60s via Cloudflare KV). To attach a new domain or remove this one, use `/api/v1/domains` (see `~/.claude/skills/here-now/SKILL.md`).
+That's it. The wrapper:
+1. `rsync -aL` mirrors `installer/` to a temp dir, dereferencing any symlinks (here-now's `publish.sh` walks files with `find -type f`, which silently skips symlinks).
+2. Substitutes `{{BUILD_STAMP}}` with the current UTC timestamp (format `yyyymmddHHMMSS`, matching the install-telemetry `build_stamp`).
+3. Publishes to slug `sandy-delta-dc3r` via the here-now skill.
+4. Carries `.herenow/` state in/out so claim tokens don't get lost.
 
-## Sharing with a client
+**Don't publish `installer/` directly with the bare here-now skill** — `{{BUILD_STAMP}}` would land in the live HTML literally, and any future symlink would silently 404 in the bundle. Both regressions have happened; both are guarded by the wrapper.
 
-Send `https://passporttowealth.app/`. The landing page handles platform detection — the client doesn't need to know whether they're on Mac or Windows. Tell them to expect their OS's "unknown developer" warning; the landing page shows them how to get past it.
+The slug `sandy-delta-dc3r` is the original here.now slug behind `passporttowealth.app`; updates propagate to the apex automatically (≤60s via Cloudflare KV). Override with `LANDING_SLUG=...` env var if needed.
 
-Do **not** send the direct download URLs (e.g. `passporttowealth.app/Welcome.command`); the landing page is what walks them through the OS warning, and that step is the most common abandonment point on both platforms.
+## The demo dashboard
+
+`installer/dashboard-demo/` is a fully-rendered dashboard (synthetic data, real template, real pipeline). Linked from section 03 of the landing page so prospects can see the output before installing. Public — no passcode.
+
+To regenerate (after the dashboard template changes, the demo-kit fixture changes, or the pipeline output shape changes):
+
+```bash
+# 1. Build a fresh dashboard from the demo-kit fixture
+rm -rf /tmp/dashboard-demo-ws
+mkdir -p /tmp/dashboard-demo-ws/inbox
+cp demo-kit/data/* /tmp/dashboard-demo-ws/inbox/
+FCB_WORKSPACE=/tmp/dashboard-demo-ws bash skill/scripts/refresh.sh --auto-confirm
+
+# 2. Replace the bundled copy
+rm -rf installer/dashboard-demo
+cp -R /tmp/dashboard-demo-ws/site installer/dashboard-demo
+
+# 3. Re-apply the two demo-only patches:
+#    a) Add the gold "Demo dashboard — synthetic data" banner right after <body>
+#    b) Override the privacy footer (the per-client passcode framing doesn't apply
+#       to a public demo). Look at git history of installer/dashboard-demo/index.html
+#       for the exact blocks; tests/test_dashboard_demo_bundle_complete asserts
+#       both are present.
+
+# 4. Force-add the synthetic CSV downloads (global *.csv ignore blocks them)
+git add -f installer/dashboard-demo/downloads/*.csv
+
+# 5. Republish
+bash installer/publish-landing.sh
+```
+
+Tests guard the bundle: `test_dashboard_demo_bundle_complete` checks the banner, the footer override, and that all assets are real files (no symlinks).
+
+## Brand assets — three copies, keep them in sync
+
+Brand files (`logo-blue.png`, `logo-white.png`, `favicon.png`) live in three places:
+
+1. `assets/brand/` — canonical
+2. `installer/assets/brand/` — bundled into the landing page
+3. `skill/templates/site/assets/brand/` — bundled into the user dashboard
+
+**No symlinks** — here-now's `publish.sh` skips them. The `test_landing_page_assets_resolve_in_publish_bundle` test fails if a symlink is reintroduced under `installer/`.
+
+When updating any brand file, run both `cp` lines from [`assets/brand/README.md`](../assets/brand/README.md).
+
+## Sharing the install link with a client
+
+Send `https://passporttowealth.app/`. The landing page handles platform detection and shows the right install command for Mac or Windows with a copy button. Tell them what to expect (Terminal/PowerShell, ~10 minutes on a fresh machine).
+
+If the prospect wants to see the output first, send them `https://passporttowealth.app/dashboard-demo/` — that's why it's there.
 
 ## Updating the installer
 
-Edit `Welcome.command`, `Welcome.bat`, or `Welcome.ps1` on a feature branch, open a PR, let CI verify it (lint + fixture run), merge to `main`. The next client to click the download URL gets the new version automatically. Existing clients pick up updates via the skill's self-update flow on their next START-HERE launch (see spec §18.1).
+Edit `install.sh` and/or `install.ps1` on a branch, open a PR, let CI lint + tests pass, merge to `main`. The next client to run the install one-liner gets the new version automatically — the install URL exec-fetches GitHub raw, so there's no separate publish step for the installer scripts themselves (only for the landing page).
 
-**Keep the two installers in sync.** Any user-facing string change in `Welcome.command` should land in `Welcome.ps1` in the same PR, and vice versa. CI lint will eventually enforce this; for now it's a code-review check.
+**Keep the two installers in sync.** Any user-facing string in `install.sh` should land in `install.ps1` in the same PR. `tests/test_installer_*` enforces parity on key blocks (telemetry, consent gate, etc.).
 
-Bump `CHANGELOG.md` and tag a `v0.x.0` release on each meaningful update.
+Bump `CHANGELOG.md` on each meaningful update.
 
 ## Reference v1 vs full parity
 
 Per `dev/finance-clarity-build-spec.md` and `dev/backlog.md`:
 
-- **macOS is the v1 reference implementation.** Every behavior described in the spec is targeted at Mac first.
-- **Windows is a parallel target with the same behavior contract.** The PowerShell installer will reach feature parity per backlog item B1.3, ahead of v1.0.0 ship if possible, otherwise immediately after.
-- **Linux is out of scope until a real customer asks for it.** No third stub.
+- **macOS** is the v1 reference. Every behavior in the spec targets Mac first.
+- **Windows** reached v0 parity in B9.16 (winget for tools, npm for Claude Code, npx for skills, parity UX). Ship-then-dry-run remains the validation strategy until we have a real Windows test box. OneDrive sync detection deferred to v1.1.
+- **Linux** is out of scope until a real customer asks for it.

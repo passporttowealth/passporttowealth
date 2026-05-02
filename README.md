@@ -4,6 +4,8 @@
 
 A private financial dashboard you build on your own laptop in under 30 minutes — from a folder of bank statements to clarity. **Your data never leaves your computer unless you choose to share it.**
 
+**Want to see the output before installing?** [View the live demo dashboard](https://passporttowealth.app/dashboard-demo/) — built from synthetic data by the real pipeline.
+
 ## Install
 
 **macOS** — open Terminal (`⌘ Space` → `Terminal` → `Enter`) and paste:
@@ -60,8 +62,11 @@ The full source of `install.sh` is right here in this repo for inspection — `c
 
 | Path | What's there |
 |---|---|
-| [`installer/install.sh`](installer/install.sh) | The canonical install script (curl-piped). |
+| [`installer/install.sh`](installer/install.sh) | The canonical Mac install script (curl-piped). |
+| [`installer/install.ps1`](installer/install.ps1) | The canonical Windows install script (irm-piped). |
 | [`installer/index.html`](installer/index.html) | The product landing page, deployed to [passporttowealth.app](https://passporttowealth.app/). |
+| [`installer/dashboard-demo/`](installer/dashboard-demo/) | Public live demo of the dashboard at [passporttowealth.app/dashboard-demo](https://passporttowealth.app/dashboard-demo/), built from `demo-kit/` synthetic data by the real pipeline. |
+| [`installer/publish-landing.sh`](installer/publish-landing.sh) | Wrapper that publishes the landing page with `{{BUILD_STAMP}}` substituted. **Use this, not the bare here-now skill.** |
 | [`installer/legacy/`](installer/legacy/) | Archived `Welcome.command` / `.bat` / `.ps1` for the file-download fallback path. |
 | [`skill/`](skill/) | The `finance-clarity-build` Claude Code skill: prompts, scripts, dashboard templates, error-code reference. |
 | [`docs/`](docs/) | Advisor-facing operational docs (onboarding, troubleshooting, design system, privacy notes). |

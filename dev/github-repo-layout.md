@@ -9,15 +9,16 @@ passporttowealth/
 ├── SECURITY.md                        ← How to report a security issue (private email, not public issues)
 ├── CHANGELOG.md                       ← Version notes per release tag (read by the self-update flow)
 │
-├── installer/                         ← What the client downloads
-│   ├── Welcome.command                ← The bootstrap script. Bundled with the landing page on here.now.
-│   ├── index.html                     ← Landing page (deployed to here.now → https://passporttowealth.app/)
-│   ├── assets/
-│   │   ├── gatekeeper-step-1.png      ← Screenshot of the "cannot be opened" dialog
-│   │   ├── gatekeeper-step-2.png      ← Screenshot of right-click → Open
-│   │   ├── gatekeeper-step-3.png      ← Screenshot of the "Open Anyway" confirmation
-│   │   └── ptw-logo.svg               ← Passport to Wealth logo for the landing page
-│   └── README.md                      ← Notes for the advisor on how to share the install link
+├── installer/                         ← What the client streams + the public landing
+│   ├── install.sh                     ← Canonical Mac installer (curl-piped from passporttowealth.app/install)
+│   ├── install.ps1                    ← Canonical Windows installer (irm-piped from passporttowealth.app/install.ps1)
+│   ├── install                        ← Tiny bash shim served at the short URL; exec-fetches install.sh from GitHub raw
+│   ├── index.html                     ← Landing page (here.now slug sandy-delta-dc3r → https://passporttowealth.app/)
+│   ├── publish-landing.sh             ← USE THIS to publish the landing page. Substitutes {{BUILD_STAMP}} in a temp dir.
+│   ├── dashboard-demo/                ← Live public demo at /dashboard-demo (built from demo-kit by the real pipeline)
+│   ├── assets/                        ← Landing imagery + brand pack (real files, no symlinks)
+│   ├── legacy/                        ← Archived Welcome.{command,bat,ps1} for file-download fallback
+│   └── README.md                      ← How to publish, regenerate the demo, sync brand assets
 │
 ├── skill/                             ← The `finance-clarity-build` skill itself
 │   ├── SKILL.md                       ← Frontmatter + behavior contract (condensed spec)
@@ -96,16 +97,17 @@ passporttowealth/
 The here-now publish slug behind `passporttowealth.app` is `sandy-delta-dc3r`. To update:
 
 ```bash
-STAGE=$(mktemp -d)
-cp installer/index.html "$STAGE/"
-cp -RL installer/assets "$STAGE/"
-cp installer/Welcome.command installer/Welcome.bat installer/Welcome.ps1 "$STAGE/"
-~/.claude/skills/here-now/scripts/publish.sh "$STAGE" \
-  --slug sandy-delta-dc3r \
-  --client passporttowealth-landing
+bash installer/publish-landing.sh
 ```
 
-(Stage to a temp dir first because `installer/assets/brand/` is a symlink — `cp -RL` dereferences it before publish.) Propagation is ≤60s globally via Cloudflare KV. The `.github/workflows/pages.yml` workflow also builds a backup mirror to GitHub Pages on every push to `main` — same content, second URL, used only if here.now is unreachable.
+That wrapper handles two regressions that bit us before:
+1. **`{{BUILD_STAMP}}` substitution** — the landing footer has a build-stamp placeholder. Without the wrapper, it renders literally on the live page.
+2. **Symlink dereferencing** — `installer/assets/brand/` was once a symlink. The here-now skill walks files with `find -type f` (skips symlinks), so the brand PNGs disappeared from the bundle and the live logo 404'd. The brand assets are now real files (and a test guards against re-introducing a symlink), but `publish-landing.sh` also runs `rsync -aL` to dereference anything new just in case.
+
+Propagation is ≤60s globally via Cloudflare KV. The `.github/workflows/pages.yml` workflow also builds a backup mirror to GitHub Pages on every push to `main` — same content, second URL, used only if here.now is unreachable.
+
+### The live demo dashboard
+`https://passporttowealth.app/dashboard-demo/` is a public mirror of the dashboard, built from the synthetic `demo-kit/` fixture by the real pipeline (classify → ... → build_site). Lives at `installer/dashboard-demo/` and ships in the same publish bundle as the landing page. No passcode (it's marketing). To regenerate, see [`installer/README.md`](../installer/README.md#the-demo-dashboard).
 
 ### What the installer pulls down
 At install time, `Welcome.command` `git clone`s the repo (or `curl`s a tarball of the latest release) into `~/Documents/my-finances/.skill/`, then symlinks the skill into the right Claude Code skills directory. This way the workspace contains its own pinned copy of the skill and self-update is just a `git fetch && git checkout {new-tag}`. The skill code itself stays in GitHub (auditable, versioned); only the landing page + installer launchers are mirrored to here.now for the brand-friendly download URL.

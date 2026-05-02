@@ -4,6 +4,8 @@
 
 A first-time, non-technical client with a folder of their own financial files (bank exports, payslips, tax docs, receipts) who wants to see their money clearly without handing it to a third-party app. Walks away in under 30 minutes with a private, password-protected URL they can open from any device and share with a financial advisor.
 
+> **Show, don't tell** — for prospects who want to see the output before committing to the install, send them `https://passporttowealth.app/dashboard-demo/`. It's the real dashboard rendered against the synthetic `demo-kit/` fixture; same layout, real charts, real categorization, fake numbers. Lives in `installer/dashboard-demo/` and is regenerated per the steps in [`installer/README.md`](../installer/README.md#the-demo-dashboard).
+
 > Assumes the `finance-clarity-build` skill and the `install-finance-clarity` bootstrap installer (see `backlog.md`) are shipped. The client never types a Python command, never edits a config file, and never opens Terminal except by double-clicking.
 
 ---

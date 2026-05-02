@@ -1037,7 +1037,7 @@ In addition to the seven hard rules in §2:
 
 - The pipeline runs against `01_bank_transactions/` only. `02_payslips/` and `04_reference_docs/` are untouched unless the user explicitly asks the skill to read a specific file from them, in which case the skill prompts per-file before opening.
 - The published site shows aggregates and transactions. It does **not** show: full account numbers (always last-4), identity fields, payslip data, or tax data — even if those somehow ended up in `transactions_tagged.csv` (the builder strips them).
-- The privacy footer on the site is mandatory and not user-removable. Wording fixed in the template.
+- The privacy footer on the site is mandatory and not user-removable. Wording fixed in the template. **It must be specific about the local/uploaded split** — past wording ("the host never received your transactions, only the rendered numbers") was misleading because `publish.sh` uploads `site/downloads/transactions_tagged.csv` and `<script id="dashboard-data">` JSON also embeds the per-transaction list. Honest framing: source files (bank statements, paystubs, tax documents) stay on the laptop; categorized transactions and CSV exports DO get uploaded behind the passcode. Test `test_privacy_footer_is_honest_about_what_publishes` guards this in both directions.
 
 ### 16.2 What the user is told upfront
 

@@ -545,6 +545,26 @@ Code from email: ______
 - New `.coming-soon-chip` CSS class (reusable for any future Coming-soon sections).
 - Section IDs renumbered (sec-01..sec-06). Section nav updated. Prototype-modal Privacy anchor moved to #sec-06.
 
+### B9.18 — Live public demo dashboard at /dashboard-demo + 3 supporting fixes · ✅ **DONE**
+**Found by:** user request "add a link to view a dashboard example in the landing page under 'See your numbers' section, and link out to a demo dashboard without a passcode mounted via here.now at passporttowealth.app/dashboard-demo using the template simulation data."
+**Why this exists:** Prospects need to see the actual output before committing to the install command. A static `<div class="dash-preview">` in the landing page is a sketch, not the real thing. A live mirror — built by the real pipeline against the synthetic demo-kit fixture — answers "what am I getting?" in one click.
+**What changed:**
+- New `installer/dashboard-demo/` (~530KB, 12 files, no symlinks). Built end-to-end by `refresh.sh --auto-confirm` against `demo-kit/data/*` (fully synthetic, deterministic random.seed(42)). Ships in the same publish bundle as the landing page → resolves at `https://passporttowealth.app/dashboard-demo/` automatically. No passcode (it's the marketing site by design).
+- Two demo-only patches applied to the bundled copy:
+  - Gold "Demo dashboard — synthetic data" banner right after `<body>` so visitors aren't confused.
+  - Footer override (the per-client passcode framing doesn't apply to a public demo).
+- Link added in section 03 of `installer/index.html` under the styled preview: "View the full live demo dashboard ↗", gold underline.
+- Considered alternative: run `publish.sh` end-to-end → separate slug → metadata-PATCH the passcode off → here-now link API to map `/dashboard-demo`. Rejected — same dashboard files either way, much more state to babysit.
+
+**Three fixes shipped in the same commit because they kept tripping each other:**
+- **Fix #1 — privacy footer was misleading.** `skill/templates/site/index.html` claimed "the host never received your transactions, only the rendered numbers." Reality: `publish.sh` uploads the full `site/` directory which includes `downloads/transactions_tagged.csv` (every row) AND embeds the per-transaction list in `<script id="dashboard-data">` JSON. New copy is specific: source files stay local; categorized transactions and CSV exports DO get uploaded behind the passcode. Spec §16.1 updated to require this honest framing for any future template edits.
+- **Fix #2 — `{{BUILD_STAMP}}` placeholder was rendering literally on the live page.** Was never wired up to a substitution mechanism. New `installer/publish-landing.sh` wrapper builds `installer/` to a temp dir, substitutes the stamp (UTC `yyyymmddHHMMSS`, same format as install-telemetry build_stamp), then publishes from temp. Source file keeps the placeholder — no per-publish git churn. **All future landing publishes must go through this wrapper, not the bare here-now skill.**
+- **Fix #3 — `installer/dashboard-demo/downloads/*.csv` were blocked by the global `*.csv` gitignore.** Force-added; they're synthetic fixtures, the ignore rule is for real client data.
+
+**Tests:** `test_dashboard_demo_bundle_complete` (banner + footer override + no symlinks anywhere) and `test_privacy_footer_is_honest_about_what_publishes` (old phrasing must not creep back; new phrasing must be present). 69 tests pass.
+
+**Docs synced:** root `README.md`, `installer/README.md` (full refresh — was still describing Welcome.command flow), `dev/github-repo-layout.md`, `dev/demo-script.md`, `dev/finance-clarity-build-spec.md` §16.1, `CHANGELOG.md`.
+
 ### B9.17 — Install-start telemetry (anonymous, opt-out): Cloudflare Worker /install + KV counters · ✅ **DONE**
 **Found by:** user question "is it possible to track number of installations? how do other software products manage this?" — investigated three layers, shipped Layer 1 (dashboards we already had) + Layer 2 (this), deferred Layer 3 (success/failure outcomes) to future work.
 **Why this exists:** Without telemetry we can't tell the difference between "no one installed today" and "ten people installed but six quit at the consent gate." We need the install-start count to size the next problem.
