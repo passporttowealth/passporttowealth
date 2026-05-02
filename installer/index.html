@@ -285,14 +285,15 @@
     /* ── Book-cover layout (Learn from the best section) ────────────────── */
     .book-row {
       display: grid;
-      grid-template-columns: 180px 1fr;
-      gap: 28px;
+      grid-template-columns: 140px 1fr;
+      gap: 24px;
       align-items: start;
       margin-top: 20px;
+      min-width: 0;
     }
     .book-cover {
       display: block;
-      width: 180px;
+      width: 140px;
       height: auto;
       border-radius: 4px;
       box-shadow: 0 4px 16px rgba(15, 30, 51, 0.15),
@@ -306,6 +307,15 @@
     }
     .book-meta strong { color: var(--color-text); display: block; margin-bottom: 4px; }
     .book-meta a { font-size: 12px; }
+    /* Belt-and-suspenders: prevent the terminal from forcing a horizontal
+       scrollbar inside the narrower column. Shorter mockup content + this
+       fallback together = no side-scroll. */
+    .book-row .term {
+      min-width: 0;
+      overflow-x: hidden;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
     @media (max-width: 700px) {
       .book-row { grid-template-columns: 1fr; gap: 20px; }
       .book-cover { width: 140px; margin: 0 auto; }
@@ -938,17 +948,20 @@
             <a href="https://www.amazon.com/Expat-Money-Playbook-Arielle-Tucker/dp/1394415958" target="_blank" rel="noopener">View on Amazon ↗</a>
           </p>
         </div>
-        <pre class="term"><span class="you">how do I keep my US retirement accounts compliant from Switzerland?</span>
-<span class="ai"><span class="ai-strong">Coming soon</span> — I'll be able to ground answers in the Playbook's</span>
-<span class="ai">chapters on cross-border investing and IRS compliance for expats.</span>
+        <pre class="term"><span class="you">US retirement compliance from Switzerland?</span>
+<span class="ai"><span class="ai-strong">Coming soon</span> — answers grounded in the</span>
+<span class="ai">Playbook's cross-border investing +</span>
+<span class="ai">IRS compliance chapters.</span>
 <span class="blank"></span>
-<span class="you">what should I plan before moving abroad next year?</span>
-<span class="ai"><span class="ai-strong">Coming soon</span> — pre-move financial-planning checklist drawn from</span>
-<span class="ai">Tucker's framework for the "unknown unknowns" that derail expats.</span>
+<span class="you">what to plan before I move abroad?</span>
+<span class="ai"><span class="ai-strong">Coming soon</span> — pre-move planning</span>
+<span class="ai">checklist drawn from Tucker's</span>
+<span class="ai">"unknown unknowns" framework.</span>
 <span class="blank"></span>
-<span class="you">walk me through estate planning across two countries</span>
-<span class="ai"><span class="ai-strong">Coming soon</span> — estate considerations that differ for Americans</span>
-<span class="ai">living abroad, with the Playbook as the source of truth.</span></pre>
+<span class="you">estate planning across two countries</span>
+<span class="ai"><span class="ai-strong">Coming soon</span> — estate considerations</span>
+<span class="ai">specific to Americans abroad, sourced</span>
+<span class="ai">from the Playbook.</span></pre>
       </div>
     </section>
 
