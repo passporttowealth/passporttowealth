@@ -506,14 +506,20 @@ $authChoice = (Read-VisiblePrompt "Type 1 or 2:").ToString().Trim()
 
 switch ($authChoice) {
     "1" {
-        Write-Host "$DIM   Opening Claude - if you're not signed in yet, your browser will open$RESET"
-        Write-Host "$DIM   for you to sign in. Come back here when it says 'success'.$RESET"
-        Write-Log "claude oauth probe"
-        try {
-            claude --dangerously-skip-permissions --print "ready" 2>&1 | Out-Null
-            Write-OkPaced "Claude (subscription) ready"
-        } catch {
-            Write-WarnLine "Claude returned a non-zero exit; continuing - you can verify later by running 'claude' yourself"
+        # Subscription path: confirm Claude Code is callable. We don't actively
+        # probe OAuth — the previous probe burned subscription quota and picked
+        # up stale ANTHROPIC_API_KEY env vars (left by prior installs / other
+        # tools), surfacing a misleading "non-zero exit" warning when OAuth
+        # was actually fine. When the user runs `claude` for the first time
+        # post-install, Claude Code's first-run UX walks them through OAuth
+        # if needed.
+        if (Get-Command claude -ErrorAction SilentlyContinue) {
+            Write-OkPaced "Claude Code ready"
+            Write-Host "$DIM   Next time you run 'claude', it'll open your browser to sign in if needed.$RESET"
+            Write-Log "claude subscription path - deferring OAuth to user's first claude invocation"
+        } else {
+            Write-FailLine "Claude Code didn't respond - install may have left it in a bad state"
+            exit 1
         }
     }
     "2" {

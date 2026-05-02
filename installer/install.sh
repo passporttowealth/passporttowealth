@@ -550,17 +550,19 @@ read -r auth_choice
 
 case "$auth_choice" in
   1)
-    # Subscription path: launch `claude` to trigger OAuth if not authenticated.
-    # Verifying authentication: claude prints help text without erroring iff the
-    # user is logged in. If not logged in, it opens a browser to sign in.
+    # Subscription path: confirm Claude Code is callable and stop. We don't
+    # actively probe OAuth here. Reasons:
+    #   1. `claude --print "ready"` would burn subscription quota for a probe.
+    #   2. The probe picks up stale ANTHROPIC_API_KEY env vars (left over
+    #      from prior installs / other tools) and prefers them over OAuth —
+    #      surfacing a misleading "non-zero exit" warning when the user's
+    #      subscription auth is actually fine.
+    # When the user runs `claude` for the first time post-install, Claude
+    # Code's normal first-run UX walks them through OAuth if needed.
     if claude --version >>"$INSTALL_LOG" 2>&1; then
-      say "${DIM}Opening Claude — if you're not signed in yet, your browser will open${RESET}"
-      say "${DIM}for you to sign in. Come back here when it says 'success'.${RESET}"
-      log "claude oauth probe"
-      # Run a no-op prompt to force any pending auth flow:
-      printf '/exit\n' | claude --dangerously-skip-permissions --print "ready" >>"$INSTALL_LOG" 2>&1 \
-        || warn "Claude returned a non-zero exit; continuing — you can verify later by running 'claude' yourself"
-      ok_paced "Claude (subscription) ready"
+      ok_paced "Claude Code ready"
+      say "${DIM}Next time you run 'claude', it'll open your browser to sign in if needed.${RESET}"
+      log "claude subscription path — deferring OAuth to user's first claude invocation"
     else
       fail "Claude Code didn't respond — install may have left it in a bad state"
       exit 1
