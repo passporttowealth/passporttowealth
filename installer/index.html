@@ -265,6 +265,22 @@
       margin-right: 14px;
       font-weight: 600;
     }
+    .coming-soon-chip {
+      display: inline-block;
+      font-family: var(--font-sans);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-text);
+      background: rgba(201, 167, 93, 0.18);    /* gold @ 18% — soft */
+      border: 1px solid var(--color-gold);
+      padding: 3px 9px;
+      border-radius: 99px;
+      vertical-align: middle;
+      margin-left: 12px;
+      letter-spacing: 0.06em;
+    }
     section .section-lede {
       font-size: 18px;
       color: var(--color-text-muted);
@@ -697,9 +713,11 @@
   <aside class="section-nav" aria-label="Page sections">
     <a href="#top" data-target="top">Top</a>
     <a href="#sec-01" data-target="sec-01"><span class="num">01</span>Drop your files</a>
-    <a href="#sec-02" data-target="sec-02"><span class="num">02</span>See your numbers</a>
-    <a href="#sec-03" data-target="sec-03"><span class="num">03</span>Share if you want</a>
-    <a href="#sec-04" data-target="sec-04"><span class="num">04</span>Privacy</a>
+    <a href="#sec-02" data-target="sec-02"><span class="num">02</span>Have a conversation</a>
+    <a href="#sec-03" data-target="sec-03"><span class="num">03</span>See your numbers</a>
+    <a href="#sec-04" data-target="sec-04"><span class="num">04</span>Ask for new analysis</a>
+    <a href="#sec-05" data-target="sec-05"><span class="num">05</span>Share if you want</a>
+    <a href="#sec-06" data-target="sec-06"><span class="num">06</span>Privacy</a>
   </aside>
 
   <main>
@@ -754,9 +772,25 @@
 <span class="ai"><span class="ok">✓ Sanity check passed.</span> Your dashboard is open in your browser.</span></pre>
     </section>
 
-    <!-- ── 02 — See your numbers ───────────────────────────────────────── -->
+    <!-- ── 02 — Have a conversation ────────────────────────────────────── -->
     <section id="sec-02">
-      <h2><span class="num">02</span>See your numbers</h2>
+      <h2><span class="num">02</span>Have a conversation</h2>
+      <p class="section-lede">Plain English, no commands to memorize. Ask about a charge, fix a misclassification, convert a PDF, rename a category. The assistant works through it with you.</p>
+      <pre class="term"><span class="you">what's that "ACME PAYMENTS" charge in March?</span>
+<span class="ai">$1,247.30 on March 14, marked as Travel. It looks like a hotel</span>
+<span class="ai">charge — want me to recategorize as <span class="ai-strong">Travel › Hotels</span>?</span>
+<span class="blank"></span>
+<span class="you">yeah, and apply that going forward</span>
+<span class="ai">Done. Updated the rule for ACME PAYMENTS → Travel/Hotels.</span>
+<span class="ai">Recategorized 4 historical entries too. Rebuild the dashboard?</span>
+<span class="blank"></span>
+<span class="you">yes please</span>
+<span class="ai"><span class="ok">✓</span> Done. Open in your browser.</span></pre>
+    </section>
+
+    <!-- ── 03 — See your numbers ───────────────────────────────────────── -->
+    <section id="sec-03">
+      <h2><span class="num">03</span>See your numbers</h2>
       <p class="section-lede">Opens locally in your browser. No third-party server, no passcode to invent.</p>
       <div class="dash-preview" aria-label="Dashboard preview">
         <div class="dash-header">
@@ -808,9 +842,25 @@
       </div>
     </section>
 
-    <!-- ── 03 — Share if you want ──────────────────────────────────────── -->
-    <section id="sec-03">
-      <h2><span class="num">03</span>Share if you want</h2>
+    <!-- ── 04 — Ask for new analysis (coming soon) ─────────────────────── -->
+    <section id="sec-04">
+      <h2><span class="num">04</span>Ask for new analysis<span class="coming-soon-chip">Coming soon</span></h2>
+      <p class="section-lede">Once your data's in, request new views. Calculators, comparisons, scenario models. We're building this layer now.</p>
+      <pre class="term"><span class="you">build me a FIRE calculator from my data</span>
+<span class="ai"><span class="ai-strong">Coming soon</span> — I'll use your income, spending, and savings rate</span>
+<span class="ai">to project financial-independence timelines and scenarios.</span>
+<span class="blank"></span>
+<span class="you">show me my FX exposure across currencies</span>
+<span class="ai"><span class="ai-strong">Coming soon</span> — multi-currency risk view: where your money sits,</span>
+<span class="ai">what's denominated in what, and how much swings if rates move.</span>
+<span class="blank"></span>
+<span class="you">compare my dining spend year-over-year</span>
+<span class="ai"><span class="ai-strong">Coming soon</span> — custom comparisons across any category, any window.</span></pre>
+    </section>
+
+    <!-- ── 05 — Share if you want ──────────────────────────────────────── -->
+    <section id="sec-05">
+      <h2><span class="num">05</span>Share if you want</h2>
       <p class="section-lede">Want your advisor to see it? Or read it on your phone? One sentence puts it on a private URL behind a passcode the assistant generates for you.</p>
       <pre class="term"><span class="you">share my dashboard</span>
 <span class="ai">Quick setup since this is your first share — what email should I use?</span>
@@ -826,9 +876,9 @@
 <span class="ai">Want me to email both to your address? <span class="ai-strong">[Y/n]</span></span></pre>
     </section>
 
-    <!-- ── Privacy ─────────────────────────────────────────────────────── -->
-    <section class="privacy" id="sec-04">
-      <h2><span class="num">04</span>Privacy, by default</h2>
+    <!-- ── 06 — Privacy ────────────────────────────────────────────────── -->
+    <section class="privacy" id="sec-06">
+      <h2><span class="num">06</span>Privacy, by default</h2>
       <ul>
         <li>
           <strong>Local first.</strong>
@@ -881,7 +931,7 @@
         <li><strong>Pre-release software.</strong> Active development by Passport to Wealth. Expect bugs and incomplete features.</li>
         <li><strong>Always keep your originals.</strong> The dashboard is a view, not a system of record. Don't delete bank exports based on what it shows.</li>
         <li><strong>Tell your advisor if something looks wrong.</strong> Don't assume the dashboard is correct. Flag anything that doesn't match your records.</li>
-        <li><strong>Privacy intact.</strong> Files stay on your laptop by default. See the <a href="#sec-04">Privacy section</a> above for details.</li>
+        <li><strong>Privacy intact.</strong> Files stay on your laptop by default. See the <a href="#sec-06">Privacy section</a> above for details.</li>
       </ul>
       <div class="modal-actions">
         <button class="secondary" data-open-feedback-modal>Leave feedback</button>
