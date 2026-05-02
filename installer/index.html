@@ -4,28 +4,28 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Finance Clarity — Passport to Wealth</title>
-  <meta name="description" content="A private financial dashboard you build on your own laptop in under 30 minutes. From a folder of bank statements to clarity — your data never leaves your computer.">
+  <meta name="description" content="Your crossborder finances without the hassle. A private dashboard you build on your own laptop in under 30 minutes.">
   <meta name="robots" content="noindex">
   <link rel="icon" type="image/png" href="assets/brand/favicon.png">
   <style>
     :root {
       --color-bg: #ffffff;
-      --color-surface: #faf8f4;
+      --color-surface: #f8f6f1;
       --color-text: #0f1e33;
       --color-text-muted: #5a6478;
       --color-text-faint: #8a93a3;
       --color-accent: #0F1E33;
       --color-accent-hover: #1A2D48;
-      --color-border: rgba(15, 30, 51, 0.08);
-      --color-border-strong: rgba(15, 30, 51, 0.16);
+      --color-border: rgba(15, 30, 51, 0.10);
+      --color-border-strong: rgba(15, 30, 51, 0.18);
       --color-code-bg: #0f1e33;
       --color-code-text: #f5f3ee;
-      --color-warning-bg: #fff8e6;
-      --color-warning-border: #e6c068;
-      --color-warning-text: #5a4318;
+      --color-code-dim: rgba(245, 243, 238, 0.55);
+      --color-code-prompt: #b89d6e;
+      --color-code-success: #7fb88f;
       --radius: 10px;
       --radius-sm: 6px;
-      --max-width: 720px;
+      --max-width: 760px;
       --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", system-ui, sans-serif;
       --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
     }
@@ -39,56 +39,132 @@
       background: var(--color-bg);
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
+      position: relative;
+    }
+
+    /* ── Crossborder watermark ────────────────────────────────────────────
+       Robinson-projection world map (Wikimedia Commons, CC0 public domain,
+       trimmed for size — see installer/assets/world-map.svg attribution).
+       Positioned behind the hero only. SVG is colored via mask-image so the
+       countries pick up the brand navy rather than rendering with their
+       default fills. Hidden in print. */
+    .watermark {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1400px;
+      max-width: 180vw;
+      height: 600px;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.045;
+      background-color: var(--color-accent);
+      -webkit-mask-image: url('assets/world-map.svg');
+              mask-image: url('assets/world-map.svg');
+      -webkit-mask-repeat: no-repeat;
+              mask-repeat: no-repeat;
+      -webkit-mask-position: center top;
+              mask-position: center top;
+      -webkit-mask-size: contain;
+              mask-size: contain;
+    }
+    main { position: relative; z-index: 1; }
+    @media (max-width: 700px) {
+      .watermark { width: 200vw; height: 400px; opacity: 0.06; }
+    }
+    @media print {
+      .watermark { display: none; }
     }
     main {
       max-width: var(--max-width);
       margin: 0 auto;
-      padding: 56px 24px 96px;
+      padding: 56px 24px 64px;
     }
-    a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 2px; }
+    a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
     a:hover { color: var(--color-accent-hover); }
+    code:not([class]) {
+      background: rgba(15, 30, 51, 0.06);
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 0.9em;
+    }
 
+    /* ── Brand row ─────────────────────────────────────────────────────────── */
     .brand {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 64px;
+      gap: 14px;
+      margin-bottom: 88px;
     }
-    .brand img { display: block; height: 40px; width: auto; }
-    .brand-text { font-size: 14px; color: var(--color-text-muted); letter-spacing: 0.02em; }
+    .brand img { display: block; height: 36px; width: auto; }
+    .brand-text {
+      font-size: 13px;
+      color: var(--color-text-muted);
+      letter-spacing: 0.04em;
+      flex: 1;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--color-accent);
+      color: var(--color-code-text);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      padding: 4px 9px;
+      border-radius: 99px;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+      text-transform: uppercase;
+      transition: background 0.15s ease, transform 0.15s ease;
+    }
+    .pill:hover { background: var(--color-accent-hover); transform: translateY(-1px); }
+    .pill::before {
+      content: "";
+      display: inline-block;
+      width: 5px; height: 5px;
+      background: #e6c068;
+      border-radius: 50%;
+    }
 
+    /* ── Hero ──────────────────────────────────────────────────────────────── */
     .hero h1 {
-      font-size: 44px;
-      line-height: 1.1;
-      letter-spacing: -0.02em;
+      font-size: 52px;
+      line-height: 1.05;
+      letter-spacing: -0.025em;
       font-weight: 700;
-      margin: 0 0 20px;
+      margin: 0 0 28px;
     }
     .hero .lede {
-      font-size: 20px;
-      line-height: 1.5;
+      font-size: 21px;
+      line-height: 1.45;
       color: var(--color-text-muted);
-      margin: 0 0 40px;
-      max-width: 580px;
+      margin: 0 0 48px;
+      max-width: 620px;
     }
 
+    /* ── Install command ──────────────────────────────────────────────────── */
     .install-block {
       background: var(--color-code-bg);
       color: var(--color-code-text);
       border-radius: var(--radius);
-      padding: 20px 24px;
-      margin: 32px 0 16px;
+      padding: 22px 24px;
+      margin: 16px 0 16px;
       position: relative;
       overflow-x: auto;
     }
     .install-block .label {
       display: block;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.10em;
       text-transform: uppercase;
-      color: rgba(245, 243, 238, 0.5);
-      margin-bottom: 12px;
+      color: var(--color-code-dim);
+      margin-bottom: 14px;
     }
     .install-block code {
       font-family: var(--font-mono);
@@ -102,11 +178,11 @@
     }
     .copy-btn {
       position: absolute;
-      top: 16px;
-      right: 16px;
-      background: rgba(245, 243, 238, 0.1);
+      top: 18px;
+      right: 18px;
+      background: rgba(245, 243, 238, 0.10);
       color: var(--color-code-text);
-      border: 1px solid rgba(245, 243, 238, 0.2);
+      border: 1px solid rgba(245, 243, 238, 0.20);
       border-radius: var(--radius-sm);
       padding: 6px 12px;
       font-size: 12px;
@@ -115,8 +191,9 @@
       cursor: pointer;
       transition: background 0.15s ease;
     }
-    .copy-btn:hover { background: rgba(245, 243, 238, 0.2); }
+    .copy-btn:hover:not([disabled]) { background: rgba(245, 243, 238, 0.20); }
     .copy-btn.copied { background: #2d5a3d; border-color: #4a8a5e; }
+    .copy-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
 
     .platform-toggle {
       display: inline-flex;
@@ -125,7 +202,7 @@
       border: 1px solid var(--color-border);
       border-radius: var(--radius-sm);
       padding: 3px;
-      margin-bottom: 16px;
+      margin-bottom: 0;
       font-size: 13px;
     }
     .platform-toggle button {
@@ -148,84 +225,223 @@
     .terminal-hint {
       font-size: 14px;
       color: var(--color-text-muted);
-      margin-top: 8px;
+      margin-top: 14px;
+      margin-bottom: 0;
     }
     .terminal-hint kbd {
       display: inline-block;
       padding: 1px 6px;
       font-family: var(--font-mono);
       font-size: 12px;
-      background: var(--color-surface);
+      background: var(--color-bg);
       border: 1px solid var(--color-border-strong);
       border-bottom-width: 2px;
       border-radius: 4px;
       color: var(--color-text);
     }
 
-    section { margin-top: 80px; }
+    /* ── Sections ──────────────────────────────────────────────────────────── */
+    section { margin-top: 112px; }
     section h2 {
-      font-size: 28px;
-      letter-spacing: -0.01em;
-      margin: 0 0 24px;
+      font-size: 32px;
+      letter-spacing: -0.02em;
+      margin: 0 0 28px;
       font-weight: 700;
+      line-height: 1.15;
     }
-    section h3 {
-      font-size: 17px;
-      margin: 0 0 8px;
-      font-weight: 600;
+    section h2 .num {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--color-text-faint);
+      letter-spacing: 0.08em;
+      vertical-align: middle;
+      margin-right: 14px;
+      font-weight: 500;
+    }
+    section .section-lede {
+      font-size: 18px;
+      color: var(--color-text-muted);
+      margin: 0 0 32px;
+      max-width: 620px;
     }
     section p { margin: 0 0 16px; color: var(--color-text-muted); }
     section ul { padding-left: 20px; color: var(--color-text-muted); }
     section li { margin: 6px 0; }
+    section strong { color: var(--color-text); font-weight: 600; }
 
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin-top: 16px;
+    /* ── Terminal mockups ─────────────────────────────────────────────────── */
+    .term {
+      background: var(--color-code-bg);
+      color: var(--color-code-text);
+      border-radius: var(--radius);
+      padding: 22px 26px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.65;
+      margin: 0;
+      overflow-x: auto;
     }
-    .feature-card {
-      background: var(--color-surface);
+    .term .you {
+      color: var(--color-code-text);
+      font-weight: 600;
+    }
+    .term .you::before {
+      content: "› ";
+      color: var(--color-code-prompt);
+      font-weight: 700;
+    }
+    .term .ai { color: var(--color-code-dim); display: block; padding-left: 16px; }
+    .term .ai-strong { color: var(--color-code-text); }
+    .term .ok { color: var(--color-code-success); }
+    .term .blank { display: block; height: 8px; }
+
+    /* ── Dashboard preview ────────────────────────────────────────────────── */
+    .dash-preview {
+      background: var(--color-bg);
       border: 1px solid var(--color-border);
       border-radius: var(--radius);
-      padding: 24px;
+      padding: 28px;
+      box-shadow: 0 1px 3px rgba(15, 30, 51, 0.04), 0 8px 24px rgba(15, 30, 51, 0.06);
     }
-    .feature-card .num {
-      font-family: var(--font-mono);
-      font-size: 12px;
+    .dash-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding-bottom: 18px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .dash-title { font-size: 18px; font-weight: 700; color: var(--color-text); }
+    .dash-period { font-size: 12px; color: var(--color-text-faint); font-family: var(--font-mono); letter-spacing: 0.04em; }
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .kpi {
+      background: var(--color-surface);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+    }
+    .kpi-label { font-size: 11px; color: var(--color-text-muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+    .kpi-value { font-size: 22px; font-weight: 700; color: var(--color-text); letter-spacing: -0.01em; }
+    .kpi-sub { font-size: 11px; color: var(--color-text-faint); margin-top: 2px; }
+
+    .chart {
+      margin-bottom: 22px;
+    }
+    .chart-title { font-size: 12px; color: var(--color-text-muted); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 10px; }
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 70px;
+      padding: 0 2px;
+    }
+    .chart-bar {
+      flex: 1;
+      background: var(--color-accent);
+      border-radius: 2px 2px 0 0;
+      opacity: 0.85;
+      transition: opacity 0.15s ease;
+    }
+    .chart-bar.dim { opacity: 0.35; }
+    .chart-axis {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
       color: var(--color-text-faint);
-      letter-spacing: 0.08em;
-      margin-bottom: 8px;
+      font-family: var(--font-mono);
+      margin-top: 4px;
     }
-    .feature-card p {
-      font-size: 14px;
-      line-height: 1.55;
+
+    .cat-table {
+      font-size: 13px;
+    }
+    .cat-row {
+      display: grid;
+      grid-template-columns: 1fr 80px 32px;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--color-border);
+      align-items: center;
+    }
+    .cat-row:last-child { border-bottom: none; }
+    .cat-name { color: var(--color-text); font-weight: 500; }
+    .cat-amt { font-family: var(--font-mono); color: var(--color-text); text-align: right; font-size: 12px; }
+    .cat-bar-cell {
+      background: var(--color-surface);
+      height: 4px;
+      border-radius: 2px;
+      overflow: hidden;
+      width: 32px;
+    }
+    .cat-bar-fill {
+      background: var(--color-accent);
+      height: 100%;
+      opacity: 0.6;
+    }
+
+    /* ── Privacy block ────────────────────────────────────────────────────── */
+    .privacy ul {
+      list-style: none;
+      padding: 0;
       margin: 0;
     }
-
-    .privacy-block {
-      background: var(--color-surface);
-      border-left: 3px solid var(--color-accent);
-      border-radius: var(--radius-sm);
-      padding: 20px 24px;
-      margin-top: 24px;
+    .privacy li {
+      padding: 16px 0;
+      border-bottom: 1px solid var(--color-border);
+      color: var(--color-text-muted);
+      margin: 0;
     }
-    .privacy-block strong { color: var(--color-text); }
-
-    .prototype-banner {
-      background: var(--color-warning-bg);
-      border: 1px solid var(--color-warning-border);
-      border-left-width: 4px;
-      border-radius: var(--radius-sm);
-      padding: 14px 20px;
-      margin: 0 0 48px;
-      font-size: 14px;
-      color: var(--color-warning-text);
+    .privacy li:last-child { border-bottom: none; }
+    .privacy li strong {
+      display: block;
+      color: var(--color-text);
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
     }
-    .prototype-banner strong { display: block; margin-bottom: 4px; }
 
+    /* ── Final CTA ────────────────────────────────────────────────────────── */
+    .final-cta {
+      margin-top: 112px;
+      padding: 56px 0;
+      text-align: center;
+      border-top: 1px solid var(--color-border);
+    }
+    .final-cta h2 {
+      font-size: 28px;
+      margin: 0 0 12px;
+      letter-spacing: -0.015em;
+    }
+    .final-cta p {
+      color: var(--color-text-muted);
+      margin: 0 0 28px;
+    }
+    .final-cta .install-block {
+      max-width: 560px;
+      margin: 0 auto;
+      text-align: left;
+    }
+
+    /* ── Floating prototype pill ──────────────────────────────────────────── */
+    .floating-pill {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 20;
+      box-shadow: 0 4px 12px rgba(15, 30, 51, 0.20);
+    }
+    @media (max-width: 640px) {
+      .floating-pill { display: none; }
+    }
+
+    /* ── Footer ───────────────────────────────────────────────────────────── */
     footer {
-      margin-top: 96px;
+      margin-top: 56px;
       padding-top: 32px;
       border-top: 1px solid var(--color-border);
       font-size: 13px;
@@ -238,36 +454,108 @@
     footer a { color: var(--color-text-muted); text-decoration: none; }
     footer a:hover { color: var(--color-accent); text-decoration: underline; }
 
-    @media (max-width: 600px) {
-      main { padding: 32px 20px 64px; }
-      .brand { margin-bottom: 40px; }
-      .hero h1 { font-size: 32px; }
-      .hero .lede { font-size: 17px; }
+    /* ── Modal ────────────────────────────────────────────────────────────── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 30, 51, 0.55);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: var(--color-bg);
+      border-radius: var(--radius);
+      max-width: 480px;
+      width: 100%;
+      padding: 32px;
+      box-shadow: 0 20px 48px rgba(15, 30, 51, 0.30);
+      animation: pop 0.18s ease-out;
+    }
+    @keyframes pop {
+      from { transform: scale(0.96); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    .modal h3 {
+      margin: 0 0 16px;
+      font-size: 22px;
+      letter-spacing: -0.01em;
+      font-weight: 700;
+    }
+    .modal ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 24px;
+    }
+    .modal li {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 15px;
+      color: var(--color-text-muted);
+    }
+    .modal li:last-child { border-bottom: none; }
+    .modal li strong {
+      display: block;
+      color: var(--color-text);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .modal button {
+      background: var(--color-accent);
+      color: var(--color-code-text);
+      border: none;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.15s ease;
+    }
+    .modal button:hover { background: var(--color-accent-hover); }
+
+    /* ── Responsive ───────────────────────────────────────────────────────── */
+    @media (max-width: 700px) {
+      main { padding: 36px 20px 48px; }
+      .brand { margin-bottom: 56px; }
+      .hero h1 { font-size: 36px; }
+      .hero .lede { font-size: 18px; margin-bottom: 32px; }
       .install-block { padding: 16px 18px; }
       .install-block code { font-size: 12px; padding-right: 0; padding-bottom: 44px; }
       .copy-btn { top: auto; bottom: 14px; right: 14px; }
-      section h2 { font-size: 22px; }
+      section { margin-top: 80px; }
+      section h2 { font-size: 24px; }
+      .kpis { grid-template-columns: 1fr; gap: 8px; }
+      .term { font-size: 12px; padding: 16px 18px; }
+      .final-cta { margin-top: 80px; padding: 40px 0; }
     }
     @media (prefers-reduced-motion: reduce) {
-      * { transition: none !important; }
+      *, *::before, *::after { transition: none !important; animation: none !important; }
     }
   </style>
 </head>
 <body>
+  <div class="watermark" aria-hidden="true"></div>
   <main>
     <div class="brand">
-      <img src="assets/brand/logo-blue.png" alt="Passport to Wealth" width="40" height="40">
+      <img src="assets/brand/logo-blue.png" alt="Passport to Wealth" width="36" height="36">
       <span class="brand-text">PASSPORT TO WEALTH · FINANCE CLARITY</span>
-    </div>
-
-    <div class="prototype-banner">
-      <strong>⚠ Prototype — pre-release</strong>
-      A pilot tool for clients of Passport to Wealth. Use as a complement to your existing financial records, not a replacement. Always keep your original bank exports.
+      <button class="pill" data-open-prototype-modal aria-label="Learn more about this prototype">Prototype</button>
     </div>
 
     <header class="hero">
-      <h1>A private financial dashboard you build on your own laptop.</h1>
-      <p class="lede">From a folder of bank statements to a categorized, charted view of your money — in under 30 minutes. Your data never leaves your computer unless you choose to share it.</p>
+      <h1>Your crossborder finances without the hassle.</h1>
+      <p class="lede">Drop your bank exports, paystubs, and tax docs in one folder. Get a categorized dashboard that handles your currencies, accounts, and countries — without uploading anything to anyone.</p>
     </header>
 
     <div class="platform-toggle" role="tablist" aria-label="Choose your operating system">
@@ -282,11 +570,11 @@
     </div>
     <div class="install-block" id="install-win" role="tabpanel" aria-labelledby="tab-win" hidden>
       <span class="label" style="color: #e6c068;">⚠ Windows — coming soon</span>
-      <code id="cmd-win" style="opacity: 0.6;">irm https://passporttowealth.app/install.ps1 | iex</code>
-      <p style="color: rgba(245,243,238,0.7); font-size: 13px; margin: 12px 0 0; padding-right: 80px; line-height: 1.5;">
-        The Windows installer is under active development. For now, Mac is the supported platform — open the page on a Mac, or contact your advisor if you need Windows access.
+      <code id="cmd-win" style="opacity: 0.55;">irm https://passporttowealth.app/install.ps1 | iex</code>
+      <p style="color: rgba(245,243,238,0.65); font-size: 13px; margin: 14px 0 0; padding-right: 80px; line-height: 1.5;">
+        The Windows installer is in active development. Mac is the supported platform today — open this page on a Mac, or contact your advisor for access timelines.
       </p>
-      <button class="copy-btn" data-target="cmd-win" aria-label="Copy install command" disabled style="opacity: 0.5; cursor: not-allowed;">Copy</button>
+      <button class="copy-btn" data-target="cmd-win" aria-label="Copy install command" disabled>Copy</button>
     </div>
 
     <p class="terminal-hint" id="hint-mac">
@@ -296,60 +584,128 @@
       First time? Open PowerShell: press <kbd>Win</kbd>, type <kbd>PowerShell</kbd>, hit <kbd>Enter</kbd>. Then paste the line above and press <kbd>Enter</kbd> again.
     </p>
 
+    <!-- ── 01 — Drop your files ────────────────────────────────────────── -->
     <section>
-      <h2>What this does</h2>
-      <p>The installer sets up everything quietly behind the scenes — Python, the AI assistant, the dashboard skill — so you only ever see a single shortcut on your Desktop. After it finishes, the workflow is one sentence:</p>
-      <ul>
-        <li>Drop your bank statements, payslips, or tax docs into one folder.</li>
-        <li>Tell the assistant <em>"build my report."</em></li>
-        <li>It sorts, dedupes, normalizes currencies, fetches exchange rates, categorizes, and shows the totals back for confirmation.</li>
-        <li>Once you approve, it builds a branded dashboard and opens it in your browser.</li>
-      </ul>
-      <p>No app to learn. No spreadsheet to maintain. Refreshes are <em>"I added new files. Refresh."</em></p>
+      <h2><span class="num">01</span>Drop your files</h2>
+      <p class="section-lede">Whatever your bank gives you. CSVs, PDFs, multi-currency, multiple accounts. Don't sort, don't rename, don't dedupe — that's the assistant's job.</p>
+      <pre class="term"><span class="you">build my report</span>
+<span class="ai">Found 47 files in your inbox.</span>
+<span class="ai">Sorted them: 18 bank exports, 12 paystubs <span class="ai-strong">(skipped — privacy)</span>,</span>
+<span class="ai">  8 tax docs <span class="ai-strong">(skipped — privacy)</span>, 3 Amazon orders, 6 to ask you about.</span>
+<span class="ai">Removed 3 duplicates I'd already seen.</span>
+<span class="ai">Normalized 412 transactions across <span class="ai-strong">USD, EUR, GBP, CHF</span>.</span>
+<span class="ai">Categorized everything. 38 new merchants — want to review?</span>
+<span class="ai"><span class="ok">✓ Sanity check passed.</span> Your dashboard is open in your browser.</span></pre>
     </section>
 
+    <!-- ── 02 — See your numbers ───────────────────────────────────────── -->
     <section>
-      <h2>How it works</h2>
-      <div class="feature-grid">
-        <div class="feature-card">
-          <div class="num">01 — Local</div>
-          <h3>On your laptop</h3>
-          <p>Your files stay on your computer. The pipeline runs locally. Nothing is uploaded by default.</p>
+      <h2><span class="num">02</span>See your numbers</h2>
+      <p class="section-lede">Opens locally in your browser. Your laptop's lock screen is the only thing protecting it — no third-party server, no passcode to invent.</p>
+      <div class="dash-preview" aria-label="Dashboard preview">
+        <div class="dash-header">
+          <div class="dash-title">Your Finance Dashboard</div>
+          <div class="dash-period">JAN 2024 — DEC 2024</div>
         </div>
-        <div class="feature-card">
-          <div class="num">02 — Private</div>
-          <h3>Opens in your browser</h3>
-          <p>The dashboard opens from disk via a <code style="background: rgba(15,30,51,0.06); padding: 1px 4px; border-radius: 3px; font-size: 13px;">file://</code> URL. No third-party server, no signup, no passcode.</p>
+        <div class="kpis">
+          <div class="kpi">
+            <div class="kpi-label">Income</div>
+            <div class="kpi-value">€127,840</div>
+            <div class="kpi-sub">across 3 currencies</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Spend</div>
+            <div class="kpi-value">€89,206</div>
+            <div class="kpi-sub">12 categories</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Net</div>
+            <div class="kpi-value" style="color: #2d5a3d;">+€38,634</div>
+            <div class="kpi-sub">30% savings rate</div>
+          </div>
         </div>
-        <div class="feature-card">
-          <div class="num">03 — Optional</div>
-          <h3>Share if you want</h3>
-          <p>Want to send it to your advisor or family? One sentence puts it on a private URL behind a passcode.</p>
+        <div class="chart">
+          <div class="chart-title">Monthly cashflow</div>
+          <div class="chart-bars">
+            <div class="chart-bar" style="height: 45%"></div>
+            <div class="chart-bar" style="height: 62%"></div>
+            <div class="chart-bar" style="height: 38%"></div>
+            <div class="chart-bar" style="height: 58%"></div>
+            <div class="chart-bar" style="height: 71%"></div>
+            <div class="chart-bar" style="height: 49%"></div>
+            <div class="chart-bar" style="height: 67%"></div>
+            <div class="chart-bar" style="height: 53%"></div>
+            <div class="chart-bar" style="height: 79%"></div>
+            <div class="chart-bar" style="height: 64%"></div>
+            <div class="chart-bar" style="height: 88%"></div>
+            <div class="chart-bar" style="height: 72%"></div>
+          </div>
+          <div class="chart-axis"><span>JAN</span><span>APR</span><span>JUL</span><span>OCT</span><span>DEC</span></div>
+        </div>
+        <div class="cat-table">
+          <div class="cat-row"><span class="cat-name">Housing</span><span class="cat-amt">€28,400</span><div class="cat-bar-cell"><div class="cat-bar-fill" style="width: 100%"></div></div></div>
+          <div class="cat-row"><span class="cat-name">Groceries</span><span class="cat-amt">€14,720</span><div class="cat-bar-cell"><div class="cat-bar-fill" style="width: 52%"></div></div></div>
+          <div class="cat-row"><span class="cat-name">Travel</span><span class="cat-amt">€11,890</span><div class="cat-bar-cell"><div class="cat-bar-fill" style="width: 42%"></div></div></div>
+          <div class="cat-row"><span class="cat-name">Dining</span><span class="cat-amt">€8,340</span><div class="cat-bar-cell"><div class="cat-bar-fill" style="width: 29%"></div></div></div>
+          <div class="cat-row"><span class="cat-name">Healthcare</span><span class="cat-amt">€4,210</span><div class="cat-bar-cell"><div class="cat-bar-fill" style="width: 15%"></div></div></div>
         </div>
       </div>
     </section>
 
+    <!-- ── 03 — Share if you want ──────────────────────────────────────── -->
     <section>
-      <h2>Privacy</h2>
-      <div class="privacy-block">
-        <p style="margin-bottom: 8px;"><strong>Local by default.</strong> The <code style="background: rgba(15,30,51,0.06); padding: 1px 4px; border-radius: 3px; font-size: 13px;">~/Documents/my-finances/</code> folder is the source of truth. Nothing syncs to a cloud unless you put the folder inside iCloud or Dropbox yourself (the installer warns and offers to relocate if it detects this).</p>
-        <p style="margin-bottom: 8px;"><strong>Sharing is opt-in.</strong> No third-party host is contacted unless you explicitly choose to publish your dashboard. Users who never publish never sign up for anything.</p>
-        <p style="margin-bottom: 0;"><strong>Sensitive files are skipped.</strong> Paystubs, tax returns, and identity documents are not fed into the pipeline by default — the AI assistant won't read them unless you opt in per file.</p>
-      </div>
+      <h2><span class="num">03</span>Share if you want</h2>
+      <p class="section-lede">Want your advisor to see it? Or read it on your phone? One sentence puts it on a private URL behind a passcode the assistant generates for you. Most clients never need this.</p>
+      <pre class="term"><span class="you">share my dashboard</span>
+<span class="ai">Quick setup since this is your first share — what email should I use?</span>
+<span class="blank"></span>
+<span class="you">arielle@example.com</span>
+<span class="ai">Sent you a sign-in code. Paste it here when it arrives.</span>
+<span class="blank"></span>
+<span class="you">XR4P-72K8</span>
+<span class="ai"><span class="ok">✓</span> Account ready.</span>
+<span class="ai"><span class="ok">✓</span> Site is live at <span class="ai-strong">https://lilac-mantra-9k2x.here.now/</span></span>
+<span class="ai"><span class="ok">✓</span> Passcode: <span class="ai-strong">paper-orchid-stove-vine</span> (saved to your workspace)</span>
+<span class="blank"></span>
+<span class="ai">Want me to email both to your address? <span class="ai-strong">[Y/n]</span></span></pre>
     </section>
 
-    <section>
-      <h2>Help, this didn't work</h2>
-      <p>If something fails, the installer writes a log file and prints what to do. If you get stuck, contact your advisor with the log file attached:</p>
+    <!-- ── Privacy ─────────────────────────────────────────────────────── -->
+    <section class="privacy" id="privacy">
+      <h2><span class="num">04</span>Privacy, by default</h2>
       <ul>
-        <li><strong>macOS:</strong> <code style="background: rgba(15,30,51,0.06); padding: 1px 4px; border-radius: 3px; font-size: 13px;">~/Library/Logs/passport-to-wealth-install.log</code></li>
-        <li><strong>Windows:</strong> <code style="background: rgba(15,30,51,0.06); padding: 1px 4px; border-radius: 3px; font-size: 13px;">%LOCALAPPDATA%\PassportToWealth\Logs\passport-to-wealth-install.log</code></li>
+        <li>
+          <strong>Local first.</strong>
+          Your <code>~/Documents/my-finances/</code> folder is the source of truth. No cloud sync unless you put the folder in iCloud or Dropbox yourself (the installer warns and offers to relocate if it detects this).
+        </li>
+        <li>
+          <strong>Sharing is opt-in.</strong>
+          No third-party host is contacted unless you explicitly choose to publish. Most clients never sign up for anything.
+        </li>
+        <li>
+          <strong>Sensitive files are skipped.</strong>
+          Paystubs, tax returns, and identity documents are not fed into the pipeline by default. The assistant won't read them unless you opt in per file.
+        </li>
+        <li>
+          <strong>Always your originals.</strong>
+          The dashboard is a view. It never edits or deletes your bank exports — keep your originals as the system of record.
+        </li>
       </ul>
-      <p style="margin-top: 16px;">Can't open Terminal or PowerShell? <a href="#">Use the file-download fallback instead</a> (legacy installers in the GitHub repo's <code style="background: rgba(15,30,51,0.06); padding: 1px 4px; border-radius: 3px; font-size: 13px;">installer/legacy/</code> folder).</p>
     </section>
+
+    <!-- ── Final CTA ───────────────────────────────────────────────────── -->
+    <div class="final-cta">
+      <h2>Ready when you are.</h2>
+      <p>One command. About 10 minutes if you've installed dev tools before, up to an hour on a fresh laptop.</p>
+      <div class="install-block">
+        <span class="label">macOS — paste in Terminal</span>
+        <code id="cmd-final">curl -fsSL https://passporttowealth.app/install | bash</code>
+        <button class="copy-btn" data-target="cmd-final" aria-label="Copy install command">Copy</button>
+      </div>
+    </div>
 
     <footer>
-      <span>© 2026 Passport to Wealth</span>
+      <span>© 2026 Passport to Wealth · <button class="pill-link" data-open-prototype-modal style="background: none; border: none; color: var(--color-text-muted); padding: 0; cursor: pointer; font: inherit; text-decoration: underline; text-underline-offset: 2px;">Prototype</button></span>
       <span>
         <a href="https://github.com/passporttowealth/passporttowealth" target="_blank" rel="noopener">GitHub</a>
         ·
@@ -358,15 +714,31 @@
     </footer>
   </main>
 
+  <!-- Floating prototype pill (Option C) -->
+  <button class="pill floating-pill" data-open-prototype-modal aria-label="Learn more about this prototype">Prototype</button>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="proto-modal" role="dialog" aria-modal="true" aria-labelledby="proto-modal-title">
+    <div class="modal">
+      <h3 id="proto-modal-title">About this prototype</h3>
+      <ul>
+        <li><strong>Pre-release software.</strong> Active development by Passport to Wealth. Expect bugs and incomplete features.</li>
+        <li><strong>Always keep your originals.</strong> The dashboard is a view, not a system of record. Don't delete bank exports based on what it shows.</li>
+        <li><strong>Tell your advisor if something looks wrong.</strong> Don't assume the dashboard is correct — flag anything that doesn't match your records.</li>
+        <li><strong>Privacy intact.</strong> Files stay on your laptop by default. See the <a href="#privacy">Privacy section</a> above for details.</li>
+      </ul>
+      <div class="modal-actions">
+        <button data-close-modal>Got it</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // OS detection — pre-select the right tab on first load.
+    // ── OS detection — pre-select the right tab on first load ─────────────
     (function() {
       var ua = navigator.userAgent || '';
-      if (/Windows NT/.test(ua)) {
-        switchTo('win');
-      }
+      if (/Windows NT/.test(ua)) switchTo('win');
     })();
-
     function switchTo(platform) {
       var isWin = platform === 'win';
       document.getElementById('tab-mac').classList.toggle('active', !isWin);
@@ -381,12 +753,12 @@
     document.getElementById('tab-mac').addEventListener('click', function() { switchTo('mac'); });
     document.getElementById('tab-win').addEventListener('click', function() { switchTo('win'); });
 
-    // Copy buttons
-    document.querySelectorAll('.copy-btn').forEach(function(btn) {
+    // ── Copy buttons ──────────────────────────────────────────────────────
+    document.querySelectorAll('.copy-btn:not([disabled])').forEach(function(btn) {
       btn.addEventListener('click', function() {
         var target = document.getElementById(btn.getAttribute('data-target'));
-        var text = target.textContent;
-        navigator.clipboard.writeText(text).then(function() {
+        if (!target) return;
+        navigator.clipboard.writeText(target.textContent).then(function() {
           btn.textContent = 'Copied!';
           btn.classList.add('copied');
           setTimeout(function() {
@@ -398,6 +770,23 @@
           setTimeout(function() { btn.textContent = 'Copy'; }, 1800);
         });
       });
+    });
+
+    // ── Prototype modal ──────────────────────────────────────────────────
+    var modal = document.getElementById('proto-modal');
+    function openModal() { modal.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeModal() { modal.classList.remove('open'); document.body.style.overflow = ''; }
+    document.querySelectorAll('[data-open-prototype-modal]').forEach(function(el) {
+      el.addEventListener('click', function(e) { e.preventDefault(); openModal(); });
+    });
+    document.querySelectorAll('[data-close-modal]').forEach(function(el) {
+      el.addEventListener('click', closeModal);
+    });
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
     });
   </script>
 </body>
