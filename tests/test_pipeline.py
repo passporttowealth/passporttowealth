@@ -1069,6 +1069,67 @@ class TestPipelineHealth(unittest.TestCase):
         self.assertNotIn('right-click', html.lower(),
             "right-click → Open instructions should be removed")
 
+    def test_install_ps1_exists_with_winget_provisioning(self):
+        """B9.16 — first version of the Windows installer. Same UX patterns
+        as install.sh (Anthropic terms gate, paced sections, visible
+        Read-VisiblePrompt instead of Read-Host -Prompt, Ctrl+C trap
+        equivalent, install log to %LOCALAPPDATA%). All system tools come
+        through winget. Skills via npx (same as Mac)."""
+        ps1 = REPO / "installer" / "install.ps1"
+        self.assertTrue(ps1.exists(), "installer/install.ps1 must exist")
+        body = ps1.read_text(encoding="utf-8")
+
+        # Header documents the canonical install URL
+        self.assertIn(
+            "irm https://raw.githubusercontent.com/passporttowealth/passporttowealth/main/installer/install.ps1",
+            body, "header must document the canonical irm install URL")
+
+        # winget for tool installs
+        for pkg in ("OpenJS.NodeJS.LTS", "astral-sh.uv", "jqlang.jq"):
+            self.assertIn(pkg, body, f"winget must install {pkg}")
+        self.assertIn("Get-Command winget", body,
+            "must check winget is available before using it")
+
+        # Same UX patterns as install.sh
+        self.assertIn("Anthropic", body, "Anthropic data-terms gate must be present")
+        self.assertIn("I accept", body, "consent gate must accept 'I accept'")
+        self.assertIn("Pause-ForUser", body, "paced sections via Pause-ForUser")
+        self.assertIn("Read-VisiblePrompt", body,
+            "must use Read-VisiblePrompt (not Read-Host -Prompt) for visibility")
+        self.assertIn("Test-Diagnostic", body,
+            "must run Step 5 diagnostics")
+
+        # Empty input doesn't silently cancel (same B9.12 fix as install.sh)
+        # PowerShell switch case "" is the empty-input branch
+        self.assertIn('"no","cancel","quit","stop"', body,
+            "explicit cancel words only, no empty match")
+        self.assertNotIn('"no","cancel","quit","stop","")', body,
+            "empty input must NOT be in the cancel branch")
+        self.assertIn("emptyCount", body, "must track empty-input count")
+
+        # Workspace at %USERPROFILE%\Documents\my-finances
+        self.assertIn('Documents\\my-finances', body,
+            "workspace path must mirror Mac convention")
+
+        # Diagnostic checks
+        for label in ("Node.js installed (npx)", "uv installed", "jq installed",
+                       "Claude Code installed", "Workspace folder", "Workspace venv",
+                       "Finance Clarity skill"):
+            self.assertIn(label, body, f"diagnostic must check: {label}")
+
+        # End-of-install message tells user how to re-enter (no Desktop shortcut)
+        self.assertIn("Open PowerShell", body,
+            "end-of-install message should tell user to open PowerShell")
+        self.assertIn("type:  claude", body.lower(),
+            "should mention typing 'claude'")
+
+        # Log to %LOCALAPPDATA%\PassportToWealth\Logs\
+        self.assertIn("LOCALAPPDATA", body)
+        self.assertIn("PassportToWealth\\Logs", body)
+
+        # Doesn't fall back to legacy patterns
+        self.assertNotIn("[STUB]", body, "no stub markers in install.ps1")
+
     def test_legacy_installers_archived_with_readme(self):
         """B9.9 — Welcome.command, Welcome.bat, Welcome.ps1 moved to
         installer/legacy/ as a fallback for users who can't open Terminal.

@@ -545,6 +545,25 @@ Code from email: ______
 - New `.coming-soon-chip` CSS class (reusable for any future Coming-soon sections).
 - Section IDs renumbered (sec-01..sec-06). Section nav updated. Prototype-modal Privacy anchor moved to #sec-06.
 
+### B9.16 — Windows installer v0 (install.ps1) · ✅ **DONE**
+**Found by:** task #60 (originally "Port real install logic + B9.7 email-code flow to Welcome.ps1") + user request to ship the first Windows-compatible install.
+**What changed:**
+- New `installer/install.ps1` — ~720 lines, parity with `install.sh`'s current shape (post-B9.10/B9.11/B9.12). Designed for `irm https://passporttowealth.app/install.ps1 | iex`.
+- All UX patterns mirror the Mac side: Anthropic data-terms gate (OP-13), section-by-section pacing via `Pause-ForUser`, visible printf-style prompts via new `Read-VisiblePrompt` helper (Read-Host -Prompt has the same render-quirk as bash's read -p — same fix), Ctrl+C trap via `trap` block, install log to `%LOCALAPPDATA%\PassportToWealth\Logs\`, INTERACTIVE_DIAG state captured + logged.
+- Tools provisioned via **winget** (Microsoft's official package manager, ships with Win 10 1809+): Node.js (`OpenJS.NodeJS.LTS`), uv (`astral-sh.uv`), jq (`jqlang.jq`). Claude Code via npm (`@anthropic-ai/claude-code` — Anthropic's distribution channel for non-Mac).
+- Skills installed via the same `npx skills add ... --agent claude-code -g -y` invocations as the Mac side. The here-now and finance-clarity-build skills land at `%USERPROFILE%\.claude\skills\`.
+- Workspace at `%USERPROFILE%\Documents\my-finances\`. Same canonical subfolders. FX prewarm runs through the workspace venv. Diagnostics pin tool presence + workspace shape.
+- API-key auth: persists the key in two places — workspace `.env` AND a User-scope environment variable (`[Environment]::SetEnvironmentVariable($name, $val, "User")`). Mirrors the Mac shell-rc append pattern so `claude` finds the key from any new PowerShell window.
+- Empty input at the consent gate doesn't silently cancel (mirrors B9.12). After 5 consecutive empties → bail with support pointer.
+- Landing-page Windows tab updated: removed "coming soon" treatment, copy button enabled, command active.
+**What's deferred to v1.1:**
+- OneDrive sync detection + workspace relocation (Windows equivalent of Mac's iCloud check).
+- Self-elevation if winget needs admin (winget usually runs without — defer until reported).
+- WSL detection (the bash path would work better there; v0 assumes native PowerShell).
+- End-to-end test on a real Windows box. Test coverage is structural only (`test_install_ps1_exists_with_winget_provisioning`); we ship-then-dry-run the first few clients.
+- Legacy/Welcome.ps1 stays a stub. Curl/irm path is the canonical onboarding.
+**Tests:** new `test_install_ps1_exists_with_winget_provisioning` — pins winget package IDs, UX-pattern presence, diagnostic checks, no [STUB] markers, end-message shape. 64 tests pass.
+
 ## Epic 6.5 — v2 hardening: zero-touch advisor onboarding (deferred from v1)
 
 Items pulled out of `finance-clarity-build-spec.md` v1 to keep the first ship simple. Together they remove the one remaining moment of third-party-service exposure (the publishing-host signup during install) and let the advisor diagnose failures without the user having to email a support bundle.

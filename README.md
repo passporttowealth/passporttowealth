@@ -12,13 +12,15 @@ A private financial dashboard you build on your own laptop in under 30 minutes �
 curl -fsSL https://passporttowealth.app/install | bash
 ```
 
-**Windows** — *coming soon.* The PowerShell installer is in active development (backlog #B9.16). Mac is the only supported platform today. Once it ships, the one-liner will be:
+**Windows** — open PowerShell (`Win` → `PowerShell` → `Enter`) and paste:
 
 ```powershell
 irm https://passporttowealth.app/install.ps1 | iex
 ```
 
 Or visit [passporttowealth.app](https://passporttowealth.app/) for the same with a copy button.
+
+> The Windows installer (v0) shipped in B9.16. Same overall flow as Mac — Anthropic terms gate, paced sections, visible prompts, all tools via winget (Node, uv, jq) + npm (Claude Code) + npx (skills). Test coverage is structural rather than end-to-end since we don't have a Windows test box; ship-then-dry-run the first few clients.
 
 > The short URL is a tiny shim that exec-fetches the canonical script at [`installer/install.sh`](installer/install.sh) on this repo's `main` branch. If you want to read what you're about to run, `curl https://passporttowealth.app/install | less` first.
 

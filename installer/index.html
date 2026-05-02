@@ -824,12 +824,9 @@
       <button class="copy-btn" data-target="cmd-mac" aria-label="Copy install command">Copy</button>
     </div>
     <div class="install-block" id="install-win" role="tabpanel" aria-labelledby="tab-win" hidden>
-      <span class="label" style="color: #e6c068;">⚠ Windows · coming soon</span>
-      <code id="cmd-win" style="opacity: 0.55;">irm https://passporttowealth.app/install.ps1 | iex</code>
-      <p style="color: rgba(245,243,238,0.65); font-size: 13px; margin: 14px 0 0; padding-right: 80px; line-height: 1.5;">
-        The Windows installer is in active development. Mac is the supported platform today. Open this page on a Mac, or contact your advisor for access timelines.
-      </p>
-      <button class="copy-btn" data-target="cmd-win" aria-label="Copy install command" disabled>Copy</button>
+      <span class="label">Windows · paste in PowerShell</span>
+      <code id="cmd-win">irm https://passporttowealth.app/install.ps1 | iex</code>
+      <button class="copy-btn" data-target="cmd-win" aria-label="Copy install command">Copy</button>
     </div>
 
     <p class="terminal-hint" id="hint-mac">
