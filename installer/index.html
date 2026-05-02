@@ -16,6 +16,12 @@
       --color-text-faint: #8a93a3;
       --color-accent: #0F1E33;
       --color-accent-hover: #1A2D48;
+      /* Brand accent — warm gold, complements navy, reads as "premium /
+         finance-trust" without being loud. Sprinkled at ≤10% of visual
+         weight: section numbers, active nav indicator, hover underlines,
+         pill dot. Body text never uses it (poor contrast on cream). */
+      --color-gold: #C9A75D;
+      --color-gold-soft: #E6C068;
       --color-border: rgba(15, 30, 51, 0.10);
       --color-border-strong: rgba(15, 30, 51, 0.18);
       --color-code-bg: #0f1e33;
@@ -59,7 +65,7 @@
       aspect-ratio: 2.04 / 1;
       pointer-events: none;
       z-index: 0;
-      opacity: 0.13;
+      opacity: 0.05;
       background-image: url('assets/world-map.svg');
       background-repeat: no-repeat;
       background-position: center center;
@@ -67,7 +73,7 @@
     }
     main { position: relative; z-index: 1; }
     @media (max-width: 700px) {
-      .watermark { width: 240vw; opacity: 0.15; }
+      .watermark { width: 240vw; opacity: 0.07; }
     }
     @media print {
       .watermark { display: none; }
@@ -123,7 +129,7 @@
       content: "";
       display: inline-block;
       width: 5px; height: 5px;
-      background: #e6c068;
+      background: var(--color-gold-soft);
       border-radius: 50%;
     }
 
@@ -134,6 +140,9 @@
       letter-spacing: -0.025em;
       font-weight: 700;
       margin: 0 0 28px;
+    }
+    .h1-accent {
+      color: var(--color-gold);
     }
     .hero .lede {
       font-size: 21px;
@@ -250,11 +259,11 @@
       display: inline-block;
       font-family: var(--font-mono);
       font-size: 13px;
-      color: var(--color-text-faint);
+      color: var(--color-gold);
       letter-spacing: 0.08em;
       vertical-align: middle;
       margin-right: 14px;
-      font-weight: 500;
+      font-weight: 600;
     }
     section .section-lede {
       font-size: 18px;
@@ -345,6 +354,8 @@
       transition: opacity 0.15s ease;
     }
     .chart-bar.dim { opacity: 0.35; }
+    /* The latest month gets the gold accent — draws the eye to "now". */
+    .chart-bar.latest { background: var(--color-gold); opacity: 1; }
     .chart-axis {
       display: flex;
       justify-content: space-between;
@@ -438,6 +449,54 @@
     .final-cta .copy-btn:hover:not([disabled]) {
       background: rgba(245, 243, 238, 0.28);
     }
+
+    /* ── Left-gutter section nav (desktop only) ───────────────────────────
+       Sticky vertical list of section titles, appears once the user scrolls
+       past the hero. IntersectionObserver toggles `visible` on the nav and
+       `active` on the link matching the section currently in view. */
+    .section-nav {
+      position: fixed;
+      top: 50%;
+      left: max(20px, calc((100vw - var(--max-width)) / 2 - 240px));
+      transform: translateY(-50%);
+      z-index: 5;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+    }
+    .section-nav.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    @media (min-width: 1100px) {
+      .section-nav { display: flex; flex-direction: column; gap: 4px; }
+    }
+    .section-nav a {
+      color: var(--color-text-faint);
+      text-decoration: none;
+      padding: 6px 12px;
+      border-left: 2px solid transparent;
+      transition: color 0.15s ease, border-color 0.15s ease;
+      line-height: 1.4;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .section-nav a:hover { color: var(--color-text-muted); }
+    .section-nav a.active {
+      color: var(--color-text);
+      border-left-color: var(--color-gold);
+    }
+    .section-nav .num {
+      font-family: var(--font-mono);
+      color: var(--color-text-faint);
+      margin-right: 8px;
+      font-size: 11px;
+      transition: color 0.15s ease;
+    }
+    .section-nav a.active .num { color: var(--color-gold); }
 
     /* ── Floating prototype pill ──────────────────────────────────────────── */
     .floating-pill {
@@ -620,6 +679,17 @@
 </head>
 <body>
   <div class="watermark" aria-hidden="true"></div>
+
+  <!-- Left-gutter section nav (desktop only, ≥1100px). Appears once user
+       scrolls past the hero. Tracks active section via IntersectionObserver. -->
+  <aside class="section-nav" aria-label="Page sections">
+    <a href="#top" data-target="top">Top</a>
+    <a href="#sec-01" data-target="sec-01"><span class="num">01</span>Drop your files</a>
+    <a href="#sec-02" data-target="sec-02"><span class="num">02</span>See your numbers</a>
+    <a href="#sec-03" data-target="sec-03"><span class="num">03</span>Share if you want</a>
+    <a href="#sec-04" data-target="sec-04"><span class="num">04</span>Privacy</a>
+  </aside>
+
   <main>
     <div class="brand">
       <img src="assets/brand/logo-blue.png" alt="Passport to Wealth" width="36" height="36">
@@ -628,7 +698,7 @@
     </div>
 
     <header class="hero">
-      <h1>Your crossborder finances without the hassle.</h1>
+      <h1>Your crossborder finances,<br><span class="h1-accent">the easy way.</span></h1>
       <p class="lede">Let your AI assistant sort your files and build you the right dashboard. Multi-currency, multi-account, multi-country.</p>
     </header>
 
@@ -659,7 +729,7 @@
     </p>
 
     <!-- ── 01 — Drop your files ────────────────────────────────────────── -->
-    <section>
+    <section id="sec-01">
       <h2><span class="num">01</span>Drop your files</h2>
       <p class="section-lede">Whatever your bank gives you. CSVs, PDFs, multi-currency, multiple accounts. Don't sort, don't rename, don't dedupe. That's the assistant's job.</p>
       <pre class="term"><span class="you">build my report</span>
@@ -673,7 +743,7 @@
     </section>
 
     <!-- ── 02 — See your numbers ───────────────────────────────────────── -->
-    <section>
+    <section id="sec-02">
       <h2><span class="num">02</span>See your numbers</h2>
       <p class="section-lede">Opens locally in your browser. No third-party server, no passcode to invent.</p>
       <div class="dash-preview" aria-label="Dashboard preview">
@@ -712,7 +782,7 @@
             <div class="chart-bar" style="height: 79%"></div>
             <div class="chart-bar" style="height: 64%"></div>
             <div class="chart-bar" style="height: 88%"></div>
-            <div class="chart-bar" style="height: 72%"></div>
+            <div class="chart-bar latest" style="height: 72%"></div>
           </div>
           <div class="chart-axis"><span>JAN</span><span>APR</span><span>JUL</span><span>OCT</span><span>DEC</span></div>
         </div>
@@ -727,7 +797,7 @@
     </section>
 
     <!-- ── 03 — Share if you want ──────────────────────────────────────── -->
-    <section>
+    <section id="sec-03">
       <h2><span class="num">03</span>Share if you want</h2>
       <p class="section-lede">Want your advisor to see it? Or read it on your phone? One sentence puts it on a private URL behind a passcode the assistant generates for you.</p>
       <pre class="term"><span class="you">share my dashboard</span>
@@ -745,7 +815,7 @@
     </section>
 
     <!-- ── Privacy ─────────────────────────────────────────────────────── -->
-    <section class="privacy" id="privacy">
+    <section class="privacy" id="sec-04">
       <h2><span class="num">04</span>Privacy, by default</h2>
       <ul>
         <li>
@@ -799,7 +869,7 @@
         <li><strong>Pre-release software.</strong> Active development by Passport to Wealth. Expect bugs and incomplete features.</li>
         <li><strong>Always keep your originals.</strong> The dashboard is a view, not a system of record. Don't delete bank exports based on what it shows.</li>
         <li><strong>Tell your advisor if something looks wrong.</strong> Don't assume the dashboard is correct. Flag anything that doesn't match your records.</li>
-        <li><strong>Privacy intact.</strong> Files stay on your laptop by default. See the <a href="#privacy">Privacy section</a> above for details.</li>
+        <li><strong>Privacy intact.</strong> Files stay on your laptop by default. See the <a href="#sec-04">Privacy section</a> above for details.</li>
       </ul>
       <div class="modal-actions">
         <button class="secondary" data-open-feedback-modal>Leave feedback</button>
@@ -990,6 +1060,68 @@
         fbSubmit.textContent = 'Try again';
       });
     });
+
+    // ── Left-gutter section nav ──────────────────────────────────────────
+    // Appears once the hero scrolls out of view. Highlights the section
+    // currently in the viewport. Smooth-scroll on click.
+    var nav = document.querySelector('.section-nav');
+    var navLinks = nav ? nav.querySelectorAll('a[data-target]') : [];
+    var heroEl = document.querySelector('.hero');
+    var trackedSections = document.querySelectorAll('section[id]');
+
+    if (nav && heroEl && 'IntersectionObserver' in window) {
+      // Show nav once the hero has scrolled out of view
+      var heroObs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+          if (e.isIntersecting) {
+            nav.classList.remove('visible');
+          } else {
+            nav.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.1 });
+      heroObs.observe(heroEl);
+
+      // Active-section tracking via a horizontal band in the middle of the
+      // viewport. The section whose top intersects this band wins.
+      var activeId = null;
+      function setActive(id) {
+        if (id === activeId) return;
+        activeId = id;
+        navLinks.forEach(function(link) {
+          link.classList.toggle('active', link.getAttribute('data-target') === id);
+        });
+      }
+      var sectionObs = new IntersectionObserver(function(entries) {
+        // Pick the entry whose intersectionRatio is highest among intersecting ones
+        var visible = entries.filter(function(e) { return e.isIntersecting; });
+        if (visible.length === 0) return;
+        visible.sort(function(a, b) { return b.intersectionRatio - a.intersectionRatio; });
+        setActive(visible[0].target.id);
+      }, {
+        // Band: ignore the top 30% and bottom 50% of the viewport — leaves a
+        // ~20% sweet spot in the upper-middle where "the section the user is
+        // reading" lives.
+        rootMargin: '-30% 0% -50% 0%',
+        threshold: [0, 0.25, 0.5, 0.75, 1]
+      });
+      trackedSections.forEach(function(s) { sectionObs.observe(s); });
+
+      // Smooth-scroll on click. "Top" goes to page top.
+      navLinks.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+          var target = link.getAttribute('data-target');
+          e.preventDefault();
+          if (target === 'top') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setActive(null);  // clear active state when at top
+          } else {
+            var el = document.getElementById(target);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      });
+    }
   </script>
 </body>
 </html>
