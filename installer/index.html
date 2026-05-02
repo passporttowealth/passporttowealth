@@ -282,7 +282,7 @@
       letter-spacing: 0.06em;
     }
 
-    /* ── Book-cover layout (Learn from the best section) ────────────────── */
+    /* ── Book-cover layout (Get expert guidance section) ────────────────── */
     .book-row {
       display: grid;
       grid-template-columns: 140px 1fr;
@@ -313,6 +313,35 @@
     @media (max-width: 700px) {
       .book-row { grid-template-columns: 1fr; gap: 20px; }
       .book-cover { width: 140px; margin: 0 auto; }
+    }
+
+    /* ── Network CTA (Get expert guidance section) ──────────────────────── */
+    .network-cta {
+      margin-top: 28px;
+      padding: 18px 22px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-left: 3px solid var(--color-gold);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      color: var(--color-text-muted);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .network-cta strong { color: var(--color-text); }
+    .network-cta a.cta-link {
+      color: var(--color-text);
+      font-weight: 600;
+      text-decoration: none;
+      white-space: nowrap;
+      border-bottom: 1px solid var(--color-gold);
+      padding-bottom: 1px;
+    }
+    .network-cta a.cta-link:hover {
+      color: var(--color-accent);
     }
 
     /* ── Compatibility badge (egregore-style "Works with X") ────────────── */
@@ -817,7 +846,7 @@
     <a href="#sec-02" data-target="sec-02"><span class="num">02</span>Have a conversation</a>
     <a href="#sec-03" data-target="sec-03"><span class="num">03</span>See your numbers</a>
     <a href="#sec-04" data-target="sec-04"><span class="num">04</span>Ask for new analysis</a>
-    <a href="#sec-05" data-target="sec-05"><span class="num">05</span>Learn from the best</a>
+    <a href="#sec-05" data-target="sec-05"><span class="num">05</span>Get expert guidance</a>
     <a href="#sec-06" data-target="sec-06"><span class="num">06</span>Share if you want</a>
     <a href="#sec-07" data-target="sec-07"><span class="num">07</span>Privacy</a>
   </aside>
@@ -958,10 +987,10 @@
 <span class="ai"><span class="ai-strong">Coming soon</span> — custom comparisons across any category, any window.</span></pre>
     </section>
 
-    <!-- ── 05 — Learn from the best (coming soon) ────────────────────── -->
+    <!-- ── 05 — Get expert guidance (coming soon) ────────────────────── -->
     <section id="sec-05">
-      <h2><span class="num">05</span>Learn from the best<span class="coming-soon-chip">Coming soon</span></h2>
-      <p class="section-lede">Ask plain-English questions about cross-border money. Get answers grounded in <em>The Expat Money Playbook</em> by Arielle Tucker — Certified Financial Planner™ and IRS Enrolled Agent, US expat in Switzerland.</p>
+      <h2><span class="num">05</span>Get expert guidance<span class="coming-soon-chip">Coming soon</span></h2>
+      <p class="section-lede">Cross-border money is full of edge cases. Ask plain-English questions and get answers grounded in <em>The Expat Money Playbook</em> and Arielle Tucker's Passport to Wealth practice. When you want a real human in the loop, the team is one click away.</p>
       <div class="book-row">
         <div>
           <a href="https://www.amazon.com/Expat-Money-Playbook-Arielle-Tucker/dp/1394415958" target="_blank" rel="noopener">
@@ -977,10 +1006,14 @@
 <span class="ai"><span class="ai-strong">Coming soon</span> — answers grounded in the Playbook's cross-border investing + IRS compliance chapters.</span>
 <span class="blank"></span>
 <span class="you">what to plan before I move abroad?</span>
-<span class="ai"><span class="ai-strong">Coming soon</span> — pre-move planning checklist drawn from Tucker's "unknown unknowns" framework.</span>
+<span class="ai"><span class="ai-strong">Coming soon</span> — pre-move checklist drawn from Tucker's "unknown unknowns" framework.</span>
 <span class="blank"></span>
-<span class="you">estate planning across two countries</span>
-<span class="ai"><span class="ai-strong">Coming soon</span> — estate considerations specific to Americans abroad, sourced from the Playbook.</span></pre>
+<span class="you">can I talk to a real advisor about my situation?</span>
+<span class="ai"><span class="ai-strong">Coming soon</span> — book a call with the Passport to Wealth team.</span></pre>
+      </div>
+      <div class="network-cta">
+        <span><strong>Want a real human in the loop?</strong> Browse the Passport to Wealth advisor directory — vetted professionals who work with US expats and globally mobile families.</span>
+        <a class="cta-link" href="https://www.passporttowealth.com/directory" target="_blank" rel="noopener">Visit the directory ↗</a>
       </div>
     </section>
 
