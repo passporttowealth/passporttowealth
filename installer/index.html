@@ -179,9 +179,9 @@
         <!-- Filled in by the OS-detection script below; falls back to showing both. -->
       </div>
       <noscript>
-        <a class="download-button" href="https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.command" download="Welcome.command">Download for Mac</a>
+        <a class="download-button" href="Welcome.command" download="Welcome.command">Download for Mac</a>
         <p class="download-fineprint" style="margin-top: 12px;">
-          On Windows? Download <a href="https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.bat" download="Welcome.bat">Welcome.bat</a> and <a href="https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.ps1" download="Welcome.ps1">Welcome.ps1</a> (keep them in the same folder).
+          On Windows? Download <a href="Welcome.bat" download="Welcome.bat">Welcome.bat</a> and <a href="Welcome.ps1" download="Welcome.ps1">Welcome.ps1</a> (keep them in the same folder).
         </p>
       </noscript>
       <p class="download-fineprint" id="other-platform"></p>
@@ -193,17 +193,17 @@
         var isWin = /Windows NT/.test(ua);
         var primary = document.getElementById('primary-download');
         var other = document.getElementById('other-platform');
-        var macHTML = '<a class="download-button" href="https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.command" download="Welcome.command">Download for Mac</a>'
+        var macHTML = '<a class="download-button" href="Welcome.command" download="Welcome.command">Download for Mac</a>'
                     + '<p class="download-fineprint">macOS 13 (Ventura) or later · Personal Macs only</p>';
-        var winHTML = '<a class="download-button" href="https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.bat" download="Welcome.bat">Download for Windows</a>'
+        var winHTML = '<a class="download-button" href="Welcome.bat" download="Welcome.bat">Download for Windows</a>'
                     + '<p class="download-fineprint">Windows 10 (build 1903+) or Windows 11 · Personal PCs only</p>'
-                    + '<p class="download-fineprint" style="font-size: 13px; margin-top: 8px;">You also need <a href="https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.ps1" download="Welcome.ps1">Welcome.ps1</a> in the same folder. (Right-click the link → Save link as.)</p>';
+                    + '<p class="download-fineprint" style="font-size: 13px; margin-top: 8px;">You also need <a href="Welcome.ps1" download="Welcome.ps1">Welcome.ps1</a> in the same folder. (Right-click the link → Save link as.)</p>';
         if (isWin) {
           primary.innerHTML = winHTML;
-          other.innerHTML = 'On a Mac? <a href="https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.command" download="Welcome.command">Download for Mac</a> instead.';
+          other.innerHTML = 'On a Mac? <a href="Welcome.command" download="Welcome.command">Download for Mac</a> instead.';
         } else if (isMac) {
           primary.innerHTML = macHTML;
-          other.innerHTML = 'On Windows? <a href="https://raw.githubusercontent.com/rafaeldavid/passporttowealth/main/installer/Welcome.bat" download="Welcome.bat">Download for Windows</a> instead.';
+          other.innerHTML = 'On Windows? <a href="Welcome.bat" download="Welcome.bat">Download for Windows</a> instead.';
         } else {
           // Unknown OS — show both, default to Mac since that's the v1 reference.
           primary.innerHTML = macHTML
