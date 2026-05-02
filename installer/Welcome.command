@@ -1,12 +1,13 @@
 #!/bin/bash
 #
-# Welcome.command — Passport to Wealth Finance Clarity bootstrap installer
+# Welcome.command — Passport to Wealth Finance Clarity bootstrap installer (macOS).
 #
-# v0 SKELETON — does not yet provision a working workspace.
-# Demonstrates the planned flow (pre-flight, friendly progress messages,
-# auth path selection, publishing-host signup walkthrough) but the actual
-# package installs are stubbed. See engagement/development/finance-clarity-build-spec.md §4
-# for the full intended behavior.
+# Run by the client after they download from https://passporttowealth.app/.
+# Provisions Xcode CLT, Homebrew, Python 3.11, jq, Claude Code, the here-now
+# publishing skill, the finance-clarity-build skill, and the workspace at
+# ~/Documents/my-finances. Drops a START-HERE shortcut on the Desktop.
+#
+# Full design: dev/finance-clarity-build-spec.md §4. Windows mirror: Welcome.ps1.
 #
 # Copyright © 2026 Passport to Wealth. All rights reserved.
 
@@ -116,9 +117,6 @@ say "  • Do not delete source files based on what the dashboard shows."
 say "  • If anything looks wrong, tell your advisor — don't assume the"
 say "    dashboard is correct."
 say
-say "${DIM}Internal note: this is a v0 skeleton. Real installer functionality"
-say "is being built per engagement/development/backlog.md Epic 1.${RESET}"
-say
 
 # ── Anthropic data-terms consent gate (required before any install action) ────
 hr
@@ -199,7 +197,7 @@ log "preflight start"
 macos_major=$(sw_vers -productVersion | cut -d. -f1)
 if [[ "$macos_major" -lt 13 ]]; then
   fail "Your Mac is running macOS $(sw_vers -productVersion). I need macOS 13 (Ventura) or later."
-  fail "FCB-0001 — see engagement/development/finance-clarity-build-spec.md §4.2"
+  fail "FCB-0001 — see dev/finance-clarity-build-spec.md §4.2"
   log "FCB-0001 macos_version=$(sw_vers -productVersion)"
   exit 1
 fi
@@ -285,11 +283,17 @@ else
   ok_paced "Homebrew installed"
 fi
 
-# 2c. Python 3.11 (we pin to 3.11 because some upstream deps lag on 3.13/3.14)
+# 2c. Python 3.11 (we pin to 3.11 because some upstream deps lag on 3.13/3.14).
+# Always resolve PYTHON311 to an absolute path — Step 6 diagnostics use `test -x`
+# which only works for filesystem paths, not bare command names.
 PYTHON311=""
 for candidate in python3.11 /opt/homebrew/opt/python@3.11/bin/python3.11 /usr/local/opt/python@3.11/bin/python3.11; do
-  if command -v "$candidate" >/dev/null 2>&1 || [ -x "$candidate" ]; then
+  if [ -x "$candidate" ]; then
     PYTHON311="$candidate"; break
+  fi
+  resolved="$(command -v "$candidate" 2>/dev/null || true)"
+  if [ -n "$resolved" ] && [ -x "$resolved" ]; then
+    PYTHON311="$resolved"; break
   fi
 done
 if [ -n "$PYTHON311" ]; then
@@ -657,15 +661,20 @@ if [ ! -f "$WS/config.yaml" ] && [ -f "$SKILL_INSTALL_DIR/skill/config.example.y
 fi
 
 # 5d. Pre-warm FX cache — last 24 months of business-day rates so the first
-# pipeline run doesn't take 30-60s on a cold cache. Honors the TTY-aware
-# progress() helper added in B9.5; visible in this Terminal.
+# pipeline run doesn't take 30-60s on a cold cache.
+#
+# stdout (noisy fetch debug) → install log; stderr (the progress() bar from
+# _lib.py — TTY-guarded) → /dev/tty so the user sees motion in this Terminal
+# even though we're inside a pipeline of redirects. If we used `2>&1` the
+# helper would correctly detect "stderr is not a TTY" and stay silent,
+# producing the 30-60s "stalled" silence the user reported.
 if [ -x "$SKILL_INSTALL_DIR/skill/scripts/fx_fetch.py" ]; then
   say "Pre-warming exchange-rate cache (last 24 months)..."
   END_DATE=$(date +%Y-%m-%d)
   START_DATE=$(date -v-24m +%Y-%m-%d 2>/dev/null || date -d "24 months ago" +%Y-%m-%d 2>/dev/null)
   FCB_WORKSPACE="$WS" "$WS/.venv/bin/python" "$SKILL_INSTALL_DIR/skill/scripts/fx_fetch.py" \
     --base EUR --pairs USD,GBP --start "$START_DATE" --end "$END_DATE" \
-    >>"$INSTALL_LOG" 2>&1 || warn "FX pre-warm failed — pipeline will fetch on first use instead"
+    >>"$INSTALL_LOG" 2>/dev/tty || warn "FX pre-warm failed — pipeline will fetch on first use instead"
   ok_paced "Exchange rate cache pre-warmed"
 fi
 
@@ -783,11 +792,11 @@ case "$(printf '%s' "$START_ANSWER" | tr '[:upper:]' '[:lower:]' | xargs)" in
       exec 3>&-                          # release the install-log fd before exec
       exec "$WORKSPACE_LAUNCHER"
     else
-      say
-      say "${DIM}(v0 stub: workspace launcher isn't provisioned yet — would normally${RESET}"
-      say "${DIM} exec into the AI assistant in your workspace folder here.)${RESET}"
-      say
-      say "Double-click ${BOLD}START-HERE${RESET} on your Desktop whenever you want to use it."
+      # Defensive fallback — Step 5e always provisions the launcher, so this
+      # branch only fires if the install was interrupted or someone deleted
+      # ~/Documents/my-finances/.skill-launcher.sh between Step 5 and now.
+      warn "Workspace launcher missing at $WORKSPACE_LAUNCHER — re-run me to fix."
+      say "Once it's back, double-click ${BOLD}START-HERE${RESET} on your Desktop."
     fi
     ;;
   *)

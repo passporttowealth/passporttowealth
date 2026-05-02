@@ -544,18 +544,33 @@ class TestPipelineHealth(unittest.TestCase):
             self.assertTrue(os.access(p, os.X_OK), f"script not executable: {name}")
 
     def test_installer_no_more_stub_markers(self):
-        """The installer used to emit '[STUB]' lines for the actual install
+        """The macOS installer used to emit '[STUB]' lines for actual install
         actions (Homebrew, Python, Claude Code, workspace, etc). After
-        finishing the end-to-end implementation, none of those should remain."""
+        finishing the end-to-end implementation, none of those should remain
+        in Welcome.command. Welcome.ps1 (Windows) still has its [STUB]
+        markers — the Windows real-install port is tracked separately;
+        this test will be tightened once that lands.
+
+        Cosmetic 'v0 skeleton' / 'engagement/development/' leftovers from
+        when these files were stubs are banned in BOTH platforms — dry-run
+        reported users seeing those lines and asking whether the installer
+        was real."""
         cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
-        # Two specific stub lines we want to confirm are gone:
+        ps1 = (REPO / "installer" / "Welcome.ps1").read_text(encoding="utf-8")
+        # macOS: no [STUB] markers, no cosmetic skeleton/dev-path leftovers
         for banned in ("[STUB] This step would install",
                        "[STUB] Would launch",
                        "[STUB] Would write key",
                        "[STUB] Would open https://here.now/signup",
                        "[STUB] Would create",
-                       "[STUB] Would run the diagnostic"):
-            self.assertNotIn(banned, cmd, f"installer still has stub: {banned!r}")
+                       "[STUB] Would run the diagnostic",
+                       "v0 skeleton", "v0 SKELETON", "v0 stub",
+                       "engagement/development/"):
+            self.assertNotIn(banned, cmd, f"Welcome.command still has: {banned!r}")
+        # Windows: cosmetic-only enforcement until the real-install port lands
+        for banned in ("v0 skeleton", "v0 SKELETON", "v0 stub",
+                       "engagement/development/"):
+            self.assertNotIn(banned, ps1, f"Welcome.ps1 still has: {banned!r}")
 
     def test_installer_auth_choice_is_two_options(self):
         """User feedback: Claude Pro and Max are both subscriptions —
@@ -687,6 +702,42 @@ class TestPipelineHealth(unittest.TestCase):
         # The homepage IS valid (200)
         self.assertIn('open "https://here.now/"', cmd,
             "installer should open here.now/ (the working homepage)")
+
+    def test_installer_python311_resolved_to_absolute_path(self):
+        """Dry-run regression: 'Python 3.11 installed' diagnostic returned
+        a false ✗ when Python was already on PATH. Step 2c was assigning
+        PYTHON311='python3.11' (bare command name); Step 6 then ran
+        `test -x "$PYTHON311"` which only works for filesystem paths.
+
+        Fix: Step 2c must resolve the candidate to an absolute path before
+        storing it, so the diagnostic check works."""
+        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        # The fix uses `command -v` to resolve the path, then validates with -x
+        self.assertIn('command -v "$candidate"', cmd,
+            "Step 2c should use `command -v` to resolve PYTHON311 to a real path")
+        self.assertIn('PYTHON311="$resolved"', cmd,
+            "Step 2c should store the resolved path, not the bare candidate name")
+
+    def test_installer_fx_prewarm_streams_progress_to_tty(self):
+        """Dry-run regression: 'Pre-warming exchange-rate cache (last 24
+        months)…' appeared to stall for 30-60s with no progress bar,
+        because the installer redirected stderr to the install log
+        (`2>&1`). The B9.5 progress() helper writes to stderr and
+        TTY-guards itself, so it correctly went silent.
+
+        Fix: stdout → install log (silent), stderr → /dev/tty so the
+        progress bar reaches the user even though we're inside redirects."""
+        cmd = (REPO / "installer" / "Welcome.command").read_text(encoding="utf-8")
+        # Find the FX prewarm invocation
+        fx_block_start = cmd.find("Pre-warming exchange-rate cache")
+        self.assertGreater(fx_block_start, 0, "FX prewarm block must exist")
+        # Grab a window large enough to see the redirect
+        fx_block = cmd[fx_block_start:fx_block_start + 1200]
+        self.assertIn("fx_fetch.py", fx_block)
+        self.assertIn("2>/dev/tty", fx_block,
+            "FX prewarm must redirect stderr to /dev/tty so progress() shows")
+        self.assertNotIn("2>&1", fx_block,
+            "FX prewarm must NOT use 2>&1 — it would silence the progress bar")
 
     def test_installer_does_not_auto_open_privacy_hub(self):
         """B9.1 regression: auto-opening privacy.anthropic.com in the browser

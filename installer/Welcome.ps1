@@ -1,7 +1,10 @@
 # Welcome.ps1 - Passport to Wealth Finance Clarity bootstrap installer (Windows)
 #
-# v0 SKELETON - mirrors macOS Welcome.command. Provisioning steps are stubbed.
-# See engagement/development/finance-clarity-build-spec.md for the full design.
+# Run by the client after they download from https://passporttowealth.app/.
+# Mirrors macOS Welcome.command step-for-step. The .bat sibling launches this
+# .ps1 with -ExecutionPolicy Bypass scoped to the single process.
+#
+# Full design: dev/finance-clarity-build-spec.md §4. macOS reference: Welcome.command.
 #
 # Copyright (c) 2026 Passport to Wealth. All rights reserved.
 
@@ -69,9 +72,6 @@ Write-Say "  - Always keep your original bank exports and statements."
 Write-Say "  - Do not delete source files based on what the dashboard shows."
 Write-Say "  - If anything looks wrong, tell your advisor - don't assume the"
 Write-Say "    dashboard is correct."
-Write-Say ""
-Write-Host "  (Internal note: this is a v0 skeleton. Real installer functionality" -ForegroundColor DarkGray
-Write-Host "  is being built per engagement/development/backlog.md Epic 1.)" -ForegroundColor DarkGray
 Write-Say ""
 
 # ── Anthropic data-terms consent gate (OP-13) ─────────────────────────────────
@@ -308,11 +308,11 @@ if ($startAnswer -in @("", "y", "yes")) {
         Write-Log "completed; launching workspace"
         Start-Process -FilePath $WorkspaceLauncher -Wait
     } else {
-        Write-Say ""
-        Write-Host "  (v0 stub: workspace launcher isn't provisioned yet - would" -ForegroundColor DarkGray
-        Write-Host "   normally launch the AI assistant in your workspace folder here.)" -ForegroundColor DarkGray
-        Write-Say ""
-        Write-Say "Double-click START-HERE on your Desktop whenever you want to use it."
+        # Defensive fallback - the workspace-provisioning step always creates
+        # this. Only fires if the install was interrupted or someone deleted
+        # the launcher between then and now.
+        Write-WarnLine "Workspace launcher missing at $WorkspaceLauncher - re-run me to fix."
+        Write-Say "Once it's back, double-click START-HERE on your Desktop."
     }
 } else {
     Write-Say ""
