@@ -388,6 +388,14 @@
       color: var(--color-text-faint);
       font-size: 12px;
     }
+    .compat-badge .compat-link {
+      color: var(--color-text);
+      text-decoration: none;
+      border-bottom: 1px solid var(--color-gold);
+      padding-bottom: 1px;
+      transition: color 0.15s ease;
+    }
+    .compat-badge .compat-link:hover { color: var(--color-gold); }
     section .section-lede {
       font-size: 18px;
       color: var(--color-text-muted);
@@ -943,7 +951,7 @@
 
     <div class="compat-badge" aria-label="Compatibility">
       <span class="compat-dot" aria-hidden="true"></span>
-      <span><strong>Works with Claude</strong> · <span class="compat-soon">additional agent compatibility coming soon</span></span>
+      <span>Works with <a href="https://claude.com/download" target="_blank" rel="noopener" class="compat-link"><strong>Claude Code</strong></a> · <span class="compat-soon">additional agent compatibility coming soon</span></span>
     </div>
 
     <!-- ── 01 — Drop your files ────────────────────────────────────────── -->
