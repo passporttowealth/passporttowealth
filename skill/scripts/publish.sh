@@ -204,7 +204,7 @@ fi
 step "Publishing placeholder"
 PLACEHOLDER_OUT=$(mktemp)
 PLACEHOLDER_ERR=$(mktemp)
-trap "rm -f '$PLACEHOLDER_OUT' '$PLACEHOLDER_ERR'" EXIT
+trap 'rm -f "$PLACEHOLDER_OUT" "$PLACEHOLDER_ERR"' EXIT
 
 if [ -n "$SLUG" ]; then
   # Update existing slug
@@ -254,7 +254,7 @@ note "✓ passwordProtected: true"
 step "Pushing real dashboard content"
 PUSH_OUT=$(mktemp)
 PUSH_ERR=$(mktemp)
-trap "rm -f '$PLACEHOLDER_OUT' '$PLACEHOLDER_ERR' '$PUSH_OUT' '$PUSH_ERR'" EXIT
+trap 'rm -f "$PLACEHOLDER_OUT" "$PLACEHOLDER_ERR" "$PUSH_OUT" "$PUSH_ERR"' EXIT
 
 PUSH_ARGS=(--slug "$SLUG" --client "finance-clarity-build")
 [ -n "$CLAIM" ] && PUSH_ARGS+=(--claim-token "$CLAIM")

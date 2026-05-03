@@ -19,7 +19,6 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 HERENOW_PUBLISH="${HERENOW_PUBLISH_SCRIPT:-${HOME}/.claude/skills/here-now/scripts/publish.sh}"
 SLUG="${LANDING_SLUG:-sandy-delta-dc3r}"
 

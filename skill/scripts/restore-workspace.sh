@@ -21,7 +21,7 @@ fi
 read -r -s -p "Backup password: " PW; echo
 
 STAGING=$(mktemp -d "/tmp/fcb-restore.XXXXXX")
-trap "rm -rf '$STAGING'" EXIT
+trap 'rm -rf "$STAGING"' EXIT
 
 step "Unpacking backup"
 ( cd "$STAGING" && unzip -qq -P "$PW" "$BACKUP" ) || fail "wrong password or corrupted file"

@@ -28,7 +28,7 @@ DESKTOP="${HOME}/Desktop"
 [ -d "$DESKTOP" ] || DESKTOP="$WS"
 BUNDLE="${DESKTOP}/finance-support-bundle-${TS}.zip"
 STAGING=$(mktemp -d "/tmp/fcb-bundle.XXXXXX")
-trap "rm -rf '$STAGING'" EXIT
+trap 'rm -rf "$STAGING"' EXIT
 
 CONFIG="$WS/config.yaml"
 

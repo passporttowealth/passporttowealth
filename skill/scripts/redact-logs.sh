@@ -11,7 +11,6 @@
 set -euo pipefail
 
 WS="${FCB_WORKSPACE:-${HOME}/Documents/my-finances}"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 step() { printf '\n\033[1m▸ %s\033[0m\n' "$*"; }
 

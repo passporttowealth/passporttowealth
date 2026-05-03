@@ -38,7 +38,7 @@ read -r -s -p "Confirm:         " PW2; echo
 
 # Stage the files we'll back up
 STAGING=$(mktemp -d "/tmp/fcb-backup.XXXXXX")
-trap "rm -rf '$STAGING'" EXIT
+trap 'rm -rf "$STAGING"' EXIT
 
 [ -f "$WS/rules.yaml" ]          && cp "$WS/rules.yaml"          "$STAGING/"
 [ -f "$WS/fx_overrides.yaml" ]   && cp "$WS/fx_overrides.yaml"   "$STAGING/"
