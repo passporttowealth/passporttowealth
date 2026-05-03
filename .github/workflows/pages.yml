@@ -26,6 +26,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Python (for /docs regeneration)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Regenerate /docs from install scripts
+        # Same step publish-landing.sh runs locally. Ensures the Pages
+        # mirror has the same /docs page the canonical here.now publish
+        # gets. Fails the build if anything in the install scripts isn't
+        # documented in installer/build_docs.py's curated map.
+        run: python3 installer/build_docs.py
+
       - name: Stage Pages content
         run: |
           mkdir -p _site

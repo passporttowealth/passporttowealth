@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terms of Service — Passport to Wealth Finance Clarity</title>
+<meta name="description" content="What you can expect from this product, what we expect from you, and what we don't promise. Draft pending legal review.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../assets/brand/favicon.png">
+<style>
+  :root {
+    --bg: #FAF8F4; --text: #0F1E33; --text-muted: #5E6473; --gold: #C9A75D;
+    --card: #FFFFFF; --border: #E8E5DE; --code-bg: #F2EEE5; --code-fg: #2A3550;
+    --warn-bg: #FFF6DD; --warn-border: #B07C00;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  .container { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
+  .back { display: inline-block; color: var(--text-muted); text-decoration: none; font-size: 14px; margin-bottom: 24px; }
+  .back:hover { color: var(--gold); }
+  h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 8px; }
+  h2 { font-size: 20px; font-weight: 700; margin: 36px 0 8px; }
+  h2::after { content: ""; display: block; width: 32px; height: 2px; background: var(--gold); margin-top: 6px; }
+  p, ul, ol { font-size: 15px; line-height: 1.7; color: var(--text); }
+  ul, ol { padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  .lede { color: var(--text-muted); font-size: 16px; margin-bottom: 16px; }
+  .meta { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+  .draft-banner { background: var(--warn-bg); border: 1px solid var(--warn-border); border-radius: 8px; padding: 16px 20px; margin: 24px 0 32px; font-size: 14px; }
+  .draft-banner strong { color: var(--warn-border); }
+  .disclaimer { background: #FBF6E8; border-left: 3px solid var(--gold); padding: 12px 16px; margin: 12px 0; font-size: 14px; border-radius: 0 4px 4px 0; }
+  code { font-family: "SF Mono", Menlo, Consolas, monospace; background: var(--code-bg); color: var(--code-fg); padding: 1px 5px; border-radius: 3px; font-size: 0.92em; }
+  a { color: var(--text); }
+  a:hover { color: var(--gold); }
+  .nav-legal { font-size: 13px; color: var(--text-muted); margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .nav-legal a { color: var(--text-muted); margin-right: 12px; }
+  .nav-legal a:hover { color: var(--gold); }
+  footer { color: var(--text-muted); font-size: 13px; margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<div class="container">
+  <a class="back" href="../">← Back to passporttowealth.app</a>
+  <h1>Terms of Service</h1>
+  <p class="meta">Effective: 3 May 2026 · Version: draft.0.1</p>
+
+  <div class="draft-banner">
+    <strong>⚠ Draft pending legal review.</strong> Written by the engineering team to describe the product as it works today. Not yet reviewed by counsel. Not legally binding. If you need binding terms before using the product, contact your advisor at Passport to Wealth.
+  </div>
+
+  <p class="lede">By using Passport to Wealth Finance Clarity (the "skill"), the install scripts, the landing page, the demo dashboard, or any related artifact, you agree to these terms.</p>
+
+  <h2>1. What this product is — and is not</h2>
+  <p>The skill is a software tool that helps you organize and visualize your financial data on your own computer. It is intended for clients of Passport to Wealth as a complement to professional advice, not as a replacement.</p>
+  <div class="disclaimer">
+    <strong>This is not financial advice.</strong> The numbers, charts, categorizations, and any text the dashboard or assistant produces are software output. They are not investment advice, tax advice, accounting advice, or any other regulated financial guidance. For decisions about your money, consult your financial advisor, CPA, or attorney. Always keep your original bank statements, broker statements, and tax documents — do not delete source records based on what this tool shows.
+  </div>
+  <p>The product is currently a <strong>pre-1.0 prototype</strong>. Features may change, break, or be removed without notice. Bugs are expected. Always verify outputs against your source records.</p>
+
+  <h2>2. Who can use it</h2>
+  <p>This product is licensed under a proprietary license (see <a href="https://github.com/passporttowealth/passporttowealth/blob/main/LICENSE">LICENSE</a> in the repository) with a personal-use grant for clients of Passport to Wealth. You may use the skill on your own financial data. You may not redistribute it, sell it, sublicense it, or use it to provide a service to others without separate written permission.</p>
+
+  <h2>3. Acceptable use</h2>
+  <p>You agree to:</p>
+  <ul>
+    <li>Use the skill only with financial data you are authorized to access.</li>
+    <li>Not attempt to identify other users from any artifact in this project (telemetry counters, here.now slugs, GitHub issues, etc.).</li>
+    <li>Not use the skill to categorize, store, or share data on behalf of someone else without their consent.</li>
+    <li>Not attempt to attack, overload, scrape, or otherwise abuse the Cloudflare Worker, the here.now publishing host, the GitHub repository, or any other infrastructure this product touches.</li>
+    <li>Not reverse-engineer the skill in ways that violate the license, even though the source is public for inspection.</li>
+  </ul>
+
+  <h2>4. Your content and credentials</h2>
+  <ul>
+    <li><strong>Your data is yours.</strong> Source files, categorized transactions, dashboards, and any rules you create remain your property. We claim no rights to them.</li>
+    <li><strong>Your AI assistant account is yours.</strong> You sign in to Claude with your own Anthropic account (Claude Pro, Claude Max, or your own API key). We don't see your conversations. Anthropic's terms govern that relationship.</li>
+    <li><strong>Your shared dashboard is yours.</strong> If you choose to publish a dashboard via the here.now flow, the URL and content are yours; here.now's terms apply to the hosting relationship.</li>
+  </ul>
+
+  <h2>5. Disclaimers</h2>
+  <div class="disclaimer">
+    The skill, the install scripts, the landing page, the demo dashboard, and any related artifact are provided <strong>"as is"</strong>, without warranty of any kind, express or implied, including but not limited to merchantability, fitness for a particular purpose, accuracy, or non-infringement. Software bugs may produce incorrect categorizations, missed transactions, wrong totals, or other errors. Always verify against source records.
+  </div>
+  <p>We do not warrant that:</p>
+  <ul>
+    <li>The skill will be available, uninterrupted, or error-free.</li>
+    <li>The categorizations, totals, or insights are accurate or complete.</li>
+    <li>The published dashboards (if you choose to share) will be accessible at any specific time.</li>
+    <li>The install scripts, dependencies, or third-party services will continue to function as they do today.</li>
+  </ul>
+
+  <h2>6. Limitation of liability</h2>
+  <p>To the maximum extent permitted by law, in no event will Passport to Wealth, Arielle Tucker, or the contributors to this project be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits, revenues, data, or use, arising out of or in connection with the skill, even if advised of the possibility of such damages. Our total liability for direct damages is limited to the amount you paid for the skill, which during the prototype phase is zero.</p>
+
+  <h2>7. Termination</h2>
+  <p>You can stop using the skill at any time by deleting the workspace folder and uninstalling Claude Code. We may discontinue the skill, the landing page, the publishing flow, the Cloudflare Worker, or any related infrastructure at any time, with or without notice. If we discontinue the publishing flow, your dashboards may become unreachable; export anything you need from <code>~/Documents/my-finances/</code> first.</p>
+
+  <h2>8. Changes</h2>
+  <p>We may update these terms. Material changes will be reflected by an updated effective date above and noted in the <a href="https://github.com/passporttowealth/passporttowealth/blob/main/CHANGELOG.md">CHANGELOG</a>. Continued use after a change constitutes acceptance.</p>
+
+  <h2>9. Governing law</h2>
+  <p><em>To be determined pending legal review.</em> Likely the law of the jurisdiction where Passport to Wealth is established. This section will be replaced with a binding choice-of-law clause once counsel has reviewed.</p>
+
+  <h2>10. Contact</h2>
+  <p>For questions: contact your advisor at Passport to Wealth, or open an issue at <a href="https://github.com/passporttowealth/passporttowealth/issues">github.com/passporttowealth/passporttowealth/issues</a>.</p>
+
+  <nav class="nav-legal">
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+    <a href="dpa.html">Data Processing Agreement</a>
+  </nav>
+  <footer>
+    Copyright © 2026 Passport to Wealth. All rights reserved.
+  </footer>
+</div>
+</body>
+</html>

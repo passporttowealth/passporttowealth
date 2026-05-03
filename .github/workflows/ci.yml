@@ -32,3 +32,10 @@ jobs:
 
       - name: Run regression suite
         run: python3 tests/test_pipeline.py
+
+      - name: Verify /docs page is in sync with install scripts
+        # Fails if installer/install.sh or install.ps1 reference any package,
+        # URL, or operation that's not documented in installer/build_docs.py's
+        # curated map. Forces the human-readable docs to stay aligned with
+        # what the install actually does.
+        run: python3 installer/build_docs.py --check

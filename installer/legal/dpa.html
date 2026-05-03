@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Processing Agreement — Passport to Wealth Finance Clarity</title>
+<meta name="description" content="GDPR-style processor obligations and sub-processor list. Draft pending legal review.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../assets/brand/favicon.png">
+<style>
+  :root {
+    --bg: #FAF8F4; --text: #0F1E33; --text-muted: #5E6473; --gold: #C9A75D;
+    --card: #FFFFFF; --border: #E8E5DE; --code-bg: #F2EEE5; --code-fg: #2A3550;
+    --warn-bg: #FFF6DD; --warn-border: #B07C00;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  .container { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
+  .back { display: inline-block; color: var(--text-muted); text-decoration: none; font-size: 14px; margin-bottom: 24px; }
+  .back:hover { color: var(--gold); }
+  h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 8px; }
+  h2 { font-size: 20px; font-weight: 700; margin: 36px 0 8px; }
+  h2::after { content: ""; display: block; width: 32px; height: 2px; background: var(--gold); margin-top: 6px; }
+  p, ul, ol { font-size: 15px; line-height: 1.7; color: var(--text); }
+  ul, ol { padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  .lede { color: var(--text-muted); font-size: 16px; margin-bottom: 16px; }
+  .meta { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+  .draft-banner { background: var(--warn-bg); border: 1px solid var(--warn-border); border-radius: 8px; padding: 16px 20px; margin: 24px 0 32px; font-size: 14px; }
+  .draft-banner strong { color: var(--warn-border); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-weight: 600; color: var(--text-muted); }
+  code { font-family: "SF Mono", Menlo, Consolas, monospace; background: var(--code-bg); color: var(--code-fg); padding: 1px 5px; border-radius: 3px; font-size: 0.92em; }
+  a { color: var(--text); }
+  a:hover { color: var(--gold); }
+  .nav-legal { font-size: 13px; color: var(--text-muted); margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .nav-legal a { color: var(--text-muted); margin-right: 12px; }
+  .nav-legal a:hover { color: var(--gold); }
+  footer { color: var(--text-muted); font-size: 13px; margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<div class="container">
+  <a class="back" href="../">← Back to passporttowealth.app</a>
+  <h1>Data Processing Agreement</h1>
+  <p class="meta">Effective: 3 May 2026 · Version: draft.0.1</p>
+
+  <div class="draft-banner">
+    <strong>⚠ Draft pending legal review.</strong> Engineering-team draft based on actual data flows. Not yet reviewed by counsel and not legally binding. Where binding processor obligations are required (for example, by your employer or a regulator), do not rely on this document.
+  </div>
+
+  <p class="lede">This DPA describes how data is processed when you use Passport to Wealth Finance Clarity. It applies in addition to the <a href="privacy.html">Privacy Policy</a> and <a href="terms.html">Terms of Service</a>. Designed to be readable by humans first; aligns with the framework of GDPR Article 28 where applicable.</p>
+
+  <h2>1. Roles</h2>
+  <p>The product is structured so the bulk of processing happens on your computer:</p>
+  <ul>
+    <li><strong>You are the controller</strong> for your financial data. You decide what to process, how long to keep it, and whether to share it.</li>
+    <li><strong>Passport to Wealth is a processor</strong> only for the narrow data flows described below in §3 (anonymous install counters, opt-in feedback events, opt-in published dashboards). Everything else lives on your machine outside our reach.</li>
+  </ul>
+
+  <h2>2. Scope of processing</h2>
+  <p>This agreement covers only the data we receive. It does <strong>not</strong> cover:</p>
+  <ul>
+    <li>Data your AI assistant (Claude) processes — that's governed by your Anthropic account terms.</li>
+    <li>Data the publishing host (here.now) processes when you choose to share — that's governed by here.now's terms (referenced as a sub-processor below).</li>
+    <li>Data on your local computer that we never receive (which, by default, is everything except the install counter ping).</li>
+  </ul>
+
+  <h2>3. Categories of personal data we process</h2>
+  <table>
+    <thead><tr><th>Category</th><th>Source</th><th>Purpose</th><th>Retention</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Install-start event (platform, build_stamp, advisor_id)</td>
+        <td>Install script POST after consent gate</td>
+        <td>Counting onboarding volume per platform</td>
+        <td>90-day TTL on the daily counter</td>
+      </tr>
+      <tr>
+        <td>Feedback event (your message + skill version + timestamp + client_id)</td>
+        <td>Dashboard "I have feedback" widget, opt-in per submission</td>
+        <td>Triage and respond to product feedback</td>
+        <td>Until manually closed and deleted from GitHub Issues</td>
+      </tr>
+      <tr>
+        <td>Published dashboard (categorized transactions, monthly summaries, CSV exports, your client_id)</td>
+        <td>Publish flow, opt-in by user choice ("share my dashboard")</td>
+        <td>Hosting your dashboard for the people you share the URL + passcode with</td>
+        <td>Until you delete the site (<code>delete-my-site.command</code>)</td>
+      </tr>
+    </tbody>
+  </table>
+  <p><strong>What's deliberately not in this table:</strong> IP address, user-agent, name, email, machine identifier. The Cloudflare Worker that receives install pings and feedback events does not read these headers; verified by source code.</p>
+
+  <h2>4. Categories of data subjects</h2>
+  <ul>
+    <li><strong>You</strong> (the user installing and running the skill).</li>
+    <li><strong>Counterparties on your transactions</strong> (people or businesses who appear in transaction descriptions you process). The pipeline operates on whatever is in your bank statements; merchant names, payee names, etc. We never see these unless you publish a dashboard.</li>
+  </ul>
+
+  <h2>5. Sub-processors</h2>
+  <p>The infrastructure we operate sits on top of these vendors. Each has their own privacy and processor terms; they apply in addition to ours.</p>
+  <table>
+    <thead><tr><th>Sub-processor</th><th>Role</th><th>Data they receive from this product</th><th>Region</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Cloudflare</td>
+        <td>Worker runtime + KV storage for install counters and feedback POST routing</td>
+        <td>Install ping payload, feedback message body. Worker observability is off, so request bodies don't sit in Cloudflare logs.</td>
+        <td>Global edge (US-headquartered company)</td>
+      </tr>
+      <tr>
+        <td>here.now</td>
+        <td>Publishing host for shared dashboards</td>
+        <td>Only contacted if you opt-in to publish. Receives the rendered <code>site/</code> bundle (HTML + categorized transactions + CSV downloads).</td>
+        <td>Cloudflare-backed; US-headquartered</td>
+      </tr>
+      <tr>
+        <td>GitHub (Microsoft)</td>
+        <td>Source code hosting + feedback issue creation + Pages backup mirror of the landing page</td>
+        <td>Feedback message bodies become GitHub issues. Otherwise nothing.</td>
+        <td>US</td>
+      </tr>
+      <tr>
+        <td>Anthropic</td>
+        <td>Claude (the AI assistant the skill runs on)</td>
+        <td><strong>You</strong> are the customer of Anthropic, not us. We don't see your Claude conversations. When you ask Claude to read a file, the file content goes to Anthropic per your account terms — not to us.</td>
+        <td>US</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>6. Security measures</h2>
+  <p>Technical measures applied to the data we do receive:</p>
+  <ul>
+    <li>All transport is HTTPS; no plaintext.</li>
+    <li>The Cloudflare Worker is bearer-gated. The bearer token is shared (visible in install scripts by design) and is an anti-abuse measure, not a confidentiality boundary.</li>
+    <li>Cloudflare KV writes are encrypted at rest by Cloudflare.</li>
+    <li>Worker observability is explicitly disabled (<code>[observability] enabled = false</code> in <code>wrangler.toml</code>) so request bodies don't end up in Cloudflare logs.</li>
+    <li>Published dashboards are passcode-gated. Content is not served until the passcode is verified at the host.</li>
+    <li>Source code is open for inspection at <a href="https://github.com/passporttowealth/passporttowealth">github.com/passporttowealth/passporttowealth</a>; the install scripts and Worker code are statically analyzed in CI on every change (<a href="https://github.com/passporttowealth/passporttowealth/actions">public CI runs</a>).</li>
+  </ul>
+
+  <h2>7. Data subject rights</h2>
+  <p>Because most of your data stays on your computer, most rights you can exercise yourself directly:</p>
+  <ul>
+    <li><strong>Access:</strong> open your workspace folder; everything is in plain CSV/JSON/HTML.</li>
+    <li><strong>Erasure:</strong> delete the workspace folder. For a published dashboard, run <code>delete-my-site.command</code>. For a feedback issue, ask via the issue thread or contact below.</li>
+    <li><strong>Portability:</strong> the workspace already gives you portable CSVs (<code>transactions_tagged.csv</code>, <code>monthly_actuals.csv</code>) — they're yours to take to any tool.</li>
+    <li><strong>Object to processing:</strong> opt out of install telemetry with <code>FCB_NO_ANALYTICS=1</code>; don't publish if you don't want a hosted copy; don't send feedback if you don't want issues created.</li>
+  </ul>
+
+  <h2>8. Breach notification</h2>
+  <p>If we become aware of a data breach affecting one of the limited categories in §3, we will notify Passport to Wealth, who will notify affected clients without undue delay (and within 72 hours where required by law). Because the data we hold is minimal, the realistic blast radius is the install counter (anonymous, no PII), feedback issues, or published dashboards.</p>
+
+  <h2>9. International transfers</h2>
+  <p>The sub-processors above are predominantly US-based. If you are a data subject in a region with cross-border transfer requirements (UK GDPR, EU GDPR, etc.), the legal basis for transfer is currently the controller-to-processor relationship between you and these vendors directly (since most processing happens between your machine and theirs). Pending legal review for explicit Standard Contractual Clauses where required.</p>
+
+  <h2>10. Audit</h2>
+  <p>Source code is public. Install scripts are static-analyzed in CI. Worker code can be inspected at <a href="https://github.com/passporttowealth/passporttowealth/tree/main/cloudflare-worker">github.com/passporttowealth/passporttowealth/tree/main/cloudflare-worker</a>. Architectural questions: contact via the channel below.</p>
+
+  <h2>11. Changes</h2>
+  <p>Changes to this DPA will be reflected by an updated effective date above and noted in the <a href="https://github.com/passporttowealth/passporttowealth/blob/main/CHANGELOG.md">CHANGELOG</a>. Adding or removing a sub-processor will be flagged there explicitly.</p>
+
+  <h2>12. Contact</h2>
+  <p>Privacy / processor inquiries: contact your advisor at Passport to Wealth, or open an issue at <a href="https://github.com/passporttowealth/passporttowealth/issues">github.com/passporttowealth/passporttowealth/issues</a>.</p>
+
+  <nav class="nav-legal">
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+    <a href="dpa.html">Data Processing Agreement</a>
+  </nav>
+  <footer>
+    Copyright © 2026 Passport to Wealth. All rights reserved.
+  </footer>
+</div>
+</body>
+</html>

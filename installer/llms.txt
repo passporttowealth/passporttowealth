@@ -1,0 +1,37 @@
+# Passport to Wealth — Finance Clarity
+
+> A Claude Code skill that turns a folder of bank statements into a private financial dashboard rendered on the user's laptop. Pre-1.0 prototype for clients of Passport to Wealth (Arielle Tucker's expat-focused financial coaching practice). Local by default; sharing with an advisor is opt-in and passcode-gated.
+
+## Install (start here)
+
+- [Mac install command](https://passporttowealth.app/install): One-line bash command. `curl -fsSL https://passporttowealth.app/install | bash` provisions Python, Node, Claude Code, and the skill itself.
+- [Windows install command](https://passporttowealth.app/install.ps1): `irm https://passporttowealth.app/install.ps1 | iex` for PowerShell.
+- [Mac install script source](https://raw.githubusercontent.com/passporttowealth/passporttowealth/main/installer/install.sh): The actual bash that runs.
+- [Windows install script source](https://raw.githubusercontent.com/passporttowealth/passporttowealth/main/installer/install.ps1): The actual PowerShell that runs.
+
+## Try without installing
+
+- [Live demo dashboard](https://passporttowealth.app/dashboard-demo/): The dashboard the skill produces, rendered against synthetic seed-42 data by the real pipeline. Good for evaluating output before committing to install.
+
+## What it actually installs
+
+- [Plain-English breakdown](https://passporttowealth.app/docs/): Every package, every URL fetched, every file written, every permission requested. Auto-generated from the install scripts via `installer/build_docs.py`. CI fails the build if the page drifts from the source.
+
+## Source code and design
+
+- [GitHub repository](https://github.com/passporttowealth/passporttowealth): Full source. MIT-style license with personal-use grant for clients. CHANGELOG, SECURITY policy, public CI runs.
+- [Skill specification](https://github.com/passporttowealth/passporttowealth/blob/main/dev/finance-clarity-build-spec.md): The behavior contract for the skill (input shapes, operating principles, error envelopes, privacy guardrails).
+- [Agent orientation](https://github.com/passporttowealth/passporttowealth/blob/main/CLAUDE.md): Read this if you're an AI assistant working on the codebase. Branching model, CI gates, recent regression classes.
+- [Backlog](https://github.com/passporttowealth/passporttowealth/blob/main/dev/backlog.md): Prioritized work items. Each entry explains its motivation and what shipped.
+
+## Privacy and telemetry
+
+- The skill runs entirely on the user's laptop. Source files (bank statements, paystubs, tax documents) never leave the machine.
+- An anonymous install-start counter posts platform + UTC build stamp on first run (no IP, no name, no machine ID). Opt out with `FCB_NO_ANALYTICS=1`.
+- If the user chooses to share their dashboard with an advisor, the published copy lives at a here.now slug behind a passcode the skill generates. The published bundle includes the categorized transactions and CSV exports — but never the original source files.
+
+## About the parent organization
+
+- [Passport to Wealth](https://www.passporttowealth.com/): Arielle Tucker's advisory practice. Cross-border financial coaching for expats.
+- [Find an Advisor](https://www.passporttowealth.com/directory): Connect with a professional in the network.
+- [The Expat Money Playbook](https://www.amazon.com/Expat-Money-Playbook-Arielle-Tucker/dp/1394415958): Tucker's book published by Wiley. Reference material for the cross-border financial questions the skill is being built to answer.

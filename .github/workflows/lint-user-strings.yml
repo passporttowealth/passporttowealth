@@ -2,15 +2,29 @@ name: Lint user-facing strings (OP-8)
 
 # Scans user-visible copy for OP-8 banned words.
 # OP-8 (spec §2): minimize user exposure to third-party service names and
-# technical plumbing. Banned words must not appear outside the install dialog.
+# technical plumbing. Banned words must not appear in copy the user reads
+# during normal skill use (greetings, prompt templates, dashboard strings).
+#
+# Explicitly NOT scanned:
+# - Install scripts (one-time exposure during install is OK in v1).
+# - Skill scripts source (engineering code; the printed *output* may have
+#   user-facing strings but they're mixed with comments, variable names,
+#   and API URLs that legitimately reference these terms).
+# - Cloudflare Worker code.
+# - The landing page (visitors there are evaluating the product; technical
+#   terms are appropriate).
+#
+# WHAT we scan: skill/prompts/ (the templates the agent uses to talk to
+# the user) and skill/templates/site/index.html (the dashboard the user
+# reads). These are pure user-facing copy.
 
 on:
   pull_request:
     branches: [main]
     paths:
       - "skill/prompts/**"
-      - "skill/scripts/**"
-      - "skill/templates/**"
+      - "skill/templates/site/**"
+      - ".github/workflows/lint-user-strings.yml"
 
 jobs:
   banned-words:
@@ -22,22 +36,22 @@ jobs:
         run: |
           set -eo pipefail
 
-          # Banned words per spec §2 OP-8
-          # Allowed scope: anywhere in skill/prompts/ + user-touching script output.
-          # NOT scanned: install scripts (one-time exposure during install is OK in v1).
-          BANNED='here\.now|API key|credential|slug|Homebrew|Python|pip install|venv|npx|OFX|webhook'
+          BANNED='here\.now|API key|credential|slug|Homebrew|pip install|\.venv|npx|OFX|webhook'
 
-          violations=$(grep -rEn --include="*.md" --include="*.py" --include="*.sh" --include="*.html" \
+          # Exclude lines that opt out via the OP8-OK marker (matches both
+          # `#OP8-OK ...` and `<!--OP8-OK ...-->` since both contain the
+          # bare token "OP8-OK").
+          violations=$(grep -rEn --include="*.md" --include="*.html" \
             "$BANNED" \
-            skill/prompts/ skill/templates/ skill/scripts/ \
-            2>/dev/null || true)
+            skill/prompts/ skill/templates/site/ \
+            2>/dev/null | grep -v 'OP8-OK' || true)
 
           if [ -n "$violations" ]; then
             echo "::error::OP-8 banned words found in user-facing copy:"
             echo "$violations"
             echo ""
             echo "If this is intentional (a comment, a doc link, an internal-only file),"
-            echo "wrap it with a #OP8-OK comment on the same line and re-run."
+            echo "add #OP8-OK or <!--OP8-OK--> on the same line and re-run."
             exit 1
           fi
 

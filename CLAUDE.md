@@ -95,6 +95,8 @@ Each of these hit production undetected. Tests now guard them. If a test fails w
 | See what's left to build / what's done | `dev/backlog.md`                                                                                    |
 | See what changed when                  | `CHANGELOG.md` (Unreleased + tagged versions)                                                       |
 | Update the landing page                | `installer/index.html` + `bash installer/publish-landing.sh`                                        |
+| Update what's listed at /docs          | `installer/build_docs.py` extracts packages/URLs/env-vars from install scripts; descriptions are curated. **Adding a new package or env var that's not in the curated maps fails CI.** |
+| Add or change a legal page             | `installer/legal/{privacy,terms,dpa}.html` — drafts pending legal review. Keep the draft banner until counsel signs off. |
 | Update the dashboard template          | `skill/templates/site/index.html` (regenerate demo via `installer/README.md` recipe)                |
 | Run the pipeline manually              | `FCB_WORKSPACE=/tmp/ws bash skill/scripts/refresh.sh --auto-confirm` after seeding `/tmp/ws/inbox/` |
 | Touch the install scripts              | `installer/install.sh` (Mac) + `installer/install.ps1` (Windows) — keep in sync                     |

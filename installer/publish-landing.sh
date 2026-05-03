@@ -19,6 +19,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 HERENOW_PUBLISH="${HERENOW_PUBLISH_SCRIPT:-${HOME}/.claude/skills/here-now/scripts/publish.sh}"
 SLUG="${LANDING_SLUG:-sandy-delta-dc3r}"
 
@@ -30,6 +31,11 @@ SLUG="${LANDING_SLUG:-sandy-delta-dc3r}"
 
 BUILD_DIR="$(mktemp -d -t passport-landing-XXXXXX)"
 trap 'rm -rf "$BUILD_DIR"' EXIT
+
+# Regenerate /docs page from current install scripts so the live page
+# never drifts. CI also runs this in --check mode to gate PRs.
+echo "▸ Rebuilding /docs from install scripts"
+python3 "$REPO_ROOT/installer/build_docs.py"
 
 # Mirror the installer/ tree, dereferencing any symlinks so the publish
 # bundle has real files (here-now's publish.sh skips symlinks).
