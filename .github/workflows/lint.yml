@@ -1,0 +1,53 @@
+name: Lint shell + PowerShell
+
+# Static analysis on the install scripts and skill helpers. Both installers
+# are streamed and executed (`curl … | bash`, `irm … | iex`) so static safety
+# is the only gate before they reach a user's laptop.
+
+on:
+  pull_request:
+    paths:
+      - 'installer/install.sh'
+      - 'installer/install'
+      - 'installer/install.ps1'
+      - 'installer/publish-landing.sh'
+      - 'skill/scripts/**.sh'
+      - '.github/workflows/lint.yml'
+  push:
+    branches: [main, next]
+
+jobs:
+  shellcheck:
+    name: shellcheck (bash)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run shellcheck
+        uses: ludeeus/action-shellcheck@master
+        env:
+          SHELLCHECK_OPTS: --severity=warning
+        with:
+          # Lint the install scripts + the skill's user-facing helpers. Skip
+          # legacy/ (intentionally archived) and node_modules.
+          ignore_paths: >-
+            installer/legacy
+            node_modules
+          additional_files: 'installer/install'
+
+  psscriptanalyzer:
+    name: PSScriptAnalyzer (install.ps1)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
+          $results = Invoke-ScriptAnalyzer -Path installer/install.ps1 -Severity Warning,Error
+          if ($results) {
+              $results | Format-Table -AutoSize
+              Write-Host ""
+              Write-Host "❌ PSScriptAnalyzer found $($results.Count) issue(s)" -ForegroundColor Red
+              exit 1
+          }
+          Write-Host "✓ install.ps1 is clean (warning + error severity)" -ForegroundColor Green

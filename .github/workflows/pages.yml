@@ -29,17 +29,35 @@ jobs:
       - name: Stage Pages content
         run: |
           mkdir -p _site
-          # Landing page + assets. -L dereferences the installer/assets/brand
-          # symlink that points back to assets/brand/ (single source of truth).
-          cp installer/index.html _site/
-          if [ -d installer/assets ]; then cp -RL installer/assets _site/; fi
-          # Make the installers downloadable directly from Pages too.
-          # Canonical landing is https://passporttowealth.app/ (here.now, slug sandy-delta-dc3r).
-          # This Pages deploy is a belt-and-suspenders backup mirror in case the apex
-          # is unreachable (DNS issue, here.now outage, custom-domain mishap).
-          cp installer/Welcome.command _site/ 2>/dev/null || true
-          cp installer/Welcome.bat _site/ 2>/dev/null || true
-          cp installer/Welcome.ps1 _site/ 2>/dev/null || true
+          # Mirror the full installer/ tree, dereferencing symlinks
+          # (here-now's publish.sh skips them; we do the same here so both
+          # mirrors stay in sync). Excludes .DS_Store and the .herenow
+          # state cache which we don't want public.
+          rsync -aL \
+            --exclude '.DS_Store' \
+            --exclude '.herenow' \
+            installer/ _site/
+          # Substitute {{BUILD_STAMP}} in the landing index so the Pages
+          # mirror has the same UTC stamp the canonical here.now publish
+          # gets. Format matches install-telemetry build_stamp.
+          STAMP="$(date -u +%Y%m%d%H%M%S)"
+          sed "s/{{BUILD_STAMP}}/$STAMP/g" _site/index.html > _site/index.html.tmp
+          mv _site/index.html.tmp _site/index.html
+
+      - name: Guard against unfilled placeholders
+        run: |
+          # Fail fast if any '{{' survived in HTML we're about to deploy.
+          # Prevents the BUILD_STAMP class of regression (literal
+          # `Build {{BUILD_STAMP}}` rendering on the live page).
+          # Restrict to top-level HTML only — dashboard-demo/index.html
+          # is a built artifact whose template-engine-style {{ }} braces
+          # may legitimately appear in other contexts.
+          if grep -l '{{' _site/index.html _site/dashboard-demo/index.html 2>/dev/null; then
+            echo "::error::Unfilled {{ placeholder found in HTML being deployed"
+            grep -n '{{' _site/index.html _site/dashboard-demo/index.html || true
+            exit 1
+          fi
+          echo "✓ No unfilled placeholders in landing or demo dashboard"
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

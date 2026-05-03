@@ -82,6 +82,12 @@ See [`docs/advisor-onboarding.md`](docs/advisor-onboarding.md) for the kickoff p
 
 Pre-v1. Structure exists; implementation in progress per [`dev/backlog.md`](dev/backlog.md). Open issues tracked at [github.com/passporttowealth/passporttowealth/issues](https://github.com/passporttowealth/passporttowealth/issues).
 
+## Contributing (humans + AI agents)
+
+If you're an AI agent picking up work on this repo, **read [`CLAUDE.md`](CLAUDE.md) first.** It covers the branching model (`main` is stable / testers point here, `next` is the dev trunk), the required CI gates, the recent regression classes that must not be re-introduced, and where to find what. Claude Code reads this file automatically; other agents should read it manually.
+
+For human contributors: same file is the single source of truth on conventions.
+
 ## License
 
 Proprietary. See [`LICENSE`](LICENSE). Copyright © 2026 Passport to Wealth. All rights reserved.

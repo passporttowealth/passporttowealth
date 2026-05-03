@@ -545,6 +545,39 @@ Code from email: ______
 - New `.coming-soon-chip` CSS class (reusable for any future Coming-soon sections).
 - Section IDs renumbered (sec-01..sec-06). Section nav updated. Prototype-modal Privacy anchor moved to #sec-06.
 
+### B9.20 — Lean two-branch model + Tier 1 CI gates + agent orientation doc · ✅ **DONE** (lean) / 📋 **DEFERRED** (full staging + transparency surfaces)
+**Found by:** user follow-up to B9.19 — "given we need constant feedback but want stable product, enable branch protection and some sort of staging/versioning. One that is public (and works) and one that is in development/testing."
+
+**The shape that fits this product:** unlike a SaaS app with one production URL, this product has five surfaces (landing page, install scripts, demo dashboard, Cloudflare Worker, the skill itself distributed via `npx skills add`). Each surface needs its own production/staging story. Full table in `CLAUDE.md` if needed. Off-the-shelf "preview deployment" patterns (Vercel etc.) don't map cleanly because the surfaces use different distribution channels.
+
+**Lean version shipped now:**
+- New `next` branch — development trunk. Push directly here; promote to `main` via PR after soak.
+- Branch protection on `main` with **admin bypass** — required status checks gate normal PRs (CI, lint, security, OP-8, pages); repo owner can still push direct in an emergency.
+- New `.github/workflows/lint.yml` — shellcheck on `install.sh`, `install` shim, `publish-landing.sh`, and `skill/scripts/*.sh`; PSScriptAnalyzer on `install.ps1`.
+- New `.github/workflows/security.yml` — `pip-audit` (Python pipeline deps) + `npm audit` (Worker deps). Runs on PR + push + weekly cron. Answers tester-question "are these installations safe?" with public CI runs.
+- New `.github/dependabot.yml` — weekly pip + npm + github-actions updates.
+- `pages.yml` updated: now substitutes `{{BUILD_STAMP}}` (so the Pages backup mirror has the same stamp the canonical here.now publish gets) and refuses to deploy if `{{` placeholders survive in HTML. Also drops the stale `Welcome.command/.bat/.ps1` copies that haven't existed at the top of `installer/` since B9.10.
+- New `CLAUDE.md` at repo root — agent orientation. Covers branching model, required CI gates, test scope, publishing surfaces, recent regression classes that must not return, and a where-to-find-what map. Claude Code reads it automatically; other agents read it manually. README updated to point at it.
+
+**Deferred — review after the prototype phase (late May 2026):**
+
+*Full staging (B9.20a):* per-surface staging environment.
+- Separate here-now slug for landing-page staging (e.g. `passport-staging.here.now/`); CI publishes from `next` to staging slug, from `main` to prod slug.
+- Cloudflare Worker `[env.staging]` block in `wrangler.toml` with separate KV namespace (`wrangler kv:namespace create FCB_METRICS_STAGING`); CI deploys from `next` → staging Worker, `main` → prod Worker.
+- `?channel=next` query param on the install shim → routes testers to `install.sh` from `next` branch instead of `main`. Lets specific testers opt into bleeding edge.
+- `staging-publish.yml` workflow on push to `next`; `prod-publish.yml` workflow on merge to `main` (also tags `vX.Y.Z` from CHANGELOG).
+- ~4-6 hours of work; ~95% of value vs lean's ~70%. Not warranted at 5-10 testers; revisit at ~20+ or after a regression that lean version would have missed.
+
+*Transparency / safety surfaces (B9.20b — open questions, see "User asked about" below):*
+- Public `/docs/security` or `/docs/install-explained` page, auto-generated from `install.sh` + `install.ps1`. Lists every package, every URL fetched, every system permission required, in plain English. Doesn't drift because it regenerates from source. Linked from landing-page footer + included in tester onboarding emails.
+- `passporttowealth.app/llms.txt` — agent-discoverable index of canonical sources (install command, demo dashboard, security page, skill spec). Per Jeremy Howard / Answer.ai's emerging convention.
+- Both deferred pending user approval of scope (open question raised in same session).
+
+**User asked about (deferred to next decision):**
+1. Automated security review beyond pip-audit + shellcheck — could add SBOM generation (CycloneDX), Sigstore/cosign signing, or a public SLSA provenance claim. Each is 4-8 hours. Diminishing returns at this scale.
+2. The `/docs/security` page above.
+3. The `llms.txt` above.
+
 ### B9.19 — Prototype-phase test scope cut + deferred CI roadmap · ✅ **DONE** (cut) / 📋 **PARTIAL** (CI roadmap deferred)
 **Found by:** user request — multi-agent assessment of "are these tests useful or fake or slop?", followed by scoping to "5-10 tester clients over the next 2 weeks; iterate fast, minimize impact on new customers, defer the rest until end-of-month."
 **The diagnosis (from two parallel audits):** the 69-test suite was ~38% behavioral / ~49% source-grep / ~10% snapshot / ~3% slop. The behavioral tests pulled real weight; the source-grep tests were useful as living documentation but many pinned copy phrases or implementation details that paid maintenance cost without defending tester-impacting behavior. Critical structural blind spot: nothing exercised the publish/deploy paths (install.sh, install.ps1, publish-landing.sh, publish.sh, the Cloudflare Worker live). Every recent regression escaped through this gap.

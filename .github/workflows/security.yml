@@ -1,0 +1,52 @@
+name: Security audit (deps)
+
+# Answers "are these installations safe?" with public, machine-checkable
+# results. Runs on every PR and weekly to catch newly-disclosed CVEs in
+# packages we already shipped.
+
+on:
+  pull_request:
+    paths:
+      - 'requirements.txt'
+      - 'cloudflare-worker/package.json'
+      - 'cloudflare-worker/package-lock.json'
+      - '.github/workflows/security.yml'
+  push:
+    branches: [main, next]
+  schedule:
+    # Weekly on Mondays — catches new CVEs against pinned versions even if
+    # nothing in the repo changed.
+    - cron: '0 8 * * 1'
+
+jobs:
+  pip-audit:
+    name: pip-audit (Python pipeline deps)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run pip-audit
+        uses: pypa/gh-action-pip-audit@v1.1.0
+        with:
+          inputs: requirements.txt
+
+  npm-audit:
+    name: npm audit (Cloudflare Worker deps)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cloudflare-worker
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install deps (so npm audit has a lockfile to read)
+        run: npm install --package-lock-only
+      - name: Run npm audit
+        # Fail on moderate or higher. The Worker handles a GitHub PAT and
+        # install-telemetry KV writes; low-severity is a warning, moderate+
+        # is a stop.
+        run: npm audit --audit-level=moderate
