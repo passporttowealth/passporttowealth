@@ -545,6 +545,43 @@ Code from email: ______
 - New `.coming-soon-chip` CSS class (reusable for any future Coming-soon sections).
 - Section IDs renumbered (sec-01..sec-06). Section nav updated. Prototype-modal Privacy anchor moved to #sec-06.
 
+### B9.19 — Prototype-phase test scope cut + deferred CI roadmap · ✅ **DONE** (cut) / 📋 **PARTIAL** (CI roadmap deferred)
+**Found by:** user request — multi-agent assessment of "are these tests useful or fake or slop?", followed by scoping to "5-10 tester clients over the next 2 weeks; iterate fast, minimize impact on new customers, defer the rest until end-of-month."
+**The diagnosis (from two parallel audits):** the 69-test suite was ~38% behavioral / ~49% source-grep / ~10% snapshot / ~3% slop. The behavioral tests pulled real weight; the source-grep tests were useful as living documentation but many pinned copy phrases or implementation details that paid maintenance cost without defending tester-impacting behavior. Critical structural blind spot: nothing exercised the publish/deploy paths (install.sh, install.ps1, publish-landing.sh, publish.sh, the Cloudflare Worker live). Every recent regression escaped through this gap.
+**The cut (2026-05-03):**
+- 69 → 39 tests (30 deletions + 3 consolidations whose load-bearing assertions were merged into surviving tests).
+- Deleted: 2 slop (lib_importable, all_scripts_executable), 4 legacy bug classes (no-stub-markers, no-desktop-artifacts, no-auto-open-privacy-hub, legacy-installers-archived), 8 copy/UX/step-numbering pins (auth_choice_two_options, step5_diagnostic_runs_checks, ends_with_clear_reentry, has_pause_gates_and_auto_flag, traps_sigint_with_step_logging, diagnostic_failure_warns_does_not_block, pre_consent_block_is_paced, fx_prewarm_streams_progress_to_tty), 11 polish-era / impl-pinning (polish_p0_markers, no_scrollintoview, no_overflow_hidden, dashboard_data_includes_polish_fields, transactions_table_default_pagesize_10, feedback_widget_framed, feedback_widget_present, feedback_config_in_dashboard_data, insights_are_factual_not_advisory, inter_font_bundled, monthly_actuals_pivot_exists), 2 micro unit tests on tiny helpers (progress_helper_silent_when_not_tty, progress_helper_handles_zero_total).
+- Consolidated: inbox-emptied check merged into routing test; curl-pipe-friendly assertions merged into curl_pipe_safe; python311 absolute-path check merged into uses_uv test.
+- Kept everything that defends: pipeline data correctness (classify/dedupe/normalize/categorize/sanity), template placeholder-substitution, dashboard JSON schema, privacy footer honesty, CDN-free / chartjs-bundled, landing-page asset resolution, dashboard-demo bundle completeness, install.sh curl-pipe safety, consent-gate-doesn't-silently-cancel, install→publish flow continuity (view-local, refresh-invokes-view, publish-runs-email-code), telemetry (install_started ping + Worker schema), Windows installer parity (install.ps1 winget), recent regression classes.
+
+**Why this is the right scope for the prototype phase:**
+- Iteration speed > defense in depth. With 5-10 testers over 2 weeks, every failed test on a legitimate refactor costs PR cycle time and burns trust in the suite.
+- Real defense comes from CI gates on the publish path (next phase), not unit tests on source-grep patterns.
+- The cut suite still catches every recent regression class (verified — the brand-symlink, BUILD_STAMP, privacy-footer, dashboard-demo guards all survived).
+
+**Deferred CI/CD roadmap — review late May 2026 after the prototype phase closes:**
+
+*Tier 1 — minimum viable, ship before going wider than 10 testers:*
+1. Pre-publish guard inside `pages.yml` — fail the workflow if `{{` survives in any HTML it's about to deploy. (One-line grep; mirrors what `installer/publish-landing.sh` already does locally.)
+2. Shellcheck `installer/install.sh` in CI via `ludeeus/action-shellcheck@master`. Catches POSIX bugs, unquoted vars, non-portable constructs.
+3. PSScriptAnalyzer on `installer/install.ps1` via PowerShell action. Same idea, Windows side, no Windows test box yet so static analysis is the only gate.
+4. Branch protection on `main` — require `ci.yml` + `lint-user-strings.yml` + the two new lint jobs to pass before merge. Repo setting via `gh repo edit`.
+5. Dependabot — `.github/dependabot.yml` for `pip` (Python deps) and `npm` (Worker / wrangler).
+
+*Tier 2 — solid, ship before 1.0:*
+6. `wrangler deploy --dry-run` on Worker PRs. Needs `CLOUDFLARE_API_TOKEN` repo secret. Catches schema/syntax errors before they reach prod.
+7. Container smoke-test of `install.sh` in Ubuntu — `bash -x install.sh` with mocked stdin + network stubs, asserts script reaches end without exit-non-zero. Catches "doesn't even start" bugs.
+8. HTML lint + relative-link check on `installer/index.html` (htmlhint + ~10-line Python link checker). Catches dead asset references before they reach prod.
+9. Pre-commit hooks — local shellcheck + JSON validity + end-of-file-fixer via `pre-commit` framework. Stops devs from pushing things CI will reject.
+
+*Tier 3 — luxury, defer past 1.0:*
+10. Lighthouse CI on landing page (perf/SEO/a11y).
+11. Live HTTP integration test against staged Worker (with isolated KV namespace).
+12. Auto-generated CHANGELOG from commit messages (release-drafter).
+13. Signed commits, OWASP Top-10 review.
+
+**Verdict from the audits:** "Tests are not slop, but mis-scoped — they defended the source code's claims about itself, not the deployed artifacts users see. Every recent regression escaped through that gap. Tier 1 closes the gap cheaply." Re-evaluate after late May, when we know which classes of issue actually surfaced in the tester pilot vs. were predicted.
+
 ### B9.18 — Live public demo dashboard at /dashboard-demo + 3 supporting fixes · ✅ **DONE**
 **Found by:** user request "add a link to view a dashboard example in the landing page under 'See your numbers' section, and link out to a demo dashboard without a passcode mounted via here.now at passporttowealth.app/dashboard-demo using the template simulation data."
 **Why this exists:** Prospects need to see the actual output before committing to the install command. A static `<div class="dash-preview">` in the landing page is a sketch, not the real thing. A live mirror — built by the real pipeline against the synthetic demo-kit fixture — answers "what am I getting?" in one click.
