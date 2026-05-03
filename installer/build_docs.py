@@ -388,31 +388,37 @@ def render_html(tools: list[str], python_packages: list[str], urls: list[str], p
     height: 100vh;
     overflow-y: auto;
   }}
-  /* Brand row: logo + wordmark, centered as a unit on the sidebar with
-     a subtle separator below before the nav. The fixed-square image box
-     guarantees vertical-center alignment between logo and text even
-     though the underlying logo PNG has internal whitespace. */
+  /* Brand row: wordmark only. The original logo-blue.png is a complex
+     circular mark with text wrapped inside it AND a plane in the
+     center — illegible at sidebar-icon size and redundant with the
+     wordmark sitting next to it. Cleaner to drop the image entirely
+     and let the wordmark stand on its own with a small gold accent
+     above it (matches the brand's gold-accent design language without
+     duplicating the wordmark). */
   .sidebar-brand {{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin: 0 0 20px;
-    padding-bottom: 18px;
+    display: block;
+    text-align: center;
+    margin: 0 0 22px;
+    padding: 4px 0 18px;
     border-bottom: 1px solid var(--border);
     text-decoration: none;
     color: var(--text);
     font-weight: 700;
-    font-size: 14px;
-    letter-spacing: 0.01em;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
   }}
-  .sidebar-brand img {{
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
-    flex: 0 0 auto;
+  .sidebar-brand::before {{
+    content: "";
+    display: block;
+    width: 28px;
+    height: 2px;
+    background: var(--gold);
+    margin: 0 auto 10px;
+    border-radius: 1px;
   }}
-  .sidebar-brand .label {{ line-height: 1.2; }}
+  .sidebar-brand:hover {{ color: var(--gold); }}
+  .sidebar-brand:hover::before {{ background: var(--text); }}
   .sidebar h3 {{
     font-size: 11px;
     text-transform: uppercase;
@@ -573,7 +579,7 @@ def render_html(tools: list[str], python_packages: list[str], urls: list[str], p
 <body>
 <div class="layout">
   <aside class="sidebar">
-    <a class="sidebar-brand" href="../"><img src="../assets/brand/logo-blue.png" alt=""><span class="label">Passport to Wealth</span></a>
+    <a class="sidebar-brand" href="../">Passport to Wealth</a>
     <h3>Docs</h3>
     <a href="#quick-start">Quick start</a>
     <a href="#what-you-get">What you get</a>
