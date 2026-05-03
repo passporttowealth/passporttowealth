@@ -59,12 +59,22 @@ jobs:
           #   not suppressed in script execution.
           # - PSUseApprovedVerbs: Pause-ForUser uses an unapproved verb
           #   (Pause). Cosmetic — the helper is internal, never exported.
+          # - PSAvoidUsingEmptyCatchBlock: install scripts intentionally
+          #   swallow non-fatal errors (e.g. `try { Register-EngineEvent } catch { }`)
+          #   to keep going when an optional handler can't be registered.
+          # - PSAvoidOverwritingBuiltInCmdlets: our `Write-Log` helper
+          #   shadows a PowerShell core cmdlet of the same name. Rename
+          #   to `Write-InstallLog` is a future cleanup (40 call sites);
+          #   no functional collision today since we don't import the
+          #   conflicting module. Tracked in backlog for end-of-prototype.
           $exclude = @(
               'PSAvoidGlobalVars',
               'PSUseBOMForUnicodeEncodedFile',
               'PSUseUsingScopeModifierInNewRunspaces',
               'PSAvoidUsingWriteHost',
-              'PSUseApprovedVerbs'
+              'PSUseApprovedVerbs',
+              'PSAvoidUsingEmptyCatchBlock',
+              'PSAvoidOverwritingBuiltInCmdlets'
           )
           $results = Invoke-ScriptAnalyzer -Path installer/install.ps1 `
               -Severity Warning,Error `
