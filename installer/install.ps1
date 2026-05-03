@@ -350,7 +350,7 @@ Write-OkPaced "Personal computer (not MDM-managed)"
 
 # Network reachability
 try {
-    $resp = Invoke-WebRequest -Uri "https://api.frankfurter.app/latest" -UseBasicParsing -TimeoutSec 5 -ErrorAction Stop
+    Invoke-WebRequest -Uri "https://api.frankfurter.app/latest" -UseBasicParsing -TimeoutSec 5 -ErrorAction Stop | Out-Null
     Write-OkPaced "Network reachable"
 } catch {
     Write-WarnLine "Couldn't reach the exchange-rate service. The installer will continue but FX may be stale."
