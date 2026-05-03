@@ -187,6 +187,18 @@
       /* No text-transform: uppercase — destroys canonical brand caps like
          macOS / iOS. Instead use small + bold + letter-spaced for emphasis. */
     }
+    .install-fyi {
+      font-size: 13px;
+      line-height: 1.5;
+      color: rgba(245, 243, 238, 0.7);
+      margin: 14px 0 0;
+      padding: 10px 14px;
+      background: rgba(201, 167, 93, 0.10);
+      border-left: 2px solid var(--color-gold);
+      border-radius: 0 4px 4px 0;
+    }
+    .install-fyi a { color: var(--color-code-text); text-decoration: underline; text-decoration-color: var(--color-gold); text-underline-offset: 2px; }
+    .install-fyi a:hover { color: var(--color-gold); }
     .install-block code {
       font-family: var(--font-mono);
       font-size: 14px;
@@ -937,9 +949,9 @@
       <button class="copy-btn" data-target="cmd-mac" aria-label="Copy install command">Copy</button>
     </div>
     <div class="install-block" id="install-win" role="tabpanel" aria-labelledby="tab-win" hidden>
-      <span class="label">Windows · paste in PowerShell</span>
+      <span class="label">Windows · early access — not yet tested on a real Windows machine</span>
       <code id="cmd-win">irm https://passporttowealth.app/install.ps1 | iex</code>
-      <button class="copy-btn" data-target="cmd-win" aria-label="Copy install command">Copy</button>
+      <p class="install-fyi">FYI: the Windows installer is in development. Source code is reviewed and statically analyzed in CI, but it has not yet been run end-to-end on a Windows box. If you try it, please <a href="https://github.com/passporttowealth/passporttowealth/issues/new" target="_blank" rel="noopener">tell us how it went</a>. Mac is the supported path today.</p>
     </div>
 
     <p class="terminal-hint" id="hint-mac">
