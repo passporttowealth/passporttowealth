@@ -545,6 +545,26 @@ Code from email: ______
 - New `.coming-soon-chip` CSS class (reusable for any future Coming-soon sections).
 - Section IDs renumbered (sec-01..sec-06). Section nav updated. Prototype-modal Privacy anchor moved to #sec-06.
 
+### B9.21 — Transparency surfaces: /docs, /llms.txt, draft legal pages, restructured footer · ✅ **DONE**
+**Found by:** user request — automated security review for "are these installs safe?", a docs section that auto-generates from the install scripts, and an llms.txt for agent-discoverable site map. Then follow-ups: privacy/terms/DPA drafts pending legal review, restructured footer to industry-standard 3-column pattern, fixed favicon (was transparent → invisible on grey browser tabs).
+**What changed:**
+- New `installer/build_docs.py` — parses `install.sh` + `install.ps1` for every package, URL, env var, and workspace path; cross-references with curated descriptions; renders a multi-section docs page at `installer/docs/index.html` with a here.now-style left sidebar. **Build fails if anything in the install scripts isn't documented in the curated maps**, so the live page can't drift from what runs. Sections: Quick start, What you get, Privacy at a glance, What this installs (auto), Sharing your dashboard, Reference (env vars).
+- Hardcoded values minimized: workspace paths and env-var names are extracted from the install scripts (so renaming the workspace folder or adding a new opt-out env var auto-surfaces on the docs page).
+- `--check` mode: CI runs `build_docs.py --check` and fails the PR if `installer/docs/index.html` is byte-out-of-sync with what the script would produce. `publish-landing.sh` and `pages.yml` both regenerate before publishing.
+- New `installer/llms.txt` — agent-discoverable site map per [llmstxt.org](https://llmstxt.org/). Sections: Install, Try without installing, What it actually installs, Source code and design, Privacy and telemetry, About the parent organization.
+- New legal pages, all marked **draft pending legal review**:
+  - `installer/legal/privacy.html` — what we collect (anonymous install ping, opt-in feedback, opt-in publishes); what we explicitly don't (IP, UA, name, machine ID); third-party sub-processors; user rights and controls.
+  - `installer/legal/terms.html` — license, acceptable use, this-is-not-financial-advice disclaimer, prototype-status disclaimer, liability cap, governing law TBD.
+  - `installer/legal/dpa.html` — controller/processor split, data categories table, sub-processors table (Cloudflare, here.now, GitHub, Anthropic), security measures, breach notification, transfers TBD.
+- Landing footer restructured to industry-standard 3-column pattern: Product (Get started, Live demo, Docs), Resources (GitHub, Changelog, llms.txt), Legal (Privacy, Terms, DPA). Brand block on the left. Copyright + Prototype pill + Build stamp in the bottom row.
+- Landing header: new "Docs" link next to the Prototype pill so visitors can find the docs from any scroll position.
+- Favicon regenerated with a white background composited under the transparent logo (was invisible on grey/dark browser tabs). Synced to all three locations (canonical + installer/ + skill/).
+- Fixed `/docs` over-promise: removed "Your bank statements... never read or sent anywhere" line — user may explicitly ask Claude to read source files, in which case file content goes to Anthropic per Anthropic's terms. Reworded to be honest about the install never reading them while acknowledging the explicit-Claude-read path.
+
+**Tests:** still 39, all passing. CI gates updated: `ci.yml` runs `build_docs.py --check` after the regression suite. `pages.yml` regenerates docs before staging.
+
+**Followups for end-of-prototype review:** counsel signoff on legal pages; Sigstore/cosign signing of install scripts; SBOM (CycloneDX) generation if requested by a client.
+
 ### B9.20 — Lean two-branch model + Tier 1 CI gates + agent orientation doc · ✅ **DONE** (lean) / 📋 **DEFERRED** (full staging + transparency surfaces)
 **Found by:** user follow-up to B9.19 — "given we need constant feedback but want stable product, enable branch protection and some sort of staging/versioning. One that is public (and works) and one that is in development/testing."
 

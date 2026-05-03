@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — Passport to Wealth Finance Clarity</title>
+<meta name="description" content="What this product collects, what it does not, and what you control. Draft pending legal review.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="../assets/brand/favicon.png">
+<style>
+  :root {
+    --bg: #FAF8F4; --text: #0F1E33; --text-muted: #5E6473; --gold: #C9A75D;
+    --card: #FFFFFF; --border: #E8E5DE; --code-bg: #F2EEE5; --code-fg: #2A3550;
+    --warn-bg: #FFF6DD; --warn-border: #B07C00;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  .container { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
+  .back { display: inline-block; color: var(--text-muted); text-decoration: none; font-size: 14px; margin-bottom: 24px; }
+  .back:hover { color: var(--gold); }
+  h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 8px; }
+  h2 { font-size: 20px; font-weight: 700; margin: 36px 0 8px; }
+  h2::after { content: ""; display: block; width: 32px; height: 2px; background: var(--gold); margin-top: 6px; }
+  p, ul, ol { font-size: 15px; line-height: 1.7; color: var(--text); }
+  ul, ol { padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  .lede { color: var(--text-muted); font-size: 16px; margin-bottom: 16px; }
+  .meta { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+  .draft-banner { background: var(--warn-bg); border: 1px solid var(--warn-border); border-radius: 8px; padding: 16px 20px; margin: 24px 0 32px; font-size: 14px; }
+  .draft-banner strong { color: var(--warn-border); }
+  code { font-family: "SF Mono", Menlo, Consolas, monospace; background: var(--code-bg); color: var(--code-fg); padding: 1px 5px; border-radius: 3px; font-size: 0.92em; }
+  a { color: var(--text); }
+  a:hover { color: var(--gold); }
+  .nav-legal { font-size: 13px; color: var(--text-muted); margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .nav-legal a { color: var(--text-muted); margin-right: 12px; }
+  .nav-legal a:hover { color: var(--gold); }
+  footer { color: var(--text-muted); font-size: 13px; margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<div class="container">
+  <a class="back" href="../">← Back to passporttowealth.app</a>
+  <h1>Privacy Policy</h1>
+  <p class="meta">Effective: 3 May 2026 · Version: draft.0.1</p>
+
+  <div class="draft-banner">
+    <strong>⚠ Draft pending legal review.</strong> This document describes how the product handles data <em>today</em>, written by the engineering team based on the actual data flows in the code. It has not been reviewed by counsel. Do not rely on it as legally binding language; if you need a binding privacy commitment, ask your advisor at Passport to Wealth before proceeding.
+  </div>
+
+  <p class="lede">Passport to Wealth Finance Clarity is a tool that builds a private financial dashboard on your own computer from your own files. The default mode is local-only. This page describes what little information leaves your computer when you use the tool, and what we deliberately do not collect.</p>
+
+  <h2>1. What stays on your computer</h2>
+  <p>The default mode is local processing. Specifically:</p>
+  <ul>
+    <li><strong>Your source files</strong> (bank statements, payslips, tax documents, anything you drop into the workspace inbox) live in <code>~/Documents/my-finances/</code> on Mac or <code>%USERPROFILE%\Documents\my-finances\</code> on Windows. The pipeline scripts (classify, normalize, categorize, build_site, etc.) run locally on your machine and never upload these files anywhere.</li>
+    <li><strong>One important nuance:</strong> if you explicitly ask the AI assistant to read a specific file (for example: "tell me about this paystub" or "summarize my Q3 statement"), the contents of that file are sent to Anthropic's API as part of your Claude conversation. That data flow is governed by your Anthropic account's data policy, not by us. We never see it. We have no API access to your conversation. The default skill flow does not ask Claude to read source files; it processes them with local Python scripts, so this only happens when you explicitly request it.</li>
+    <li><strong>The categorized transactions and rendered dashboard</strong> are produced locally and opened locally in your browser via a <code>file://</code> URL. No third-party server is contacted to render them.</li>
+    <li><strong>Your AI assistant credentials</strong> (Claude Pro/Max session or Anthropic API key) are stored locally by Anthropic's tools, governed by Anthropic's privacy policy. We don't see them.</li>
+    <li><strong>Categorization rules and local config</strong> (<code>rules.yaml</code>, <code>config.yaml</code>) are yours to edit and never transmitted.</li>
+  </ul>
+
+  <h2>2. What we collect</h2>
+  <p>Three narrowly-scoped categories, each with a clear purpose:</p>
+  <ul>
+    <li><strong>Anonymous install-start counters.</strong> When the install script runs, it sends a single tiny event to a Cloudflare Worker we operate: <code>{"v": 1, "event": "install_started", "platform": "mac" or "win", "build_stamp": "&lt;UTC timestamp&gt;", "advisor_id": "passporttowealth"}</code>. That's the entire payload. The Worker increments a daily per-platform counter in a key-value store. Used to size onboarding capacity. Opt out by setting the environment variable <code>FCB_NO_ANALYTICS=1</code> before running the install command.</li>
+    <li><strong>Feedback events you explicitly send.</strong> If you click "I have feedback" inside your dashboard and write a message, it's POSTed to the same Cloudflare Worker, which creates a GitHub issue under <code>passporttowealth/passporttowealth</code>. The body of the issue contains: your message, your client ID (set by your advisor at install time), the skill version, the platform, and a timestamp. It does <em>not</em> contain transactions, file paths, or the workspace contents — only what the message itself includes.</li>
+    <li><strong>Your dashboard, if you choose to share it.</strong> If you tell the assistant "share my dashboard," the publish flow uploads the rendered <code>site/</code> directory to a private URL on the here.now publishing host, gated by a passcode the skill generates. The uploaded bundle includes: the rendered HTML, the categorized transactions (in JSON embedded in the page and in CSV exports under <code>downloads/</code>), and aggregate summaries. It does <em>not</em> include the original source files (PDFs, statements). This is opt-in per dashboard; if you never share, nothing is uploaded.</li>
+  </ul>
+
+  <h2>3. What we explicitly do not collect</h2>
+  <ul>
+    <li>Your IP address. The Cloudflare Worker that receives the install ping and feedback events does not read the <code>cf-connecting-ip</code> header. (Verified by source: <a href="https://github.com/passporttowealth/passporttowealth/blob/main/cloudflare-worker/src/index.js">cloudflare-worker/src/index.js</a>.)</li>
+    <li>Your user-agent string.</li>
+    <li>Your name, email, machine identifier, or any field that could re-identify you. The install ping carries platform + timestamp + advisor_id; nothing else.</li>
+    <li>Cloudflare logs of the request body. Worker observability is explicitly turned off in <code>wrangler.toml</code> so requests don't sit in Cloudflare's own logs.</li>
+    <li>Analytics. There are no third-party analytics scripts on this landing page or the published dashboards. No Google Analytics, no Mixpanel, no Segment, no anything.</li>
+    <li>Telemetry on individual pipeline runs. The skill does not phone home when you run "build my report" or "refresh." Errors are written to a local file you control; transmission of error envelopes to your advisor is opt-in and user-triggered.</li>
+  </ul>
+
+  <h2>4. Third parties we rely on</h2>
+  <p>Each of these is governed by their own privacy policy, which applies in addition to this one:</p>
+  <ul>
+    <li><strong>Cloudflare</strong> — operates the Worker that receives install pings and feedback events. <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare Privacy Policy</a>.</li>
+    <li><strong>here.now</strong> — operates the publishing host that serves your shared dashboards. Only contacted if you choose to publish. <a href="https://here.now/privacy">here.now Privacy Policy</a>.</li>
+    <li><strong>GitHub (Microsoft)</strong> — hosts the source code, receives feedback issues you create, and serves a backup mirror of this landing page. <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub Privacy Statement</a>.</li>
+    <li><strong>Anthropic</strong> — operates Claude, the AI assistant the skill runs on. You sign in with your own Claude account; we don't see your conversations. <a href="https://www.anthropic.com/legal/privacy">Anthropic Privacy Policy</a>.</li>
+  </ul>
+
+  <h2>5. How long we keep things</h2>
+  <ul>
+    <li>Daily install counters are kept for 90 days then auto-expire (configured via Cloudflare KV TTL).</li>
+    <li>Feedback events become GitHub issues, which persist according to GitHub's normal issue lifetime — until manually closed and deleted.</li>
+    <li>Published dashboards persist on the here.now slug until you (or your advisor) explicitly delete them. Use <code>delete-my-site.command</code> from the workspace to take down a site.</li>
+    <li>Local files in <code>~/Documents/my-finances/</code> persist until you delete them. We don't auto-clean anything.</li>
+  </ul>
+
+  <h2>6. Your rights and controls</h2>
+  <ul>
+    <li><strong>Opt out of install telemetry</strong> by setting <code>FCB_NO_ANALYTICS=1</code> before running the install command.</li>
+    <li><strong>Delete a published dashboard</strong> via <code>delete-my-site.command</code> in your workspace.</li>
+    <li><strong>Delete your workspace</strong> by removing the <code>~/Documents/my-finances/</code> folder (Mac) or <code>%USERPROFILE%\Documents\my-finances\</code> (Windows). Nothing on our side persists about your local data, so deleting the folder is sufficient.</li>
+    <li><strong>Request deletion of a feedback event</strong> by replying to the GitHub issue or contacting the address below.</li>
+  </ul>
+
+  <h2>7. Children</h2>
+  <p>This product is intended for adults managing their own finances or working with a financial advisor. We do not knowingly collect data from anyone under 18.</p>
+
+  <h2>8. Changes to this policy</h2>
+  <p>If material changes occur (e.g., a new sub-processor, a new data category collected), we will update this page and update the version above. Substantive changes will be noted in the project's <a href="https://github.com/passporttowealth/passporttowealth/blob/main/CHANGELOG.md">CHANGELOG</a>.</p>
+
+  <h2>9. Contact</h2>
+  <p>For privacy questions: contact your advisor at Passport to Wealth, or open an issue at <a href="https://github.com/passporttowealth/passporttowealth/issues">github.com/passporttowealth/passporttowealth/issues</a>.</p>
+
+  <nav class="nav-legal">
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+    <a href="dpa.html">Data Processing Agreement</a>
+  </nav>
+  <footer>
+    Copyright © 2026 Passport to Wealth. All rights reserved.
+  </footer>
+</div>
+</body>
+</html>
