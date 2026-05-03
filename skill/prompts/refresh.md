@@ -14,7 +14,7 @@ The agent runs `refresh.sh` which:
 After refresh.sh completes, the agent **opens the rebuilt dashboard locally**
 (`view-local.sh` → `file://$WS/site/index.html`) by default. **Republishing
 to a shared URL only happens if the user has previously published** — i.e.
-`$HOME/.herenow/credentials` exists. New users see the local view and are
+`$HOME/.herenow/credentials` exists. <!--OP8-OK: agent-instruction context, not shown to user verbatim--> New users see the local view and are
 asked once whether they want to share.
 
 The user types one sentence; the agent does everything else.
@@ -41,12 +41,12 @@ what changed.
 {conditional: "→ Asking you about {n_new_merchants} new merchants..."}
 ✓ Sanity check passed
 ✓ Dashboard rebuilt
-{conditional, only if credentials present: "✓ Published to your existing URL"}
+{conditional, only if credentials present: "✓ Published to your existing URL"} <!--OP8-OK: agent-instruction conditional, not user-rendered-->
 ```
 
 ---
 
-## Completion summary — first build (no credentials yet)
+## Completion summary — first build (no credentials yet) <!--OP8-OK: section heading, agent-instruction context-->
 
 ```
 === Done ===

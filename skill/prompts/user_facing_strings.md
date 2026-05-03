@@ -2,7 +2,7 @@
 
 Single source of truth for every user-visible string the skill emits, outside the install dialog. Reviewed against OP-8 (banned-words list) on every PR via `.github/workflows/lint-user-strings.yml`.
 
-OP-8 banned in any value below: `here.now`, `API key`, `credential`, `slug`, `Homebrew`, `Python`, `pip`, `venv`, `npx`, `OFX`, `webhook`. Permitted: "your site", "your passcode", "your folder", "your dashboard."
+OP-8 banned in any value below: `here.now`, `API key`, `credential`, `slug`, `Homebrew`, `Python`, `pip`, `venv`, `npx`, `OFX`, `webhook`. Permitted: "your site", "your passcode", "your folder", "your dashboard." <!--OP8-OK: this line is the canonical banned-words list itself, intentionally enumerating them-->
 
 The full prompt copy lives in the dedicated files (`greeting.md`, `sanity_gate.md`, `refresh.md`). This file is the lexicon for **everything else** — short messages the agent emits during the flow.
 
