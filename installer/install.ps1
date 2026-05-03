@@ -585,7 +585,7 @@ switch ($authChoice) {
                 max_tokens = 1
                 messages = @(@{ role = "user"; content = "." })
             } | ConvertTo-Json -Depth 5
-            $resp = Invoke-WebRequest -Uri "https://api.anthropic.com/v1/messages" `
+            Invoke-WebRequest -Uri "https://api.anthropic.com/v1/messages" `
                 -Method POST `
                 -Headers @{
                     "x-api-key" = $apiKey
@@ -593,7 +593,7 @@ switch ($authChoice) {
                     "content-type" = "application/json"
                 } `
                 -Body $body `
-                -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+                -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop | Out-Null
             Write-OkPaced "API key verified"
         } catch {
             $statusCode = $null

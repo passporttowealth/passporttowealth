@@ -46,17 +46,25 @@ jobs:
           # Excluded rules and why:
           # - PSAvoidGlobalVars: install.ps1 intentionally uses $Global: scope
           #   to share state across functions (CurrentStep, Workspace, etc.).
-          #   This is a normal PowerShell installer pattern.
+          #   Normal PowerShell installer pattern.
           # - PSUseBOMForUnicodeEncodedFile: macOS-edited files don't typically
           #   carry a UTF-8 BOM. Adding one would create churn on every edit.
           # - PSUseUsingScopeModifierInNewRunspaces: false positive when using
           #   `param + -ArgumentList` to pass values into Start-Job (the
           #   canonical alternative to $Using:). Verified the telemetry POST
           #   works with the current pattern.
+          # - PSAvoidUsingWriteHost: Write-Host is intentional for an
+          #   interactive installer. Output is for the user reading the
+          #   terminal, not for capture/redirection. Suppressed in user code,
+          #   not suppressed in script execution.
+          # - PSUseApprovedVerbs: Pause-ForUser uses an unapproved verb
+          #   (Pause). Cosmetic — the helper is internal, never exported.
           $exclude = @(
               'PSAvoidGlobalVars',
               'PSUseBOMForUnicodeEncodedFile',
-              'PSUseUsingScopeModifierInNewRunspaces'
+              'PSUseUsingScopeModifierInNewRunspaces',
+              'PSAvoidUsingWriteHost',
+              'PSUseApprovedVerbs'
           )
           $results = Invoke-ScriptAnalyzer -Path installer/install.ps1 `
               -Severity Warning,Error `

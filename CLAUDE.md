@@ -8,7 +8,7 @@ This file is read automatically by Claude Code when working in this repo. If you
 
 ## What this project is (in one paragraph)
 
-`passporttowealth/passporttowealth` is the Finance Clarity skill for [Passport to Wealth](https://passporttowealth.com/) — Arielle Tucker's expat-focused financial advisory. It's a Claude Code skill that turns a folder of bank statements into a private dashboard rendered on the user's laptop. Distribution is curl-pipe-bash on Mac (`curl -fsSL https://passporttowealth.app/install | bash`) and irm-pipe-iex on Windows. Pre-1.0 prototype. **5–10 testers actively using it during a 2-week pilot (started ~2026-05-03).** Every change you ship has a real chance of hitting a real tester within hours.
+`passporttowealth/passporttowealth` is the Finance Clarity skill for [Passport to Wealth](https://passporttowealth.com/) — Arielle Tucker's expat-focused financial network of advisors and content. It's a Claude Code skill that turns a folder of bank statements into a private dashboard rendered on the user's laptop. Distribution is curl-pipe-bash on Mac (`curl -fsSL https://passporttowealth.app/install | bash`) and irm-pipe-iex on Windows. Pre-1.0 prototype. **5–10 testers actively using it during a 2-week pilot (started ~2026-05-03).** Every change you ship has a real chance of hitting a real tester within hours.
 
 ---
 
@@ -16,12 +16,13 @@ This file is read automatically by Claude Code when working in this repo. If you
 
 Two branches:
 
-- **`main`** — what testers' install commands resolve to. Must always work. Branch-protected with admin bypass: required status checks gate normal PRs, but the repo owner can push direct in an emergency. **Default: do not push direct to `main`.** Open a PR from `next` instead.
-- **`next`** — development trunk. Push directly here. After changes have soaked (no tester complaints, CI green), fast-forward `main` to `next`.
+- `**main`** — what testers' install commands resolve to. Must always work. Branch-protected with admin bypass: required status checks gate normal PRs, but the repo owner can push direct in an emergency. **Default: do not push direct to `main`.** Open a PR from `next` instead.
+- `**next`** — development trunk. Push directly here. After changes have soaked (no tester complaints, CI green), fast-forward `main` to `next`.
 
 Hotfix path: `hotfix/<short-name>` branch off `main`, PR back into `main`. Required checks still gate it.
 
 **Workflow for any change:**
+
 ```bash
 git checkout next
 git pull
@@ -38,13 +39,15 @@ gh pr create --base main --head next --title "Promote next → main"
 
 Configured in `.github/workflows/`:
 
-| Workflow | What it gates | Why it exists |
-|---|---|---|
-| `ci.yml` | Python pipeline regression suite (39 tests, `tests/test_pipeline.py`) | Pipeline correctness on demo-kit fixture. |
-| `lint.yml` | shellcheck on `install.sh` + `install` shim + `publish-landing.sh` + `skill/scripts/*.sh`. PSScriptAnalyzer on `install.ps1`. | Both installers are streamed and executed (`curl … \| bash`); static analysis is the only gate before they reach a laptop. |
-| `security.yml` | `pip-audit` (Python deps) + `npm audit` (Worker deps) | Answers tester / advisor question: "are these installations safe?" Public, machine-verifiable result. |
-| `lint-user-strings.yml` | OP-8 banned-words check (no third-party service names in user-facing copy) | Keeps "API key", "slug", "Homebrew" out of strings users see. |
-| `pages.yml` | GitHub Pages backup mirror of the landing page; substitutes `{{BUILD_STAMP}}` and refuses to deploy if `{{` placeholders survive | Prevents the literal-`{{BUILD_STAMP}}`-on-live-site regression class. |
+
+| Workflow                | What it gates                                                                                                                    | Why it exists                                                                                         |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `ci.yml`                | Python pipeline regression suite (39 tests, `tests/test_pipeline.py`)                                                            | Pipeline correctness on demo-kit fixture.                                                             |
+| `lint.yml`              | shellcheck on `install.sh` + `install` shim + `publish-landing.sh` + `skill/scripts/*.sh`. PSScriptAnalyzer on `install.ps1`.    | Both installers are streamed and executed (`curl …                                                    |
+| `security.yml`          | `pip-audit` (Python deps) + `npm audit` (Worker deps)                                                                            | Answers tester / advisor question: "are these installations safe?" Public, machine-verifiable result. |
+| `lint-user-strings.yml` | OP-8 banned-words check (no third-party service names in user-facing copy)                                                       | Keeps "API key", "slug", "Homebrew" out of strings users see.                                         |
+| `pages.yml`             | GitHub Pages backup mirror of the landing page; substitutes `{{BUILD_STAMP}}` and refuses to deploy if `{{` placeholders survive | Prevents the literal-`{{BUILD_STAMP}}`-on-live-site regression class.                                 |
+
 
 If you add a new check to a workflow, also add it to the required-checks list via `gh api -X PUT /repos/passporttowealth/passporttowealth/branches/main/protection` (or the GitHub UI).
 
@@ -62,11 +65,11 @@ The full Tier 1/2/3 testing roadmap (container smoke-test of `install.sh`, live 
 
 Five things visitors and testers depend on:
 
-1. **`https://passporttowealth.app/`** — landing page, here-now slug `sandy-delta-dc3r`. Publish via `bash installer/publish-landing.sh` (NEVER the bare here-now skill — `{{BUILD_STAMP}}` would render literally and any new symlink would 404).
-2. **`https://passporttowealth.app/install`** — bash shim that exec-fetches `install.sh` from GitHub raw `main`. Updates on every push to `main` automatically.
-3. **`https://passporttowealth.app/install.ps1`** — same for Windows.
-4. **`https://passporttowealth.app/dashboard-demo/`** — public demo dashboard built from `demo-kit/` synthetic data by the real pipeline. Regenerate per the recipe in `installer/README.md`.
-5. **`passport-feedback.rafaeldf2.workers.dev`** — Cloudflare Worker for feedback issues + install telemetry. Deploy via `wrangler deploy` from `cloudflare-worker/`. KV namespace `FCB_METRICS` (id `26eca96d62724b968eeefb17f7cd51e4`).
+1. `**https://passporttowealth.app/`** — landing page, here-now slug `sandy-delta-dc3r`. Publish via `bash installer/publish-landing.sh` (NEVER the bare here-now skill — `{{BUILD_STAMP}}` would render literally and any new symlink would 404).
+2. `**https://passporttowealth.app/install*`* — bash shim that exec-fetches `install.sh` from GitHub raw `main`. Updates on every push to `main` automatically.
+3. `**https://passporttowealth.app/install.ps1**` — same for Windows.
+4. `**https://passporttowealth.app/dashboard-demo/**` — public demo dashboard built from `demo-kit/` synthetic data by the real pipeline. Regenerate per the recipe in `installer/README.md`.
+5. `**passport-feedback.rafaeldf2.workers.dev**` — Cloudflare Worker for feedback issues + install telemetry. Deploy via `wrangler deploy` from `cloudflare-worker/`. KV namespace `FCB_METRICS` (id `26eca96d62724b968eeefb17f7cd51e4`).
 
 ---
 
@@ -85,18 +88,20 @@ Each of these hit production undetected. Tests now guard them. If a test fails w
 
 ## Where to find what
 
-| You need to… | Look at |
-|---|---|
-| Understand the product spec | `dev/finance-clarity-build-spec.md` (long; see § for what you need) |
-| See what's left to build / what's done | `dev/backlog.md` |
-| See what changed when | `CHANGELOG.md` (Unreleased + tagged versions) |
-| Update the landing page | `installer/index.html` + `bash installer/publish-landing.sh` |
-| Update the dashboard template | `skill/templates/site/index.html` (regenerate demo via `installer/README.md` recipe) |
-| Run the pipeline manually | `FCB_WORKSPACE=/tmp/ws bash skill/scripts/refresh.sh --auto-confirm` after seeding `/tmp/ws/inbox/` |
-| Touch the install scripts | `installer/install.sh` (Mac) + `installer/install.ps1` (Windows) — keep in sync |
-| Touch the Worker | `cloudflare-worker/src/index.js` — `wrangler deploy` from that directory |
-| Read advisor-facing docs | `docs/advisor-onboarding.md`, `docs/troubleshooting.md` |
-| Check CI workflow definitions | `.github/workflows/` |
+
+| You need to…                           | Look at                                                                                             |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Understand the product spec            | `dev/finance-clarity-build-spec.md` (long; see § for what you need)                                 |
+| See what's left to build / what's done | `dev/backlog.md`                                                                                    |
+| See what changed when                  | `CHANGELOG.md` (Unreleased + tagged versions)                                                       |
+| Update the landing page                | `installer/index.html` + `bash installer/publish-landing.sh`                                        |
+| Update the dashboard template          | `skill/templates/site/index.html` (regenerate demo via `installer/README.md` recipe)                |
+| Run the pipeline manually              | `FCB_WORKSPACE=/tmp/ws bash skill/scripts/refresh.sh --auto-confirm` after seeding `/tmp/ws/inbox/` |
+| Touch the install scripts              | `installer/install.sh` (Mac) + `installer/install.ps1` (Windows) — keep in sync                     |
+| Touch the Worker                       | `cloudflare-worker/src/index.js` — `wrangler deploy` from that directory                            |
+| Read advisor-facing docs               | `docs/advisor-onboarding.md`, `docs/troubleshooting.md`                                             |
+| Check CI workflow definitions          | `.github/workflows/`                                                                                |
+
 
 ---
 
@@ -119,4 +124,4 @@ Each of these hit production undetected. Tests now guard them. If a test fails w
 
 ---
 
-_This file should be updated whenever a new convention is introduced that future agents should follow. Keep it under 300 lines so it stays scannable._
+*This file should be updated whenever a new convention is introduced that future agents should follow. Keep it under 300 lines so it stays scannable.*
