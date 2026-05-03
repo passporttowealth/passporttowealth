@@ -107,6 +107,11 @@
       letter-spacing: 0.04em;
       flex: 1;
     }
+    /* Drop the "· CLARITY APP" suffix on mobile so the header stays readable
+       alongside the Docs link + Prototype pill. */
+    @media (max-width: 640px) {
+      .brand-suffix { display: none; }
+    }
     .header-link {
       font-size: 13px;
       color: var(--color-text-muted);
@@ -900,7 +905,7 @@
   <main>
     <div class="brand">
       <img src="assets/brand/logo-blue.png" alt="Passport to Wealth" width="36" height="36">
-      <span class="brand-text">PASSPORT TO WEALTH · CLARITY APP</span>
+      <span class="brand-text">PASSPORT TO WEALTH<span class="brand-suffix"> · CLARITY APP</span></span>
       <a href="docs/" class="header-link">Docs</a>
       <button id="header-pill" class="pill" data-open-prototype-modal aria-label="Learn more about this prototype">Prototype</button>
     </div>
