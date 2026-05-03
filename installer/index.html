@@ -873,8 +873,11 @@
       .hero-br { display: none; }   /* let the H1 wrap naturally on mobile instead of forced break */
       .hero .lede { font-size: 18px; margin-bottom: 32px; }
       .install-block { padding: 16px 18px; }
-      .install-block code { font-size: 12px; padding-right: 0; padding-bottom: 44px; }
-      .copy-btn { top: auto; bottom: 14px; right: 14px; }
+      /* Keep the copy button top-right on mobile (saves vertical space).
+         Code keeps right-padding so wrapped text doesn't slide under
+         the button; copy button gets a tighter pad + smaller font. */
+      .install-block code { font-size: 12px; padding-right: 64px; }
+      .copy-btn { top: 12px; right: 12px; padding: 4px 9px; font-size: 11px; }
       section { margin-top: 80px; }
       section h2 { font-size: 24px; }
       .kpis { grid-template-columns: 1fr; gap: 8px; }
