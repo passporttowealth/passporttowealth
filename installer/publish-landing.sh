@@ -43,6 +43,14 @@ python3 "$REPO_ROOT/installer/build_docs.py"
 rsync -aL --exclude '.herenow' --exclude '.DS_Store' \
   "$SCRIPT_DIR/" "$BUILD_DIR/"
 
+# Mirror demo-kit/data → /demo-data so testers can curl the sample
+# files directly from passporttowealth.app/demo-data/* and drop them
+# into their workspace inbox. Single source of truth stays at
+# demo-kit/data/; we don't commit a duplicate.
+echo "▸ Mirroring demo-kit/data → /demo-data"
+mkdir -p "$BUILD_DIR/demo-data"
+rsync -a --exclude '.DS_Store' "$REPO_ROOT/demo-kit/data/" "$BUILD_DIR/demo-data/"
+
 # Substitute {{BUILD_STAMP}} with current UTC stamp (yyyymmddHHMMSS, same
 # format as the install_started telemetry build_stamp so the two correlate).
 STAMP="$(date -u +%Y%m%d%H%M%S)"

@@ -239,6 +239,7 @@
     <h3>Docs</h3>
     <a href="#quick-start">Quick start</a>
     <a href="#what-you-get">What you get</a>
+    <a href="#try-it">Try it with sample data</a>
     <a href="#privacy-glance">Privacy at a glance</a>
     <a href="#what-installs">What this installs</a>
     <a href="#sharing">Sharing your dashboard</a>
@@ -305,6 +306,44 @@
 └── .env                         ← passcode + API key (chmod 600)</pre>
 
       <p>Re-entry is always <code>claude</code> from any terminal — the skill remembers where the workspace is. To refresh after dropping new files: open the assistant and say <em>"refresh."</em></p>
+    </section>
+
+    <section class="doc-section" id="try-it">
+      <h2>Try it with sample data</h2>
+      <p class="section-lede">Don't have your bank exports handy yet? You can run the full pipeline against a fully-synthetic 12-month fixture (deterministic seed-42 generator, fake names and amounts, no real money). It exercises every step the pipeline does on real data.</p>
+
+      <h3>1. Download the sample files into your inbox</h3>
+      <p>From any terminal:</p>
+      <pre class="code">cd ~/Documents/my-finances/inbox/ \
+  &amp;&amp; curl -fsSL --remote-name-all \
+    "https://passporttowealth.app/demo-data/{demo_checking_2025.csv,demo_brokerage_2025.csv,duplicate_q3_checking.csv,paystub_jan_2025.pdf,tax_assessment_2024.pdf,amazon_orders_2025.pdf,mystery_scan.pdf}"</pre>
+
+      <p>The seven files together are about 35KB. They cover every code path the pipeline supports:</p>
+      <ul>
+        <li><code>demo_checking_2025.csv</code> — 12 months of USD checking, ~400 transactions.</li>
+        <li><code>demo_brokerage_2025.csv</code> — small brokerage with paired transfers (tests the sign convention).</li>
+        <li><code>duplicate_q3_checking.csv</code> — Q3 of the checking file duplicated (the deduper should catch this).</li>
+        <li><code>paystub_jan_2025.pdf</code> — synthetic paystub with a text layer (privacy classifier should route it to <code>02_payslips/</code> and <strong>not</strong> open it).</li>
+        <li><code>tax_assessment_2024.pdf</code> — synthetic tax doc (same: routed but not opened).</li>
+        <li><code>amazon_orders_2025.pdf</code> — synthetic Amazon order summary (OK to read, lands in <code>03_amazon_orders/</code>).</li>
+        <li><code>mystery_scan.pdf</code> — image-only PDF with no text layer (no-OCR rule routes it to <code>05_other/</code>).</li>
+      </ul>
+
+      <h3>2. Open the assistant and ask it to build the report</h3>
+      <pre class="code">claude</pre>
+      <p>Then in the assistant, say:</p>
+      <pre class="code">build my report</pre>
+      <p>The assistant will sort the files into buckets, dedupe, normalize transactions, fetch FX rates, categorize against the starter rules, run the sanity check, and build the dashboard. Wall time on a warm machine: about 30 seconds.</p>
+
+      <h3>3. The dashboard opens in your browser</h3>
+      <p>Local file, no third-party server. You can compare it to the <a class="body-link" href="../dashboard-demo/" target="_blank" rel="noopener">live demo dashboard</a> — same data, same layout — to verify your install is producing the right output.</p>
+
+      <h3>Reset between runs</h3>
+      <p>The pipeline is deterministic, so you can re-run as many times as you want. To start fresh:</p>
+      <pre class="code">rm -rf ~/Documents/my-finances/inbox/* \
+       ~/Documents/my-finances/0[1-5]_*/* \
+       ~/Documents/my-finances/pipeline/output/*</pre>
+      <p>Then re-download the sample files into <code>inbox/</code> and run again.</p>
     </section>
 
     <section class="doc-section" id="privacy-glance">

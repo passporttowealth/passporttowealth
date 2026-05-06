@@ -49,6 +49,11 @@ jobs:
             --exclude '.DS_Store' \
             --exclude '.herenow' \
             installer/ _site/
+          # Mirror demo-kit/data → /demo-data so the sample files are
+          # downloadable from the same URL as the canonical here.now
+          # mirror (passporttowealth.app/demo-data/*).
+          mkdir -p _site/demo-data
+          rsync -a --exclude '.DS_Store' demo-kit/data/ _site/demo-data/
           # Substitute {{BUILD_STAMP}} in the landing index so the Pages
           # mirror has the same UTC stamp the canonical here.now publish
           # gets. Format matches install-telemetry build_stamp.

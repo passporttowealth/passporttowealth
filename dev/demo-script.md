@@ -57,6 +57,68 @@ If anything fails, the installer writes `install.log` and offers to bundle it fo
 
 ---
 
+## Demo dry-run on your own Mac (5 min, before showing a client)
+
+If you (the advisor) are practicing the demo on your own machine before running it live, use the synthetic sample data — it covers every code path without needing real client files.
+
+**Sample data location** (in the repo): `demo-kit/data/` — 7 files, fully synthetic, deterministic seed-42 generator, ~52KB total.
+
+| File | What it is | What it tests |
+|---|---|---|
+| `demo_checking_2025.csv` | 12 months USD checking, ~400 transactions | Sorted to `01_bank_transactions/`, normalized, categorized |
+| `demo_brokerage_2025.csv` | Small brokerage with paired transfers | Sign convention; transfer-pair detection |
+| `duplicate_q3_checking.csv` | Q3 of checking duplicated | Deduper should catch the 100% overlap |
+| `paystub_jan_2025.pdf` | Synthetic paystub (text layer) | OP-1: routes to `02_payslips/`, **does not open** |
+| `tax_assessment_2024.pdf` | Synthetic tax doc (text layer) | OP-1: routes to `04_reference_docs/`, skipped |
+| `amazon_orders_2025.pdf` | Synthetic Amazon order summary | Routes to `03_amazon_orders/`, OK to read |
+| `mystery_scan.pdf` | Image-only PDF (no text layer) | No-OCR rule routes to `05_other/` |
+
+### Running it
+
+Assumes you've already run `curl -fsSL https://passporttowealth.app/install | bash` and have `~/Documents/my-finances/` set up.
+
+```bash
+# 1. Copy the sample files into your inbox
+cp /path/to/passporttowealth/demo-kit/data/* ~/Documents/my-finances/inbox/
+
+# 2. (Optional) Confirm they landed
+ls ~/Documents/my-finances/inbox/
+
+# 3. Open Claude Code
+claude
+```
+
+Then in the assistant: *"build my report"*. Wall time on a warm machine: ~30 seconds.
+
+If you don't have the repo cloned, clients can also pull the same files directly from the website (mirrored at publish time):
+
+```bash
+cd ~/Documents/my-finances/inbox/ && curl -fsSL --remote-name-all \
+  "https://passporttowealth.app/demo-data/{demo_checking_2025.csv,demo_brokerage_2025.csv,duplicate_q3_checking.csv,paystub_jan_2025.pdf,tax_assessment_2024.pdf,amazon_orders_2025.pdf,mystery_scan.pdf}"
+```
+
+### Talking points to hit during the live demo
+
+- **"It found 47 files"** — the assistant counts files, says how many it sorted vs. skipped vs. wants to ask about. The skip-with-disclosure on paystubs/tax docs is the **privacy moment** (OP-1 in action).
+- **"Removed 3 duplicates"** — show the dedupe summary; `duplicate_q3_checking.csv` is intentional.
+- **"38 new merchants — want to review?"** — the assistant offers to walk through unfamiliar names so the user can teach the rules.
+- **The dashboard opens in your browser** — local file (`file://`), no third-party server. This is the **"you own this" moment**.
+- **Compare to the live demo dashboard** at `https://passporttowealth.app/dashboard-demo/` — same data, same render. Lets you and the client confirm the install is producing the right output.
+
+### Reset between practice runs
+
+Pipeline is deterministic; output identical every run.
+
+```bash
+rm -rf ~/Documents/my-finances/inbox/* \
+       ~/Documents/my-finances/0[1-5]_*/* \
+       ~/Documents/my-finances/pipeline/output/*
+```
+
+Then re-copy from `demo-kit/data/`.
+
+---
+
 ## Phase 1 — Open the workspace (2 min)
 
 Live, screen-sharing.
