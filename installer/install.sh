@@ -336,8 +336,8 @@ ok_paced "macOS version OK ($(sw_vers -productVersion))"
 # Disk space
 free_kb=$(df -k "$HOME" | awk 'NR==2 {print $4}')
 free_gb=$(( free_kb / 1024 / 1024 ))
-if [[ "$free_gb" -lt 5 ]]; then
-  fail "Only ${free_gb} GB free on your home drive. I need at least 5 GB."
+if [[ "$free_gb" -lt 2 ]]; then
+  fail "Only ${free_gb} GB free on your home drive. I need at least 2 GB."
   fail "Free up some space and run me again."
   log "FCB-0002 free_gb=$free_gb"
   exit 1

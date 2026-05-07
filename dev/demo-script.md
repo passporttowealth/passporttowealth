@@ -25,7 +25,7 @@ A first-time, non-technical client with a folder of their own financial files (b
 
 Same checklist every client. If any of these aren't true, fix them before sending the install link:
 
-1. **Mac running macOS 13 (Ventura) or later**, personal (not employer-managed), at least 10 GB free.
+1. **Mac running macOS 13 (Ventura) or later**, personal (not employer-managed), at least 2 GB free (the installer enforces this; realistic peak install footprint is ~300–400 MB across uv, Python 3.11, Node, Claude Code, and the skills).
 2. **One of:** active Claude Pro subscription, active Claude Max subscription, or Anthropic API key with billing set up. The installer will guide them through whichever they have.
 3. **Heads-up sent** that the install takes ~10 minutes if they've installed developer tools before, up to an hour on a fresh Mac.
 
