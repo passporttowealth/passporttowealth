@@ -55,6 +55,15 @@ jobs:
           fi
           echo "✓ Secret present"
 
+      - name: Regenerate demo-kit fixture
+        # demo-kit/data/* is gitignored (*.csv / *.pdf rules) so a fresh
+        # checkout doesn't have it. publish-landing.sh mirrors that
+        # directory into /demo-data, so we regenerate it here from the
+        # deterministic build_demo.py before publishing.
+        run: |
+          pip install --quiet reportlab~=4.4
+          python3 demo-kit/build_demo.py
+
       - name: Install the here-now publishing skill
         # `npx skills add` from heredotnow/skill — same path the install
         # scripts use locally. -g for global so the script lands at the
