@@ -181,39 +181,28 @@ Pause-ForUser
 
 # ── Section 3: Anthropic data-terms consent gate (OP-13) ─────────────────────
 Write-Hr
-Write-Host "Before we continue - about the AI assistant" -ForegroundColor White
+Write-Host "About the AI assistant" -ForegroundColor White
 Write-Hr
 Write-Say ""
-Write-Say "This workspace uses Claude, an AI assistant made by Anthropic."
-Write-Say "When you ask Claude to build, refresh, or troubleshoot your dashboard,"
-Write-Say "the contents of the messages you send (which may include details from"
-Write-Say "your financial files as you discuss them) are sent to Anthropic to"
-Write-Say "produce a response."
+Write-Say "This workspace uses Claude (Anthropic). The messages you send"
+Write-Say "Claude - including anything from your files you ask Claude to read - go"
+Write-Say "to Anthropic."
 Write-Say ""
-Write-Say "Anthropic's data handling - including what they retain, for how long,"
-Write-Say "whether your conversations are used to train models, and how you can"
-Write-Say "change those settings - is described in their official documentation."
-Write-Say "Please review it before continuing:"
+Write-Say "You can manage what Anthropic does with your conversations at:"
+Write-Say "  https://privacy.anthropic.com/"
 Write-Say ""
-Write-SayPaced "  - Privacy hub:           https://privacy.anthropic.com/"
-Write-SayPaced "  - Privacy policy:        https://www.anthropic.com/legal/privacy"
-Write-SayPaced "  - Consumer (Pro/Max):    https://www.anthropic.com/legal/consumer-terms"
-Write-SayPaced "  - Commercial (API key):  https://www.anthropic.com/legal/commercial-terms"
-Write-SayPaced "  - Trust & security:      https://trust.anthropic.com/"
+Write-Say "If you plan to use a personal account, it's recommended you turn off"
+Write-Say "'Help improve Claude' to opt out of your data being used for training."
+Write-Say "You can find the toggle at:"
+Write-Say "  https://claude.ai/settings/data-privacy-controls"
 Write-Say ""
-Write-Say "Things to know - and to manage in your Anthropic account settings:"
-Write-SayPaced "  - You can opt out of having your conversations used to improve Claude."
-Write-SayPaced "  - You can delete your conversation history at any time."
-Write-SayPaced "  - Sensitive files (paystubs, tax documents) are skipped by default by"
-Write-Say      "    this skill, so their contents are not sent to Claude unless you"
-Write-Say      "    explicitly ask."
+Write-Say "Using an API key will by default retain your data for 7 days."
 Write-Say ""
-Write-Host "$DIM   One more note: this installer sends an anonymous 'install started' event$RESET"
-Write-Host "$DIM   to Passport to Wealth so we know how many clients are onboarding. No IP,$RESET"
-Write-Host "$DIM   no name, no machine ID - just 'a Windows install happened today.' Opt out$RESET"
-Write-Host "$DIM   by setting `$env:FCB_NO_ANALYTICS=`"1`" before running.$RESET"
+Write-Host "$DIM   Heads-up: when you start the install, we send Passport to Wealth a single$RESET"
+Write-Host "$DIM   tiny ping - 'a Windows install happened today' - so we can size onboarding.$RESET"
+Write-Host "$DIM   No name, no IP, no machine ID.$RESET"
 Write-Say ""
-Write-Say "If you do not accept Anthropic's terms, please stop here and contact"
+Write-Say "If you're not comfortable with this, please stop here and contact"
 Write-Say "your advisor - we can talk about alternatives."
 Write-Say ""
 Pause-ForUser
@@ -221,7 +210,7 @@ Pause-ForUser
 # Empty input no longer treated as cancel (mirrors install.sh B9.12 fix).
 # Only explicit decline words exit. After 5 empties, bail with support pointer.
 Write-Say "By typing 'I accept' below you confirm:"
-Write-SayPaced "  1. You accept Anthropic's data-handling terms (linked above)."
+Write-SayPaced "  1. You're aware your messages to Claude go to Anthropic (see above)."
 Write-SayPaced "  2. You understand this is prototype software and you will keep"
 Write-Say      "     your original financial records as the source of truth."
 Write-Say ""
@@ -316,7 +305,6 @@ $os = Get-CimInstance Win32_OperatingSystem
 $buildNum = [int]$os.BuildNumber
 if ($buildNum -lt 18362) {
     Write-FailLine "Your Windows is too old (build $buildNum). I need Windows 10 build 18362 (1903) or later."
-    Write-FailLine "FCB-0001"
     Write-Log "FCB-0001 windows_build=$buildNum"
     exit 1
 }
@@ -327,7 +315,7 @@ $drive = (Get-Item $env:USERPROFILE).PSDrive
 $freeGB = [math]::Round($drive.Free / 1GB)
 if ($freeGB -lt 5) {
     Write-FailLine "Only $freeGB GB free on your home drive. I need at least 5 GB."
-    Write-FailLine "FCB-0002 - free up some space and run me again."
+    Write-FailLine "Free up some space and run me again."
     Write-Log "FCB-0002 free_gb=$freeGB"
     exit 1
 }
@@ -342,7 +330,6 @@ try {
 if ($mdmEnrolled) {
     Write-FailLine "Your computer is managed by an organization (MDM enrolled)."
     Write-FailLine "This skill is designed for personal computers. Please talk to your advisor."
-    Write-FailLine "FCB-0003"
     Write-Log "FCB-0003 mdm_detected=true"
     exit 1
 }
@@ -574,7 +561,6 @@ switch ($authChoice) {
         $apiKey = $apiKey.Trim()
         if ($apiKey -notmatch "^sk-ant-") {
             Write-FailLine "That doesn't look like an Anthropic API key (should start with sk-ant-)."
-            Write-FailLine "FCB-0004"
             Write-Log "FCB-0004 api_key_format_invalid"
             exit 1
         }

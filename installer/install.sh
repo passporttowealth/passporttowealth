@@ -210,39 +210,28 @@ pause_for_user
 
 # ── Section 3: Anthropic data-terms consent gate (OP-13) ─────────────────────
 hr
-say "${BOLD}Before we continue — about the AI assistant${RESET}"
+say "${BOLD}About the AI assistant${RESET}"
 hr
 say
-say "This workspace uses ${BOLD}Claude${RESET}, an AI assistant made by Anthropic."
-say "When you ask Claude to build, refresh, or troubleshoot your dashboard,"
-say "the contents of the messages you send (which may include details from"
-say "your financial files as you discuss them) are sent to Anthropic to"
-say "produce a response."
+say "This workspace uses ${BOLD}Claude${RESET} (Anthropic). The messages you send"
+say "Claude — including anything from your files you ask Claude to read — go"
+say "to Anthropic."
 say
-say "Anthropic's data handling — including ${BOLD}what they retain${RESET}, ${BOLD}for how"
-say "long${RESET}, ${BOLD}whether your conversations are used to train models${RESET}, and how"
-say "you can change those settings — is described in their official"
-say "documentation. Please review it before continuing:"
+say "You can manage what Anthropic does with your conversations at:"
+say "  ${BOLD}https://privacy.anthropic.com/${RESET}"
 say
-say_paced "  • Privacy hub:           ${BOLD}https://privacy.anthropic.com/${RESET}"
-say_paced "  • Privacy policy:        ${BOLD}https://www.anthropic.com/legal/privacy${RESET}"
-say_paced "  • Consumer (Pro/Max):    ${BOLD}https://www.anthropic.com/legal/consumer-terms${RESET}"
-say_paced "  • Commercial (API key):  ${BOLD}https://www.anthropic.com/legal/commercial-terms${RESET}"
-say_paced "  • Trust & security:      ${BOLD}https://trust.anthropic.com/${RESET}"
+say "If you plan to use a ${BOLD}personal account${RESET}, it's recommended you turn off"
+say "${BOLD}\"Help improve Claude\"${RESET} to opt out of your data being used for training."
+say "You can find the toggle at:"
+say "  ${BOLD}https://claude.ai/settings/data-privacy-controls${RESET}"
 say
-say "Things to know — and to manage in your Anthropic account settings:"
-say_paced "  • You can opt out of having your conversations used to improve Claude."
-say_paced "  • You can delete your conversation history at any time."
-say_paced "  • Sensitive files (paystubs, tax documents) are skipped by default by"
-say         "    this skill, so their contents are not sent to Claude unless you"
-say         "    explicitly ask."
+say "Using an ${BOLD}API key${RESET} will by default retain your data for 7 days."
 say
-say "${DIM}One more note: this installer sends an anonymous \"install started\" event to"
-say "Passport to Wealth so we know how many clients are onboarding. No IP, no name,"
-say "no machine ID — just \"a Mac install happened today.\" Opt out by setting"
-say "FCB_NO_ANALYTICS=1 before running.${RESET}"
+say "${DIM}Heads-up: when you start the install, we send Passport to Wealth a single"
+say "tiny ping — \"a Mac install happened today\" — so we can size onboarding."
+say "No name, no IP, no machine ID.${RESET}"
 say
-say "If you do not accept Anthropic's terms, please ${BOLD}stop here${RESET} and contact"
+say "If you're not comfortable with this, please ${BOLD}stop here${RESET} and contact"
 say "your advisor — we can talk about alternatives."
 say
 pause_for_user
@@ -253,7 +242,7 @@ pause_for_user
 # the URLs printed above — the user clicks if they want to read first.
 
 say "${BOLD}By typing 'I accept' below you confirm:${RESET}"
-say_paced "  1. You accept Anthropic's data-handling terms (linked above)."
+say_paced "  1. You're aware your messages to Claude go to Anthropic (see above)."
 say_paced "  2. You understand this is ${BOLD}prototype${RESET} software and you will keep"
 say         "     your original financial records as the source of truth."
 say
@@ -339,7 +328,6 @@ log "preflight start"
 macos_major=$(sw_vers -productVersion | cut -d. -f1)
 if [[ "$macos_major" -lt 13 ]]; then
   fail "Your Mac is running macOS $(sw_vers -productVersion). I need macOS 13 (Ventura) or later."
-  fail "FCB-0001 — see dev/finance-clarity-build-spec.md §4.2"
   log "FCB-0001 macos_version=$(sw_vers -productVersion)"
   exit 1
 fi
@@ -350,7 +338,7 @@ free_kb=$(df -k "$HOME" | awk 'NR==2 {print $4}')
 free_gb=$(( free_kb / 1024 / 1024 ))
 if [[ "$free_gb" -lt 5 ]]; then
   fail "Only ${free_gb} GB free on your home drive. I need at least 5 GB."
-  fail "FCB-0002 — free up some space and run me again."
+  fail "Free up some space and run me again."
   log "FCB-0002 free_gb=$free_gb"
   exit 1
 fi
@@ -360,7 +348,6 @@ ok_paced "Free disk space OK (${free_gb} GB)"
 if profiles status -type enrollment 2>/dev/null | grep -q "Enrolled via DEP: Yes\|MDM enrollment: Yes"; then
   fail "Your Mac is managed by an organization (MDM enrolled)."
   fail "This skill is designed for personal laptops. Please talk to your advisor."
-  fail "FCB-0003"
   log "FCB-0003 mdm_detected=true"
   exit 1
 fi
@@ -601,7 +588,6 @@ case "$auth_choice" in
     api_key="$(printf '%s' "$api_key" | tr -d '[:space:]')"
     if [[ ! "$api_key" =~ ^sk-ant- ]]; then
       fail "That doesn't look like an Anthropic API key (should start with sk-ant-)."
-      fail "FCB-0004"
       log "FCB-0004 api_key_format_invalid"
       exit 1
     fi
