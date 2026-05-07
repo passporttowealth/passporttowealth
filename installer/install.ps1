@@ -313,8 +313,8 @@ Write-OkPaced "Windows version OK (build $buildNum)"
 # Free disk space on home drive
 $drive = (Get-Item $env:USERPROFILE).PSDrive
 $freeGB = [math]::Round($drive.Free / 1GB)
-if ($freeGB -lt 5) {
-    Write-FailLine "Only $freeGB GB free on your home drive. I need at least 5 GB."
+if ($freeGB -lt 2) {
+    Write-FailLine "Only $freeGB GB free on your home drive. I need at least 2 GB."
     Write-FailLine "Free up some space and run me again."
     Write-Log "FCB-0002 free_gb=$freeGB"
     exit 1
