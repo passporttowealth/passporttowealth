@@ -822,12 +822,44 @@ printf '\n%s▶ Want to start now? [Y/n]%s ' "$BOLD" "$RESET"
 read -r START_ANSWER
 case "$(printf '%s' "$START_ANSWER" | tr '[:upper:]' '[:lower:]' | xargs)" in
   ""|y|yes)
-    log "starting claude with primer prompt"
-    export FCB_WORKSPACE="$WS"
-    cd "$WS" || true
-    exec 3>&-                # release the install-log fd before exec
-    exec claude --add-dir "$WS" "Welcome. Drop your financial files into $WS/inbox/ and say 'build my report' when you're ready."
-    # exec replaces this process — nothing below runs.
+    # ──────────────────────────────────────────────────────────────────────
+    # Two paths from here, depending on how install.sh was invoked.
+    #
+    # (a) INTERACTIVE_DIAG="already_tty" — user ran the script directly
+    #     from a real terminal (e.g. `bash install.sh`). Bash owns the
+    #     terminal's foreground process group; exec-ing into claude
+    #     transfers that role cleanly. Do the exec.
+    #
+    # (b) INTERACTIVE_DIAG="rebind_ok" — user ran `curl … | bash`. We
+    #     successfully rebound stdin to /dev/tty so reads work, but the
+    #     bash process is NOT the terminal's foreground process group
+    #     (it's part of the curl pipeline). Exec-ing claude here makes
+    #     claude inherit /dev/tty as stdin but it can't take foreground,
+    #     so keystrokes go nowhere — the terminal looks frozen.
+    #     Print friendly instructions instead; user types `claude`
+    #     themselves in the same window, which spawns a fresh process
+    #     with proper foreground role.
+    # ──────────────────────────────────────────────────────────────────────
+    if [ "${INTERACTIVE_DIAG:-}" = "already_tty" ]; then
+      log "starting claude with primer prompt (already_tty path — exec safe)"
+      export FCB_WORKSPACE="$WS"
+      cd "$WS" || true
+      exec 3>&-                # release the install-log fd before exec
+      exec claude --add-dir "$WS" "Welcome. Drop your financial files into $WS/inbox/ and say 'build my report' when you're ready."
+      # exec replaces this process — nothing below runs.
+    fi
+    # curl-pipe-bash path: don't exec; tell the user how to start in one step.
+    log "start-now requested but tty_state=${INTERACTIVE_DIAG} — printing instructions instead of exec"
+    say
+    say "${BOLD}You're all set.${RESET} Type one word in this same terminal to start:"
+    say
+    say "    ${BOLD}claude${RESET}"
+    say
+    say "Then tell it ${BOLD}\"build my report\"${RESET} once you've dropped your files in:"
+    say "    ${BOLD}$WS/inbox/${RESET}"
+    say
+    say "${DIM}(We can't auto-launch from a curl-piped install — Terminal needs you to type it directly so it can take over the keyboard properly.)${RESET}"
+    say
     ;;
   *)
     say

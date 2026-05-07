@@ -613,6 +613,32 @@ class TestPipelineHealth(unittest.TestCase):
         self.assertIn("export ANTHROPIC_API_KEY=", cmd,
             "must export ANTHROPIC_API_KEY into the shell rc")
 
+    def test_install_sh_start_now_only_execs_when_real_tty(self):
+        """Bug found 2026-05-07 in tester dry-run: the end-of-install
+        'Want to start now? [Y/n]' prompt was unconditionally `exec`-ing
+        into claude. That works when the user ran the script directly
+        from a real terminal, but fails under curl-pipe-bash: bash isn't
+        the terminal's foreground process group, so the exec'd claude
+        inherits stdin pointing at /dev/tty but can't take foreground.
+        Result: keystrokes don't reach claude, terminal looks frozen.
+
+        Fix: only exec when `INTERACTIVE_DIAG="already_tty"`. In the
+        rebind_ok (curl-pipe-bash) case, print instructions and let the
+        user type `claude` themselves — that gives the new process
+        proper foreground role."""
+        cmd = (REPO / "installer" / "install.sh").read_text(encoding="utf-8")
+        # The exec is gated on the TTY diagnostic
+        self.assertIn('if [ "${INTERACTIVE_DIAG:-}" = "already_tty" ]; then', cmd,
+            "exec claude must be gated on INTERACTIVE_DIAG=already_tty (real terminal)")
+        # The exec lives inside that gate, not before it
+        gate_idx = cmd.find('if [ "${INTERACTIVE_DIAG:-}" = "already_tty" ]; then')
+        exec_idx = cmd.find('exec claude --add-dir "$WS"')
+        self.assertGreater(exec_idx, gate_idx,
+            "exec claude must come AFTER the already_tty gate")
+        # And the curl-pipe-bash fallback gives the user the one word to type
+        self.assertIn("Type one word in this same terminal to start", cmd,
+            "curl-pipe-bash fallback must tell the user to type 'claude'")
+
     def test_refresh_sh_defaults_to_workspace_venv(self):
         """B9.10 — without START-HERE activating the venv, refresh.sh has to
         default PYTHON to the workspace venv's python so the pipeline runs

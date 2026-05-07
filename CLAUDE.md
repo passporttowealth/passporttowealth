@@ -83,6 +83,7 @@ Each of these hit production undetected. Tests now guard them. If a test fails w
 - `pages.yml` placeholder guard — don't disable it. `{{BUILD_STAMP}}` in `installer/index.html` is intentional; substitution happens at publish time via `installer/publish-landing.sh` or the workflow.
 - `test_installer_curl_pipe_safe` — install.sh must `exec </dev/tty` early, capture `INTERACTIVE=1` once, and never re-test `[ -t 0 ]` later. Bash 3.2 (Apple's default) returns stale results from `[ -t 0 ]` after redirect.
 - `test_installer_consent_gate_does_not_silently_cancel_on_empty` — empty input at the consent gate must re-prompt, not silently cancel. Was a real bug.
+- `test_install_sh_start_now_only_execs_when_real_tty` — the end-of-install "Want to start now? [Y/n]" prompt must only `exec claude` when `INTERACTIVE_DIAG="already_tty"`. Under curl-pipe-bash (`rebind_ok`), bash isn't the terminal's foreground process group, so exec-ing into a TUI freezes the terminal — claude runs but keystrokes don't reach it. Fall back to printing instructions; user types `claude` themselves in the same window.
 
 ---
 
