@@ -858,7 +858,7 @@ case "$(printf '%s' "$START_ANSWER" | tr '[:upper:]' '[:lower:]' | xargs)" in
     say "Then tell it ${BOLD}\"build my report\"${RESET} once you've dropped your files in:"
     say "    ${BOLD}$WS/inbox/${RESET}"
     say
-    say "${DIM}(We can't auto-launch from a curl-piped install — Terminal needs you to type it directly so it can take over the keyboard properly.)${RESET}"
+    say "${DIM}(One last step you do yourself: typing the word is how your Terminal hands the keyboard over to the assistant. From any new Terminal window later, opening it again is always the same single word — \"claude\".)${RESET}"
     say
     ;;
   *)
