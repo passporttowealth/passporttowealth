@@ -1,0 +1,100 @@
+name: Publish landing page to here.now
+
+# Auto-runs `installer/publish-landing.sh` on every push to main when
+# anything visitor-facing changes. Prevents the live site (the bundled
+# install.ps1, the /docs page, the demo-data files, the landing index)
+# from drifting behind main while we ship PRs.
+#
+# Setup: this workflow needs the HERENOW_API_KEY repo secret set:
+#
+#     gh secret set HERENOW_API_KEY < ~/.herenow/credentials
+#
+# The secret value is the same API key that lives in your local
+# ~/.herenow/credentials. Without it, the workflow fails fast with a
+# clear message instead of trying to publish anonymously.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'installer/**'
+      - 'demo-kit/data/**'
+      - '.github/workflows/publish-landing.yml'
+  workflow_dispatch:
+
+# Prevent overlapping publishes — if two PRs merge in quick succession,
+# only run the publish once with the latest content.
+concurrency:
+  group: publish-landing
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python (for build_docs.py)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node (for npx + the here-now skill)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verify HERENOW_API_KEY is set
+        env:
+          HERENOW_API_KEY: ${{ secrets.HERENOW_API_KEY }}
+        run: |
+          if [ -z "$HERENOW_API_KEY" ]; then
+            echo "::error::HERENOW_API_KEY repo secret is not set."
+            echo "Run locally: gh secret set HERENOW_API_KEY < ~/.herenow/credentials"
+            exit 1
+          fi
+          echo "✓ Secret present"
+
+      - name: Install the here-now publishing skill
+        # `npx skills add` from heredotnow/skill — same path the install
+        # scripts use locally. -g for global so the script lands at the
+        # location publish-landing.sh expects (~/.claude/skills/here-now/).
+        run: npx --yes skills add heredotnow/skill --skill here-now -g -y
+
+      - name: Configure here-now credentials
+        env:
+          HERENOW_API_KEY: ${{ secrets.HERENOW_API_KEY }}
+        run: |
+          mkdir -p "$HOME/.herenow"
+          printf '%s' "$HERENOW_API_KEY" > "$HOME/.herenow/credentials"
+          chmod 600 "$HOME/.herenow/credentials"
+
+      - name: Publish landing page
+        # Same script we run locally. Regenerates /docs from install
+        # scripts, mirrors demo-kit/data → /demo-data, substitutes
+        # {{BUILD_STAMP}}, then publishes to slug sandy-delta-dc3r.
+        run: bash installer/publish-landing.sh
+
+      - name: Smoke-check the live URLs
+        run: |
+          set -eo pipefail
+          # Wait a few seconds for Cloudflare KV propagation (≤60s, usually <10s)
+          sleep 10
+          for url in \
+            "https://passporttowealth.app/" \
+            "https://passporttowealth.app/install" \
+            "https://passporttowealth.app/install.ps1" \
+            "https://passporttowealth.app/docs/" \
+            "https://passporttowealth.app/dashboard-demo/" \
+            "https://passporttowealth.app/demo-data/demo_checking_2025.csv" \
+            "https://passporttowealth.app/llms.txt" \
+            "https://passporttowealth.app/legal/privacy.html"; do
+              status=$(curl -o /dev/null -s -w "%{http_code}" "$url")
+              if [ "$status" = "200" ]; then
+                echo "✓ $url ($status)"
+              else
+                echo "::error::Bad status on $url: $status"
+                exit 1
+              fi
+          done
+          echo "✓ all live URLs OK"
