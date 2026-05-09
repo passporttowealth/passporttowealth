@@ -116,8 +116,16 @@ def aggregate(rows: list[dict]) -> dict:
         else:
             by_month_out[month] += -r["amount"]
         if r["category"] != "Income":
-            by_category[r["category"]] += abs(r["amount"])
-            by_month_cat[month][r["category"]] += abs(r["amount"])
+            # Net spend: outflows (negative amount) add positive spend;
+            # refunds/inflows (positive amount) subtract. Avoids inflating
+            # category totals when a credit hits the same category as past
+            # debits — e.g. a Krankenkasse benefit payout hitting the same
+            # merchant rule as health-insurance contributions, an Amazon
+            # return hitting the same rule as the original purchase, a
+            # Wise FX-fee refund, a deposit return, a chargeback.
+            net_spend = -r["amount"]
+            by_category[r["category"]] += net_spend
+            by_month_cat[month][r["category"]] += net_spend
         rows_for_table.append(r)
 
     months = sorted(by_month_in.keys() | by_month_out.keys())
@@ -209,7 +217,7 @@ def _generate_insights(table_rows, by_category, by_month_in, by_month_out, month
     # 3. Recurring subscriptions
     subs_rows = [r for r in table_rows if r["category"] == "Subscriptions"]
     if subs_rows:
-        subs_total = sum(abs(r["amount"]) for r in subs_rows)
+        subs_total = sum(-r["amount"] for r in subs_rows)
         n_subs = len(subs_rows)
         per_month = subs_total / max(len(months), 1)
         insights.append(
