@@ -201,6 +201,55 @@ class TestCategorize(PipelineTestBase):
         # 4 outflows from checking + 4 inflows to brokerage = 8 paired rows
         self.assertEqual(len(transfers), 8, f"expected 8 paired transfer rows, got {len(transfers)}")
 
+    def test_starter_rules_word_bounded_against_name_false_positives(self):
+        """Short merchant tokens in starter rules (aldi, hit, bart, lime, dental,
+        etc.) must use \\b word boundaries so they don't substring-match unrelated
+        names and words. Regression: a babysitter named 'Geraldine' — the
+        substring 'aldi' inside 'GerALDIne' wrongly tagged her SEPA transfers as
+        Groceries (real bug from a tester's data)."""
+        import yaml
+        starter_path = REPO / "skill" / "templates" / "rules-starter.yaml"
+        rules = yaml.safe_load(starter_path.read_text())
+
+        def categorize(desc):
+            for r in rules:
+                pat = r.get("match", "")
+                if not pat:
+                    continue
+                try:
+                    if re.search(pat, desc):
+                        return r.get("category", "Uncategorized")
+                except re.error:
+                    continue
+            return "Uncategorized"
+
+        # NEGATIVE cases — these substrings were causing false positives.
+        for desc, wrong_cat, regression_substr in [
+            ("Geraldine Hackmayer | 4/17",       "Groceries", "aldi"),
+            ("Hitchcock Studios",                 "Groceries", "hit"),
+            ("Brewer & Sons Engineering",         "Groceries", "rewe"),
+            ("Frontier Airlines flight",          "Transport", "tier"),
+            ("Limestone Construction Ltd",        "Transport", "lime"),
+            ("Birdsong Recording Co",             "Transport", "bird"),
+            ("Incidental Music Ltd",              "Healthcare","dental"),
+        ]:
+            self.assertNotEqual(categorize(desc), wrong_cat,
+                f"{desc!r} mis-tagged {wrong_cat!r} — substring "
+                f"'{regression_substr}' matched without \\b boundary")
+
+        # POSITIVE cases — real merchant strings must still match after the fix.
+        for desc, expected_cat in [
+            ("REWE BERLIN MITTE",                 "Groceries"),
+            ("ALDI SUED FILIALE",                 "Groceries"),
+            ("EDEKA*ZENTRALE",                    "Groceries"),
+            ("BVG-VKB FAHRSCHEIN",                "Transport"),
+            ("BART STATION OAKLAND",              "Transport"),
+            ("LIME E-SCOOTER 12345",              "Transport"),
+            ("DR. SMITH FAMILY DENTAL",           "Healthcare"),
+        ]:
+            self.assertEqual(categorize(desc), expected_cat,
+                f"{desc!r} should still match {expected_cat!r} after \\b fix")
+
 class TestSanity(PipelineTestBase):
     @classmethod
     def setUpClass(cls):

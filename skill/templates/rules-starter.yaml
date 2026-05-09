@@ -54,11 +54,13 @@
 - {match: "(?i)at&t|verizon|t-mobile|comcast|xfinity",       type: regex, category: Utilities,     subcategory: "Telecom (US)"}
 
 # ─── Groceries (EU) ──────────────────────────────────────────────────────────
-- {match: "(?i)rewe|edeka|aldi|lidl|kaufland|netto|penny|hit",       type: regex, category: Groceries,     subcategory: "Supermarket (DE)"}
-- {match: "(?i)alnatura|bio[- ]?company|denn[\\.\\']?s",             type: regex, category: Groceries,     subcategory: "Supermarket (organic, DE)"}
-- {match: "(?i)carrefour|monoprix|franprix|auchan|leclerc",          type: regex, category: Groceries,     subcategory: "Supermarket (FR)"}
-- {match: "(?i)tesco|sainsbur|waitrose|asda|morrisons|lidl gb",      type: regex, category: Groceries,     subcategory: "Supermarket (UK)"}
-- {match: "(?i)whole foods|trader joe|kroger|safeway|publix|wegmans",type: regex, category: Groceries,     subcategory: "Supermarket (US)"}
+# \b word boundaries on short tokens — without them, "aldi" matches Geraldine,
+# "hit" matches Hitchcock/Whitby, "rewe" matches Brewer, etc.
+- {match: "(?i)\\b(rewe|edeka|aldi|lidl|kaufland|netto|penny|hit)\\b", type: regex, category: Groceries,   subcategory: "Supermarket (DE)"}
+- {match: "(?i)\\b(alnatura|bio[- ]?company|denn['.]?s)\\b",          type: regex, category: Groceries,    subcategory: "Supermarket (organic, DE)"}
+- {match: "(?i)\\b(carrefour|monoprix|franprix|auchan|leclerc)\\b",   type: regex, category: Groceries,    subcategory: "Supermarket (FR)"}
+- {match: "(?i)\\b(tesco|sainsbur|waitrose|asda|morrisons|lidl gb)\\b", type: regex, category: Groceries,  subcategory: "Supermarket (UK)"}
+- {match: "(?i)\\b(whole foods|trader joe|kroger|safeway|publix|wegmans)\\b", type: regex, category: Groceries, subcategory: "Supermarket (US)"}
 
 # ─── Restaurants & delivery ──────────────────────────────────────────────────
 - {match: "(?i)wolt|deliveroo|uber\\s*\\*?\\s*eats|doordash|grubhub|just eat|lieferando", type: regex, category: Restaurants, subcategory: "Food delivery"}
@@ -68,14 +70,17 @@
 - {match: "(?i)bar |pub |kneipe|brewery",                            type: regex, category: Entertainment, subcategory: "Bars"}
 
 # ─── Transport ────────────────────────────────────────────────────────────────
-- {match: "(?i)bvg|mvv|hvv|rmv|s-bahn|deutsche bahn|db vertrieb",    type: regex, category: Transport,     subcategory: "Public transport (DE)"}
-- {match: "(?i)tfl |oyster|transport for london|trainline",          type: regex, category: Transport,     subcategory: "Public transport (UK)"}
-- {match: "(?i)bart|mta|cta|caltrain|amtrak",                        type: regex, category: Transport,     subcategory: "Public transport (US)"}
-- {match: "(?i)uber\\s*\\*?\\s*trip|lyft",                           type: regex, category: Transport,     subcategory: "Ride-hailing"}
-- {match: "(?i)bolt eu|free now|mytaxi",                             type: regex, category: Transport,     subcategory: "Ride-hailing (EU)"}
-- {match: "(?i)lime|bird|tier|voi",                                  type: regex, category: Transport,     subcategory: "Scooter"}
-- {match: "(?i)shell|aral|esso|bp |chevron|exxon|tankstelle|gas station", type: regex, category: Transport, subcategory: "Fuel"}
-- {match: "(?i)avis|hertz|sixt|enterprise|europcar|miles mobility",  type: regex, category: Transport,     subcategory: "Car rental / sharing"}
+# 3–4 char transit codes (bvg, mta, bart, lime, etc.) need \b — without it
+# "bart" matches anyone named Bart/Barthelemy, "lime" matches Limestone/
+# Aliment, "tier" matches Frontier/Cartier, "voi" matches voice/void.
+- {match: "(?i)\\b(bvg|mvv|hvv|rmv|s-bahn|deutsche bahn|db vertrieb)\\b", type: regex, category: Transport, subcategory: "Public transport (DE)"}
+- {match: "(?i)\\b(tfl|oyster|transport for london|trainline)\\b",    type: regex, category: Transport,    subcategory: "Public transport (UK)"}
+- {match: "(?i)\\b(bart|mta|cta|caltrain|amtrak)\\b",                 type: regex, category: Transport,    subcategory: "Public transport (US)"}
+- {match: "(?i)uber\\s*\\*?\\s*trip|\\blyft\\b",                      type: regex, category: Transport,    subcategory: "Ride-hailing"}
+- {match: "(?i)\\b(bolt eu|free now|mytaxi)\\b",                      type: regex, category: Transport,    subcategory: "Ride-hailing (EU)"}
+- {match: "(?i)\\b(lime|bird|tier|voi)\\b",                           type: regex, category: Transport,    subcategory: "Scooter"}
+- {match: "(?i)\\b(shell|aral|esso|bp|chevron|exxon|tankstelle|gas station)\\b", type: regex, category: Transport, subcategory: "Fuel"}
+- {match: "(?i)\\b(avis|hertz|sixt|enterprise|europcar|miles mobility)\\b", type: regex, category: Transport, subcategory: "Car rental / sharing"}
 
 # ─── Travel ───────────────────────────────────────────────────────────────────
 - {match: "(?i)airbnb|booking\\.com|booking com|expedia|hotels\\.com|hotel ", type: regex, category: Travel, subcategory: "Lodging"}
@@ -86,11 +91,12 @@
 - {match: "(?i)babysitter|au-pair|babysitting",                       type: regex, category: Childcare,   subcategory: "Babysitting"}
 
 # ─── Healthcare ───────────────────────────────────────────────────────────────
-- {match: "(?i)apotheke|pharmacy|cvs|walgreens|boots\\.com|boots ",   type: regex, category: Healthcare,   subcategory: "Pharmacy"}
-- {match: "(?i)krankenkasse|tk berlin|aok|barmer|dak ",               type: regex, category: Insurance,    subcategory: "Health insurance (DE)"}
-- {match: "(?i)bupa|nhs ",                                            type: regex, category: Insurance,    subcategory: "Health insurance (UK)"}
-- {match: "(?i)blue cross|blue shield|kaiser perm|aetna|cigna|united health", type: regex, category: Insurance, subcategory: "Health insurance (US)"}
-- {match: "(?i)dr\\.\\s|doctor|arzt|zahnarzt|dental|clinic",          type: regex, category: Healthcare,   subcategory: "Doctor / clinic"}
+- {match: "(?i)\\b(apotheke|pharmacy|cvs|walgreens|boots\\.com|boots)\\b", type: regex, category: Healthcare, subcategory: "Pharmacy"}
+- {match: "(?i)\\b(krankenkasse|tk berlin|aok|barmer|dak)\\b",        type: regex, category: Insurance,    subcategory: "Health insurance (DE)"}
+- {match: "(?i)\\b(bupa|nhs)\\b",                                     type: regex, category: Insurance,    subcategory: "Health insurance (UK)"}
+- {match: "(?i)\\b(blue cross|blue shield|kaiser perm|aetna|cigna|united health)\\b", type: regex, category: Insurance, subcategory: "Health insurance (US)"}
+# `dental` and `arzt` need \b — without it, matches "incidental", "Marzt", etc.
+- {match: "(?i)dr\\.\\s|\\b(doctor|arzt|zahnarzt|dental|clinic)\\b",  type: regex, category: Healthcare,   subcategory: "Doctor / clinic"}
 
 # ─── Personal care ────────────────────────────────────────────────────────────
 - {match: "(?i)dm[- ]?drogerie|dm sagt",                              type: regex, category: Personal Care, subcategory: "Drugstore (DM)"}
