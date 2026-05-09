@@ -369,6 +369,64 @@ class TestBuildSite(PipelineTestBase):
         self.assertGreaterEqual(len(nav_anchors), 6, f"expected ≥6 nav items; got {nav_anchors}")
 
 
+class TestNetCategoryAggregation(unittest.TestCase):
+    """A positive-amount row in a non-Income category must REDUCE that
+    category's total, not inflate it. Regression guard for the abs() bug
+    in build_site.aggregate(): a refund / benefit payout / chargeback /
+    rental-deposit return that shares a merchant rule with prior debits
+    used to be added to the category instead of netted out, lying about
+    spend. Touches the Spend-by-category and Monthly-spend charts."""
+
+    def setUp(self):
+        self.tmpdir = Path(tempfile.mkdtemp(prefix="fcb-net-cat-"))
+        self.workspace = self.tmpdir / "workspace"
+        self.workspace.mkdir()
+        out = self.workspace / "pipeline" / "output"
+        out.mkdir(parents=True)
+        # Insurance: $50 paid in Jan, $300 refund in Jan, $50 paid in Feb
+        # → expected net = -$200 (refund exceeds spend)
+        # Restaurants: one $10 debit → expected $10
+        with (out / "transactions_tagged.csv").open("w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["date", "description", "amount", "currency", "account",
+                        "source_file", "source_row", "category", "subcategory"])
+            w.writerow(["2026-01-15", "Insurance contribution", "-50.00", "USD",
+                        "Checking", "test.csv", "1", "Insurance", ""])
+            w.writerow(["2026-01-22", "Insurance refund / benefit",  "300.00", "USD",
+                        "Checking", "test.csv", "2", "Insurance", ""])
+            w.writerow(["2026-02-15", "Insurance contribution", "-50.00", "USD",
+                        "Checking", "test.csv", "3", "Insurance", ""])
+            w.writerow(["2026-02-20", "Coffee shop", "-10.00", "USD",
+                        "Checking", "test.csv", "4", "Restaurants", ""])
+        (out / "monthly_actuals.csv").write_text("month\n2026-01\n2026-02\n")
+        sanity = {
+            "confirmed_at": datetime.now(timezone.utc).isoformat(),
+            "acknowledged_violations": [],
+        }
+        (out / "sanity_confirmed.json").write_text(json.dumps(sanity))
+        self.env = {"FCB_WORKSPACE": str(self.workspace)}
+
+    def tearDown(self):
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
+    def test_refund_in_non_income_category_nets_against_spend(self):
+        run_script("build_site.py", env_extra=self.env)
+        html = (self.workspace / "site" / "index.html").read_text()
+        m = re.search(r'<script id="dashboard-data"[^>]*>(.+?)</script>', html, re.DOTALL)
+        self.assertIsNotNone(m, "dashboard-data <script> block missing")
+        d = json.loads(m.group(1))
+        cat_totals = dict(d["category_totals"])
+        # If abs() bug regressed: Insurance = 50+300+50 = 400.
+        # Correct net: -50+300-50 inverted to spend convention = -200.
+        self.assertAlmostEqual(
+            cat_totals.get("Insurance", 0), -200.00, places=2,
+            msg=(f"Insurance net should be -$200 (refunds exceed spend), "
+                 f"got {cat_totals.get('Insurance')}. abs() bug regression?"))
+        self.assertAlmostEqual(
+            cat_totals.get("Restaurants", 0), 10.00, places=2,
+            msg="Restaurants should be $10 net (single debit row)")
+
+
 class TestPipelineHealth(unittest.TestCase):
     """Smoke-level sanity that the pipeline scripts themselves are importable
     and the shared lib doesn't have basic syntax errors."""
