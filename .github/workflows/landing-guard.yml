@@ -1,0 +1,88 @@
+name: Landing-page placeholder guard
+
+# Validates the publish bundle before it ships. Mirrors the substitution
+# pipeline from publish-landing.sh (regen /docs, regen demo-kit, BUILD_STAMP)
+# in a throwaway _site/ tree, then asserts no `{{` placeholder survived.
+# This catches the literal-`{{BUILD_STAMP}}`-on-live-site regression class
+# even when nothing in installer/ changed.
+#
+# Validate-only: nothing is uploaded or deployed. The canonical publish
+# path is here.now via publish-landing.yml.
+#
+# History: this workflow used to also deploy a GitHub Pages backup
+# mirror, but Pages was never enabled on the repo so the deploy steps
+# always 404'd. Stripped to its useful role (the placeholder guard)
+# 2026-05-19.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "installer/**"
+      - ".github/workflows/landing-guard.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: landing-guard
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python (for /docs regeneration)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Regenerate /docs from install scripts
+        # Same step publish-landing.sh runs locally. Fails the build if
+        # anything in the install scripts isn't documented in
+        # installer/build_docs.py's curated map.
+        run: python3 installer/build_docs.py
+
+      - name: Regenerate demo-kit fixture
+        # demo-kit/data/* is gitignored (*.csv / *.pdf rules) so a fresh
+        # checkout doesn't have it. The "Stage bundle" step below rsyncs
+        # that directory, so we regenerate it here from the deterministic
+        # build_demo.py before staging. Mirrors the equivalent step in
+        # publish-landing.yml so the two paths stay in sync.
+        run: |
+          pip install --quiet reportlab~=4.4
+          python3 demo-kit/build_demo.py
+
+      - name: Stage bundle for validation
+        run: |
+          mkdir -p _site
+          # Mirror the full installer/ tree, dereferencing symlinks
+          # (here-now's publish.sh skips them; we do the same here so
+          # both paths stay in sync). Excludes .DS_Store and the
+          # .herenow state cache.
+          rsync -aL \
+            --exclude '.DS_Store' \
+            --exclude '.herenow' \
+            installer/ _site/
+          mkdir -p _site/demo-data
+          rsync -a --exclude '.DS_Store' demo-kit/data/ _site/demo-data/
+          # Substitute {{BUILD_STAMP}} in the landing index. Format
+          # matches install-telemetry build_stamp.
+          STAMP="$(date -u +%Y%m%d%H%M%S)"
+          sed "s/{{BUILD_STAMP}}/$STAMP/g" _site/index.html > _site/index.html.tmp
+          mv _site/index.html.tmp _site/index.html
+
+      - name: Guard against unfilled placeholders
+        run: |
+          # Fail fast if any '{{' survived in HTML we're about to publish.
+          # Prevents the BUILD_STAMP class of regression (literal
+          # `Build {{BUILD_STAMP}}` rendering on the live page).
+          # Restrict to top-level HTML only — dashboard-demo/index.html
+          # is a built artifact whose template-engine-style {{ }} braces
+          # may legitimately appear in other contexts.
+          if grep -l '{{' _site/index.html _site/dashboard-demo/index.html 2>/dev/null; then
+            echo "::error::Unfilled {{ placeholder found in HTML being shipped"
+            grep -n '{{' _site/index.html _site/dashboard-demo/index.html || true
+            exit 1
+          fi
+          echo "✓ No unfilled placeholders in landing or demo dashboard"
