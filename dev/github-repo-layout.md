@@ -77,7 +77,7 @@ passporttowealth/
 │   ├── workflows/
 │   │   ├── ci.yml                     ← Run `scripts/run_fixture.sh` against the test fixtures on every PR
 │   │   ├── lint-user-strings.yml      ← OP-8 banned-words check on every PR
-│   │   └── pages.yml                  ← Backup deploy of `installer/` to GitHub Pages (canonical landing is here.now)
+│   │   └── landing-guard.yml          ← Validate-only: runs the publish-landing.sh substitution pipeline and asserts no `{{` placeholder survives
 │   ├── ISSUE_TEMPLATE/
 │   │   ├── bug.md                     ← For Rafa / dev only, not advertised to clients
 │   │   └── feature.md
@@ -104,7 +104,7 @@ That wrapper handles two regressions that bit us before:
 1. **`{{BUILD_STAMP}}` substitution** — the landing footer has a build-stamp placeholder. Without the wrapper, it renders literally on the live page.
 2. **Symlink dereferencing** — `installer/assets/brand/` was once a symlink. The here-now skill walks files with `find -type f` (skips symlinks), so the brand PNGs disappeared from the bundle and the live logo 404'd. The brand assets are now real files (and a test guards against re-introducing a symlink), but `publish-landing.sh` also runs `rsync -aL` to dereference anything new just in case.
 
-Propagation is ≤60s globally via Cloudflare KV. The `.github/workflows/pages.yml` workflow also builds a backup mirror to GitHub Pages on every push to `main` — same content, second URL, used only if here.now is unreachable.
+Propagation is ≤60s globally via Cloudflare KV. (Earlier versions of this repo also kept a GitHub Pages backup mirror via `pages.yml`; that workflow was renamed to `landing-guard.yml` on 2026-05-19 and stripped to its validate-only role after we confirmed Pages had never been enabled on the repo. There is no longer a backup URL — if here.now is unreachable, the landing is unreachable.)
 
 ### The live demo dashboard
 `https://passporttowealth.app/dashboard-demo/` is a public mirror of the dashboard, built from the synthetic `demo-kit/` fixture by the real pipeline (classify → ... → build_site). Lives at `installer/dashboard-demo/` and ships in the same publish bundle as the landing page. No passcode (it's marketing). To regenerate, see [`installer/README.md`](../installer/README.md#the-demo-dashboard).
