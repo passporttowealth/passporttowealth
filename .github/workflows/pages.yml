@@ -38,6 +38,17 @@ jobs:
         # documented in installer/build_docs.py's curated map.
         run: python3 installer/build_docs.py
 
+      - name: Regenerate demo-kit fixture
+        # demo-kit/data/* is gitignored (*.csv / *.pdf rules) so a fresh
+        # checkout doesn't have it. The "Stage Pages content" step below
+        # rsyncs that directory into _site/demo-data, so we regenerate it
+        # here from the deterministic build_demo.py before staging.
+        # Mirrors the equivalent step in publish-landing.yml so the two
+        # publish paths stay in sync.
+        run: |
+          pip install --quiet reportlab~=4.4
+          python3 demo-kit/build_demo.py
+
       - name: Stage Pages content
         run: |
           mkdir -p _site
