@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Working Session 1 — Passport to Wealth</title>
+<link rel="icon" type="image/png" href="https://passporttowealth.app/assets/brand/favicon.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css">
+<style>
+:root {
+  --color-bg: #ffffff;
+  --color-surface: #f8f6f1;
+  --color-text: #0f1e33;
+  --color-text-muted: #5a6478;
+  --color-text-faint: #8a93a3;
+  --color-accent: #0F1E33;
+  --color-gold: #C9A75D;
+  --color-gold-soft: #E6C068;
+  --color-border: rgba(15, 30, 51, 0.10);
+  --color-border-strong: rgba(15, 30, 51, 0.18);
+  --color-code-bg: #0f1e33;
+  --color-code-text: #f5f3ee;
+  --color-code-prompt: #b89d6e;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+html, body { background: var(--color-bg); margin: 0; padding: 0; }
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url('https://passporttowealth.app/assets/world-map.svg');
+  background-size: 200% auto;
+  background-position: center 35%;
+  background-repeat: no-repeat;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.reveal { position: relative; z-index: 1; font-family: var(--font-sans); font-weight: 400; color: var(--color-text); font-size: 23px; line-height: 1.55; }
+.reveal .slides { text-align: left; }
+.reveal .slides section { padding: 60px 88px !important; height: 100% !important; box-sizing: border-box; display: flex !important; flex-direction: column !important; justify-content: center !important; }
+.reveal .slides section.dense { padding: 48px 64px !important; }
+.reveal .slides section > h2:first-of-type, .reveal .slides section > h1:first-of-type { flex: 0 0 auto; }
+
+.reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  text-transform: none;
+  font-weight: 700;
+  margin: 0 0 0.5em 0;
+  line-height: 1.1;
+}
+.reveal h1 { font-size: 2.6em; letter-spacing: -0.025em; }
+.reveal h2 { font-size: 1.7em; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 0.45em; }
+.reveal h3 { font-size: 1.05em; color: var(--color-text-muted); font-weight: 500; letter-spacing: -0.01em; }
+.reveal h4 { font-size: 0.95em; color: var(--color-text-muted); font-weight: 600; }
+
+.reveal p { margin: 0.45em 0; }
+.reveal a { color: var(--color-text); text-decoration: underline; text-decoration-color: var(--color-gold); text-underline-offset: 3px; text-decoration-thickness: 1.5px; }
+.reveal a:hover { text-decoration-color: var(--color-text); }
+
+.reveal strong { color: var(--color-text); font-weight: 600; }
+.reveal em { font-style: italic; color: var(--color-text-muted); }
+
+.reveal blockquote {
+  background: var(--color-surface);
+  border-left: 3px solid var(--color-border-strong);
+  border-radius: 0 6px 6px 0;
+  padding: 0.6em 1em;
+  margin: 0.5em 0;
+  font-size: 0.92em;
+  color: var(--color-text);
+  font-style: normal;
+  box-shadow: none;
+  width: auto;
+}
+.reveal blockquote p { margin: 0; }
+
+.reveal ul, .reveal ol { margin: 0.35em 0 0.35em 1.4em; padding: 0; }
+.reveal li { margin: 0.18em 0; }
+.reveal li::marker { color: var(--color-gold); font-weight: 700; }
+
+.reveal pre, .reveal code { font-family: var(--font-mono); }
+.reveal code { background: var(--color-surface); padding: 1px 6px; border-radius: 4px; font-size: 0.85em; color: var(--color-text); border: 1px solid var(--color-border); font-variant-ligatures: none; }
+.reveal pre { background: var(--color-code-bg); border-radius: 10px; padding: 16px 20px; margin: 0.4em 0; font-size: 0.72em; box-shadow: none; width: 100%; box-sizing: border-box; color: var(--color-code-text); }
+.reveal pre code { background: transparent; padding: 0; color: var(--color-code-text); border: none; display: block; font-variant-ligatures: none; }
+
+.reveal table { width: 100%; border-collapse: collapse; font-size: 0.74em; margin: 0.4em 0; background: var(--color-bg); }
+.reveal table th { background: var(--color-surface); border-bottom: 2px solid var(--color-border-strong); padding: 10px 14px; text-align: left; font-weight: 600; color: var(--color-text); font-size: 0.95em; }
+.reveal table td { padding: 10px 14px; border-bottom: 1px solid var(--color-border); vertical-align: top; }
+.reveal table tr:last-child td { border-bottom: none; }
+
+.reveal .mermaid { display: flex; justify-content: center; align-items: center; margin: 0.4em 0; }
+.reveal .mermaid svg { max-width: 100% !important; max-height: 70vh; height: auto !important; }
+.reveal .mermaid-tall svg { max-height: 78vh; }
+
+.reveal .diagram-img { display: block; margin: 0.4em auto; max-width: 100%; max-height: 68vh; width: auto; height: auto; }
+.reveal .diagram-img-tall { max-height: 74vh; }
+.reveal .two-col-viz .diagram-img { max-height: 56vh; }
+
+.ptw-wordmark { position: absolute; top: 22px; left: 30px; display: flex; align-items: center; gap: 10px; z-index: 10; }
+.ptw-wordmark img { height: 24px; width: auto; display: block; }
+.ptw-wordmark-text { font-family: var(--font-sans); font-size: 10px; font-weight: 600; color: var(--color-text); letter-spacing: 0.12em; text-transform: uppercase; }
+.ptw-wordmark-text .suffix { color: var(--color-text-muted); font-weight: 500; }
+
+.slide-title { text-align: center; display: flex !important; flex-direction: column; justify-content: center; }
+.slide-title h1 { font-size: 3.2em; margin-top: 0.2em; margin-bottom: 0.3em; letter-spacing: -0.025em; line-height: 1.05; }
+.slide-title .lede { font-size: 1.1em; color: var(--color-text-muted); max-width: 900px; margin: 0.4em auto 2em auto; line-height: 1.45; }
+.slide-title .meta { color: var(--color-text-muted); font-size: 0.72em; letter-spacing: 0.04em; margin: 0.3em 0; }
+.slide-title .meta strong { color: var(--color-text); font-weight: 600; }
+
+.slide-part-divider { display: flex !important; flex-direction: column; justify-content: center; background: var(--color-surface); }
+.slide-part-divider .eyebrow { font-size: 0.62em; letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-gold); font-weight: 700; margin-bottom: 0.8em; }
+.slide-part-divider h1 { font-size: 2.8em; margin-bottom: 0.25em; letter-spacing: -0.025em; }
+.slide-part-divider .duration { font-size: 0.7em; color: var(--color-text-muted); margin-bottom: 0; font-family: var(--font-mono); letter-spacing: 0.04em; }
+
+.figure-caption { text-align: center; font-size: 0.7em; color: var(--color-text-muted); margin-top: 0.5em; font-style: italic; }
+
+.bignum li { margin: 0.28em 0; }
+.bignum .num { color: var(--color-gold); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+.two-col-viz { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: stretch; }
+.two-col-viz h3 { font-size: 0.7em; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted); font-weight: 700; margin-bottom: 0.4em; text-align: center; }
+
+/* SVG triangle viz */
+.triangle-viz { display: block; margin: 0 auto; width: 100%; max-width: 380px; height: auto; }
+
+/* Evolution grid — slide 7 rebuild */
+.evolution { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 0.6em 0; font-size: 0.95em; }
+.evol-stage { display: flex; flex-direction: column; gap: 8px; }
+.evol-header { margin-bottom: 4px; }
+.evol-num { font-family: var(--font-mono); font-size: 0.55em; letter-spacing: 0.18em; color: var(--color-gold); font-weight: 700; text-transform: uppercase; margin-bottom: 2px; }
+.evol-stage-name { font-size: 1.55em; font-weight: 700; color: var(--color-text); letter-spacing: -0.018em; margin: 0; line-height: 1.05; }
+.evol-years { font-family: var(--font-mono); font-size: 0.55em; color: var(--color-text-muted); margin: 4px 0 0; letter-spacing: 0.04em; }
+.evol-track { border-radius: 6px; padding: 10px 12px; font-size: 0.55em; line-height: 1.5; }
+.evol-track.cultivated { background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border); }
+.evol-track.governed { background: #eef1f5; color: var(--color-text); border: 1px solid var(--color-border); }
+.evol-track h4 { font-size: 0.9em; letter-spacing: 0.12em; text-transform: uppercase; margin: 0 0 6px; font-weight: 700; color: var(--color-text-muted); opacity: 0.75; }
+.evol-track ul { margin: 0; padding-left: 0; list-style: none; }
+.evol-track li { margin: 3px 0; padding-left: 12px; position: relative; }
+.evol-track li::before { content: "—"; position: absolute; left: 0; color: var(--color-gold); }
+
+/* Alice/Bob medium diagram styling — applied via mermaid classDef */
+
+.reveal .slide-number { font-family: var(--font-mono); background: transparent; color: var(--color-text-faint); font-size: 0.6em; right: 24px; bottom: 16px; letter-spacing: 0.04em; }
+.reveal .progress { height: 2px; color: var(--color-gold); }
+.reveal .controls { display: none; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============== SLIDE 1: TITLE ============== -->
+<section class="slide-title">
+  <div class="ptw-wordmark">
+    <img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt="">
+    <span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span>
+  </div>
+  <h1>Working Session 1</h1>
+  <p class="lede">AI overview, Claude Code setup, dashboard demo, feedback.</p>
+  <p class="meta"><strong>Wednesday 2026-05-13</strong> · 10:00–11:00 CET</p>
+</section>
+
+<!-- ============== SLIDE 2: TODAY'S AGENDA ============== -->
+<section>
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Today's agenda</h2>
+  <ol start="0">
+    <li>AI trends — what's emerging in adoption.</li>
+    <li>Install Claude Code on your laptop.</li>
+    <li>Run your dashboard end-to-end.</li>
+    <li>Start one disposable app of your own.</li>
+    <li>Feedback before the May 27 advisor meeting.</li>
+  </ol>
+</section>
+
+<!-- ============== PART 1 DIVIDER ============== -->
+<section class="slide-part-divider">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <p class="eyebrow">Part 1</p>
+  <h1>Where we are</h1>
+  <p class="duration">4 slides · ~8 min</p>
+</section>
+
+<!-- ============== AI IS A MEDIUM (MERGED TEXT + REBUILT VISUAL) ============== -->
+<section class="dense">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>AI is a medium, not a tool</h2>
+  <p style="font-size: 0.92em;">A tool has known failure modes you can diagnose. A medium reshapes how people work and think. AI sits in the second category — <em>probabilistic, generative, and with failure patterns that shift on every model update</em>.</p>
+  <img class="diagram-img diagram-img-tall" src="diagrams/slide-04-alice-bob.png" alt="Two people, Alice and Bob, each routing through their own AI agent into a shared channel of services; community and web sources feed each side.">
+
+  <p class="figure-caption">Each person reasons through their own AI; AI also runs inside the services they share.</p>
+</section>
+
+<!-- ============== ADOPTION TODAY ============== -->
+<section>
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Adoption today</h2>
+  <ul class="bignum">
+    <li><strong>ChatGPT:</strong> <span class="num">~900M</span> weekly users.</li>
+    <li><strong>OpenAI Codex</strong> (their AI that builds software): <span class="num">~2M</span> weekly users.</li>
+    <li><strong>GitHub Copilot:</strong> <span class="num">4.7M</span> paid subscribers.</li>
+    <li><strong>Claude Code:</strong> estimated <span class="num">50–150k</span> daily active users.</li>
+    <li><strong>Excel macros:</strong> estimated <span class="num">10–15M</span> daily active users.</li>
+  </ul>
+  <p>Most AI use today is conversational. Few people use AI to build software. The tools we're using today are still emerging — it's worth being early, and worth not over-optimizing for the specific tools that exist right now.</p>
+</section>
+
+<!-- ============== AI EVOLUTION (REBUILT IN BRAND) ============== -->
+<section class="dense">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Chats → tools → agents → factories</h2>
+  <p style="font-size: 0.85em; color: var(--color-text-muted); margin-bottom: 0.4em;">Two parallel tracks: what people invent on their own (cultivated), and what organizations sanction (governed).</p>
+  <div class="evolution">
+    <div class="evol-stage">
+      <div class="evol-header">
+        <div class="evol-num">Stage 01</div>
+        <h3 class="evol-stage-name">Chat</h3>
+        <p class="evol-years">2022–23</p>
+      </div>
+      <div class="evol-track cultivated">
+        <h4>Cultivated</h4>
+        <ul>
+          <li>Everyday use of ChatGPT</li>
+          <li>Personal-account exploration</li>
+          <li>Prompt experimentation</li>
+        </ul>
+      </div>
+      <div class="evol-track governed">
+        <h4>Governed</h4>
+        <ul>
+          <li>Acceptable-use policies</li>
+          <li>Blanket bans (Samsung)</li>
+          <li>First enterprise licenses</li>
+        </ul>
+      </div>
+    </div>
+    <div class="evol-stage">
+      <div class="evol-header">
+        <div class="evol-num">Stage 02</div>
+        <h3 class="evol-stage-name">Tools</h3>
+        <p class="evol-years">2023–24</p>
+      </div>
+      <div class="evol-track cultivated">
+        <h4>Cultivated</h4>
+        <ul>
+          <li>Custom GPTs and skills</li>
+          <li>Prompt libraries and kits</li>
+          <li>Team-authored workflows</li>
+        </ul>
+      </div>
+      <div class="evol-track governed">
+        <h4>Governed</h4>
+        <ul>
+          <li>Sanctioned tool lists</li>
+          <li>Enterprise vendor deals</li>
+          <li>Verification checkpoints</li>
+        </ul>
+      </div>
+    </div>
+    <div class="evol-stage">
+      <div class="evol-header">
+        <div class="evol-num">Stage 03</div>
+        <h3 class="evol-stage-name">Agents</h3>
+        <p class="evol-years">2024–26</p>
+      </div>
+      <div class="evol-track cultivated">
+        <h4>Cultivated</h4>
+        <ul>
+          <li>Vibe-coding, agentic IDEs</li>
+          <li>Agents with wallets</li>
+          <li>AI-native workflows</li>
+        </ul>
+      </div>
+      <div class="evol-track governed">
+        <h4>Governed</h4>
+        <ul>
+          <li>Forward Deployed Engineers</li>
+          <li>Agent governance protocols</li>
+          <li>Model risk frameworks</li>
+        </ul>
+      </div>
+    </div>
+    <div class="evol-stage">
+      <div class="evol-header">
+        <div class="evol-num">Stage 04</div>
+        <h3 class="evol-stage-name">Factories</h3>
+        <p class="evol-years">2026–28</p>
+      </div>
+      <div class="evol-track cultivated">
+        <h4>Cultivated</h4>
+        <ul>
+          <li>One-person agent fleets</li>
+          <li>Always-on personal pipelines</li>
+          <li>Second brains</li>
+        </ul>
+      </div>
+      <div class="evol-track governed">
+        <h4>Governed</h4>
+        <ul>
+          <li>Compute and token budgets</li>
+          <li>Fleet-level observability</li>
+          <li>Output-quality contracts</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== TENSION TRIANGLE (MERGED: REBUILT VIZ + TEXT) ============== -->
+<section class="dense">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>The tension triangle</h2>
+  <div class="two-col" style="gap: 40px; align-items: center;">
+    <div>
+      <svg class="triangle-viz" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="200,80 60,320 340,320" fill="none" stroke="rgba(15,30,51,0.25)" stroke-width="1.5"/>
+        <text x="200" y="28" text-anchor="middle" dominant-baseline="middle" fill="#0F1E33" font-size="14" font-weight="600" letter-spacing="0.08em" font-family="-apple-system, BlinkMacSystemFont, sans-serif">VELOCITY</text>
+        <circle cx="200" cy="80" r="34" fill="#0F1E33"/>
+        <text x="200" y="80" text-anchor="middle" dominant-baseline="central" fill="#fff" font-weight="700" font-size="26" font-family="-apple-system, BlinkMacSystemFont, sans-serif">V</text>
+        <circle cx="60" cy="320" r="34" fill="#0F1E33"/>
+        <text x="60" y="320" text-anchor="middle" dominant-baseline="central" fill="#fff" font-weight="700" font-size="26" font-family="-apple-system, BlinkMacSystemFont, sans-serif">A</text>
+        <text x="60" y="372" text-anchor="middle" dominant-baseline="middle" fill="#0F1E33" font-size="14" font-weight="600" letter-spacing="0.08em" font-family="-apple-system, BlinkMacSystemFont, sans-serif">ASSURANCE</text>
+        <circle cx="340" cy="320" r="34" fill="#0F1E33"/>
+        <text x="340" y="320" text-anchor="middle" dominant-baseline="central" fill="#fff" font-weight="700" font-size="26" font-family="-apple-system, BlinkMacSystemFont, sans-serif">L</text>
+        <text x="340" y="372" text-anchor="middle" dominant-baseline="middle" fill="#0F1E33" font-size="14" font-weight="600" letter-spacing="0.08em" font-family="-apple-system, BlinkMacSystemFont, sans-serif">LEGIBILITY</text>
+      </svg>
+    </div>
+    <div>
+      <p style="font-size: 0.9em;">Three forces every team adopting AI has to balance:</p>
+      <ul style="font-size: 0.88em;">
+        <li><strong>Velocity</strong> — how fast you can ship and iterate.</li>
+        <li><strong>Assurance</strong> — how much structure verifies the output before it matters.</li>
+        <li><strong>Legibility</strong> — how well you can still see what's happening.</li>
+      </ul>
+      <p style="font-size: 0.88em; margin-top: 0.8em;">Push any one too hard and the other two collapse. This project sits on the <strong>velocity</strong> end — disposable apps live here on purpose. Fast, low-stakes, easy to throw away.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SUCCESS VS FAILURE PATTERNS ============== -->
+<section>
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Success vs. failure patterns</h2>
+  <div class="two-col">
+    <div>
+      <h3>Patterns that work</h3>
+      <ul>
+        <li><strong>Play first, plan second</strong> — let exploration run, then formalize what stuck.</li>
+        <li><strong>Harvest from practice</strong> — wait for a workflow to prove itself before standardizing.</li>
+        <li><strong>Sandbox the experiment</strong> — keep throwaway separate from production.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Patterns that fail</h3>
+      <ul>
+        <li><strong>Premature standardization</strong> — picking the official workflow that will change in three months.</li>
+        <li><strong>Disorientation</strong> — shipping faster than the team can keep up.</li>
+        <li><strong>Blast radius</strong> — letting agents act on things they shouldn't.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============== PART 2 DIVIDER ============== -->
+<section class="slide-part-divider">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <p class="eyebrow">Part 2</p>
+  <h1>Your stack</h1>
+  <p class="duration">3 slides · ~6 min</p>
+</section>
+
+<!-- ============== BEFORE AND AFTER (TWO MERMAID SIDE BY SIDE) ============== -->
+<section class="dense">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Before and after Claude Code</h2>
+  <div class="two-col-viz">
+    <div>
+      <h3>Before — you operate each tool yourself</h3>
+      <img class="diagram-img" src="diagrams/slide-10-before.png" alt="Diagram: you connect directly to Files, GitHub, here.now, and Email.">
+    </div>
+    <div>
+      <h3>With Claude Code — you direct, Claude operates</h3>
+      <img class="diagram-img" src="diagrams/slide-10-after.png" alt="Diagram: you direct Claude Code, and Claude Code connects to Files, GitHub, here.now, and Email.">
+    </div>
+  </div>
+</section>
+
+<!-- ============== YOUR STACK TODAY (MERMAID — SPACING FIX) ============== -->
+<section class="dense">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Your stack today, plus future surface area</h2>
+  <img class="diagram-img diagram-img-tall" src="diagrams/slide-11-your-stack.png" alt="Diagram: you direct Claude Code, which connects to Your files, GitHub, and here.now today; Email, Slack, and Google Drive are dashed as future surface area.">
+
+  <p class="figure-caption">Solid = active today. Dashed = future. Your domain (<code>passporttowealth.app</code>) points visitors at <code>here.now</code> via DNS.</p>
+</section>
+
+<!-- ============== THE CORNERSTONE TOOLS ============== -->
+<section>
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>The cornerstone tools</h2>
+  <table>
+    <thead><tr><th>Tool</th><th>What it is</th><th>Why it's in your stack</th></tr></thead>
+    <tbody>
+      <tr><td><strong>GitHub</strong></td><td>A versioned filing cabinet for code and docs.</td><td>Backup and shareable. Claude operates it for you.</td></tr>
+      <tr><td><strong>here.now</strong></td><td>A passcode-protected publishing host.</td><td>Where your dashboard lives, privately.</td></tr>
+      <tr><td><strong>Domain</strong> (Porkbun)</td><td>A human-friendly web address.</td><td>Your branded URL — <code>passporttowealth.app</code>.</td></tr>
+      <tr><td><strong>Claude Code</strong></td><td>An AI assistant that reads, edits, and runs — only with your permission.</td><td>The thing we're installing in five minutes.</td></tr>
+      <tr><td><strong>Folders</strong> (a.k.a. directory)</td><td>Where you save files within reach of your AI assistant.</td><td>The address book Claude works from.</td></tr>
+    </tbody>
+  </table>
+  <p>A useful habit: regularly ask Claude — "in this project, is there anything I could do to make it simpler?" AI assistants find creative workarounds, so it's worth asking them to simplify.</p>
+</section>
+
+<!-- ============== PART 3 DIVIDER ============== -->
+<section class="slide-part-divider">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <p class="eyebrow">Part 3</p>
+  <h1>Installing Claude Code</h1>
+  <p class="duration">1 slide + live action · ~8 min</p>
+</section>
+
+<!-- ============== LIVE INSTALL ============== -->
+<section>
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Live install on Windows</h2>
+  <ol>
+    <li><strong>Open PowerShell</strong> — Start menu → type "PowerShell" → Enter. The <code>PS C:\&gt;</code> prompt is the right one (not Command Prompt).</li>
+    <li><strong>Run the official installer:</strong>
+      <pre><code>irm https://claude.ai/install.ps1 | iex</code></pre>
+    </li>
+    <li><strong>Restart PowerShell</strong> — fresh window. Otherwise <code>claude</code> won't be on PATH.</li>
+    <li><strong>Verify:</strong>
+      <pre><code>claude --version</code></pre>
+    </li>
+    <li><strong>Authenticate:</strong> run <code>claude</code>, sign in via browser, back to the terminal.</li>
+  </ol>
+</section>
+
+<!-- ============== PART 4 DIVIDER ============== -->
+<section class="slide-part-divider">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <p class="eyebrow">Part 4</p>
+  <h1>Claude Code 101</h1>
+  <p class="duration">4 slides · ~12 min</p>
+</section>
+
+<!-- ============== 1. THE AGENTIC LOOP ============== -->
+<section>
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>1. The agentic loop</h2>
+  <p>Claude works in a loop:</p>
+  <ol>
+    <li>Gathers context — reads your files.</li>
+    <li>Proposes an action — in plain English.</li>
+    <li>Does the action — after you say yes (or you pre-approved automatic changes).</li>
+    <li>Verifies — checks it worked.</li>
+  </ol>
+</section>
+
+<!-- ============== 2. PERMISSION MODES ============== -->
+<section>
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>2. Permission modes — <code>Shift+Tab</code></h2>
+  <p>Three modes, toggled by pressing <code>Shift+Tab</code>:</p>
+  <ul>
+    <li><strong>Default</strong> — Claude asks before each file change.</li>
+    <li><strong>Plan mode</strong> — Claude can read everything, but cannot change anything.</li>
+    <li><strong>Auto-accept</strong> — Claude works without asking. Skip this for now.</li>
+  </ul>
+</section>
+
+<!-- ============== 3. PLAN MODE DEMO ============== -->
+<section>
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>3. Plan mode on a vague request</h2>
+  <p><strong>Live demo (4 min):</strong> in plan mode, ask:</p>
+  <blockquote>"Add a section to the dashboard that shows my top five spending categories with a small description of each."</blockquote>
+  <p>Claude reads files, proposes a plan, asks for approval. Don't approve yet.</p>
+  <p>Edit the plan in plain English:</p>
+  <blockquote>"Actually, top three categories — not five."</blockquote>
+  <p>Claude updates the plan. Then approve.</p>
+</section>
+
+<!-- ============== 4. THREE KEYSTROKES ============== -->
+<section>
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>4. Three keystrokes that matter</h2>
+  <table>
+    <thead><tr><th>Key</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>Esc</code> once</td><td>Stop Claude mid-action.</td></tr>
+      <tr><td><code>Esc Esc</code></td><td>Rewind — undo both the conversation and the file changes since your last message.</td></tr>
+      <tr><td><code>/clear</code></td><td>Start a fresh conversation. Old context confuses Claude over time.</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top: 1em;">Skip for today: subagents, MCP servers, hooks, custom skills. Those come in session 2.</p>
+</section>
+
+<!-- ============== PART 5 DIVIDER ============== -->
+<section class="slide-part-divider">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <p class="eyebrow">Part 5</p>
+  <h1>Run the demo</h1>
+  <p class="duration">1 slide + live action · ~14 min</p>
+</section>
+
+<!-- ============== DRIVE THE BUILD FLOW ============== -->
+<section>
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Drive the build flow</h2>
+  <table>
+    <thead><tr><th>Min</th><th>Step</th><th>What you do</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td>0–2</td><td>Drop sample files into <code>inbox/</code></td><td>Drag-drop the prepared bundle</td><td>The only folder you ever put files in.</td></tr>
+      <tr><td>2–4</td><td>Say "build my report"</td><td>Type the phrase</td><td>Sort and dedupe output.</td></tr>
+      <tr><td>4–6</td><td>Privacy gate on paystubs</td><td>Confirm "skip"</td><td>Claude won't read sensitive files without explicit permission.</td></tr>
+      <tr><td>6–8</td><td>Sanity gate on totals</td><td>Read, say "looks right"</td><td>Review the numbers before the dashboard builds.</td></tr>
+      <tr><td>8–10</td><td>Dashboard opens locally</td><td>Click around</td><td>KPI cards, charts, transactions. No calculators yet — opt-in, session 2.</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top: 1em; font-size: 0.85em; color: var(--color-text-muted);">Optional (3 min, only if time allows): publish to here.now, walk through the passcode flow.</p>
+</section>
+
+<!-- ============== PART 6 DIVIDER ============== -->
+<section class="slide-part-divider">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <p class="eyebrow">Part 6</p>
+  <h1>Feedback</h1>
+  <p class="duration">1 slide · ~8 min</p>
+</section>
+
+<!-- ============== FOUR QUESTIONS ============== -->
+<section>
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Four questions</h2>
+  <ol>
+    <li>Where did the demo lose you?</li>
+    <li>What did you wish the dashboard showed that it doesn't?</li>
+    <li>If someone tried this for the first time, what would feel different from the other AI tools on <a href="http://plannerxchange.ai/">plannerxchange.ai</a>?</li>
+    <li>What would make you confident enough to recommend this to an advisor in your network the next day?</li>
+  </ol>
+</section>
+
+<!-- ============== PART 7 DIVIDER ============== -->
+<section class="slide-part-divider">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <p class="eyebrow">Part 7</p>
+  <h1>Net new vs. extend</h1>
+  <p class="duration">2 slides · ~7 min</p>
+</section>
+
+<!-- ============== SAME TWO PRIMITIVES ============== -->
+<section>
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Same two primitives, different starting point</h2>
+  <p>Everything Claude Code does sits on two primitives — the agentic loop and plan mode.</p>
+  <p>We've been using them to extend this project. The same primitives let you start something net new.</p>
+  <p>The difference is narrower than it looks.</p>
+</section>
+
+<!-- ============== SIDE-BY-SIDE DEMO ============== -->
+<section>
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Side-by-side demo</h2>
+  <table>
+    <thead><tr><th>Mode</th><th>Action</th><th>What you see</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Extend</strong></td><td>In this project, plan mode: <em>"Add a section showing how my spending has changed quarter over quarter."</em></td><td>Claude reads existing code, proposes a small change.</td></tr>
+      <tr><td><strong>Net new</strong></td><td>Open an empty folder (<code>mkdir my-experiment</code>). Run <code>claude</code>. Type <code>/init</code>. Plan mode: <em>"Build a single-page web tool that takes my age and shows me how many weeks I have left if I live to 85, as a grid of dots."</em></td><td>Claude has nothing to read. Asks clarifying questions, proposes a small standalone HTML file, scaffolds it.</td></tr>
+    </tbody>
+  </table>
+  <p>A disposable app is a small single-purpose web tool: build in an afternoon, share with one or two people, abandon when you don't need it.</p>
+</section>
+
+<!-- ============== PART 8 DIVIDER ============== -->
+<section class="slide-part-divider">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <p class="eyebrow">Part 8</p>
+  <h1>Wrap &amp; homework</h1>
+  <p class="duration">1 slide · ~3 min</p>
+</section>
+
+<!-- ============== HOMEWORK ============== -->
+<section>
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Homework</h2>
+  <p>Offered, not required.</p>
+  <ol>
+    <li>Try one disposable app on your own. Empty folder → <code>claude</code> → <code>/init</code> → describe a small tool you want. The point is the experience of starting from a blank folder, not the artifact.</li>
+    <li>Skim <a href="https://code.claude.com/docs/en/best-practices">Anthropic Claude Code best practices</a> — the canonical version of what we covered.</li>
+    <li>Note anywhere this demo felt rough or confusing. Send a quick note as it comes to mind.</li>
+  </ol>
+  <h3 style="margin-top: 1.2em; color: var(--color-text); font-weight: 600;">Next session (session 2 of 2)</h3>
+  <ul>
+    <li>Demo the opt-in calculators (Net Worth + FIRE) — fully shipped by then.</li>
+    <li>Cover what we skipped: subagents, the project's skill, the here.now publish flow.</li>
+    <li>Decide together what the build-in-public post looks like.</li>
+  </ul>
+</section>
+
+<!-- ============== THANK YOU ============== -->
+<section class="slide-title">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h1>Thank you</h1>
+  <p class="lede">Questions in the chat. Anything you don't ask now, send a note later.</p>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  themeVariables: {
+    primaryColor: '#ffffff',
+    primaryTextColor: '#0f1e33',
+    primaryBorderColor: '#0f1e33',
+    lineColor: '#5a6478',
+    secondaryColor: '#f8f6f1',
+    tertiaryColor: '#fef3c7',
+    background: '#ffffff',
+    mainBkg: '#ffffff',
+    nodeBorder: '#0f1e33',
+    clusterBkg: '#f8f6f1',
+    clusterBorder: 'rgba(15, 30, 51, 0.18)',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif',
+    fontSize: '15px'
+  },
+  flowchart: { curve: 'basis', htmlLabels: true, padding: 18, nodeSpacing: 36, rankSpacing: 36 }
+});
+
+Reveal.initialize({
+  hash: true,
+  slideNumber: 'c/t',
+  transition: 'fade',
+  transitionSpeed: 'fast',
+  controls: false,
+  progress: true,
+  width: 1280,
+  height: 720,
+  margin: 0.04,
+  minScale: 0.2,
+  maxScale: 2.0
+});
+
+function renderMermaid() {
+  document.querySelectorAll('.mermaid:not([data-processed])').forEach((el, i) => {
+    const src = el.textContent.trim();
+    const id = 'mermaid-' + Date.now() + '-' + i;
+    try {
+      mermaid.render(id, src).then(({svg}) => {
+        el.innerHTML = svg;
+        el.setAttribute('data-processed', 'true');
+      }).catch(e => console.warn('mermaid render failed', e));
+    } catch (e) { console.warn('mermaid render failed', e); }
+  });
+}
+Reveal.on('ready', renderMermaid);
+Reveal.on('slidechanged', renderMermaid);
+</script>
+</body>
+</html>
