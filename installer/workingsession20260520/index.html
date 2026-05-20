@@ -32,7 +32,7 @@ body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background-image: url('https://passporttowealth.app/assets/world-map.svg');
+  background-image: url('assets/world-map.png');
   background-size: 200% auto;
   background-position: center 35%;
   background-repeat: no-repeat;
@@ -95,10 +95,6 @@ body::before {
 .reveal table td { padding: 10px 14px; border-bottom: 1px solid var(--color-border); vertical-align: top; }
 .reveal table tr:last-child td { border-bottom: none; }
 
-.reveal .mermaid { display: flex; justify-content: center; align-items: center; margin: 0.4em 0; }
-.reveal .mermaid svg { max-width: 100% !important; max-height: 70vh; height: auto !important; }
-.reveal .mermaid-tall svg { max-height: 78vh; }
-
 .reveal .diagram-img { display: block; margin: 0.4em auto; max-width: 100%; max-height: 68vh; width: auto; height: auto; }
 .reveal .diagram-img-tall { max-height: 74vh; }
 .reveal .two-col-viz .diagram-img { max-height: 56vh; }
@@ -145,8 +141,6 @@ body::before {
 .evol-track ul { margin: 0; padding-left: 0; list-style: none; }
 .evol-track li { margin: 3px 0; padding-left: 12px; position: relative; }
 .evol-track li::before { content: "—"; position: absolute; left: 0; color: var(--color-gold); }
-
-/* Alice/Bob medium diagram styling — applied via mermaid classDef */
 
 .reveal .slide-number { font-family: var(--font-mono); background: transparent; color: var(--color-text-faint); font-size: 0.6em; right: 24px; bottom: 16px; letter-spacing: 0.04em; }
 .reveal .progress { height: 2px; color: var(--color-gold); }
@@ -598,29 +592,7 @@ body::before {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <script>
-mermaid.initialize({
-  startOnLoad: false,
-  theme: 'base',
-  themeVariables: {
-    primaryColor: '#ffffff',
-    primaryTextColor: '#0f1e33',
-    primaryBorderColor: '#0f1e33',
-    lineColor: '#5a6478',
-    secondaryColor: '#f8f6f1',
-    tertiaryColor: '#fef3c7',
-    background: '#ffffff',
-    mainBkg: '#ffffff',
-    nodeBorder: '#0f1e33',
-    clusterBkg: '#f8f6f1',
-    clusterBorder: 'rgba(15, 30, 51, 0.18)',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif',
-    fontSize: '15px'
-  },
-  flowchart: { curve: 'basis', htmlLabels: true, padding: 18, nodeSpacing: 36, rankSpacing: 36 }
-});
-
 Reveal.initialize({
   hash: true,
   slideNumber: 'c/t',
@@ -634,21 +606,6 @@ Reveal.initialize({
   minScale: 0.2,
   maxScale: 2.0
 });
-
-function renderMermaid() {
-  document.querySelectorAll('.mermaid:not([data-processed])').forEach((el, i) => {
-    const src = el.textContent.trim();
-    const id = 'mermaid-' + Date.now() + '-' + i;
-    try {
-      mermaid.render(id, src).then(({svg}) => {
-        el.innerHTML = svg;
-        el.setAttribute('data-processed', 'true');
-      }).catch(e => console.warn('mermaid render failed', e));
-    } catch (e) { console.warn('mermaid render failed', e); }
-  });
-}
-Reveal.on('ready', renderMermaid);
-Reveal.on('slidechanged', renderMermaid);
 </script>
 </body>
 </html>
