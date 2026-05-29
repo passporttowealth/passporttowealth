@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Working Session 2 — Passport to Wealth</title>
+<link rel="icon" type="image/png" href="https://passporttowealth.app/assets/brand/favicon.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css">
+<style>
+:root {
+  --color-bg: #ffffff;
+  --color-surface: #f8f6f1;
+  --color-text: #0f1e33;
+  --color-text-muted: #5a6478;
+  --color-text-faint: #8a93a3;
+  --color-accent: #0F1E33;
+  --color-gold: #C9A75D;
+  --color-gold-soft: #E6C068;
+  --color-border: rgba(15, 30, 51, 0.10);
+  --color-border-strong: rgba(15, 30, 51, 0.18);
+  --color-code-bg: #0f1e33;
+  --color-code-text: #f5f3ee;
+  --color-code-prompt: #b89d6e;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+html, body { background: var(--color-bg); margin: 0; padding: 0; }
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url('assets/world-map.png');
+  background-size: 200% auto;
+  background-position: center 35%;
+  background-repeat: no-repeat;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.reveal { position: relative; z-index: 1; font-family: var(--font-sans); font-weight: 400; color: var(--color-text); font-size: 23px; line-height: 1.55; }
+.reveal .slides { text-align: left; }
+.reveal .slides section { padding: 60px 88px !important; height: 100% !important; box-sizing: border-box; display: flex !important; flex-direction: column !important; justify-content: center !important; }
+.reveal .slides section.dense { padding: 44px 64px !important; }
+.reveal .slides section.dense-xs { padding: 36px 56px !important; font-size: 0.92em; }
+.reveal .slides section > h2:first-of-type, .reveal .slides section > h1:first-of-type { flex: 0 0 auto; }
+
+.reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  text-transform: none;
+  font-weight: 700;
+  margin: 0 0 0.5em 0;
+  line-height: 1.1;
+}
+.reveal h1 { font-size: 2.6em; letter-spacing: -0.025em; }
+.reveal h2 { font-size: 1.7em; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 0.45em; }
+.reveal h3 { font-size: 1.05em; color: var(--color-text-muted); font-weight: 500; letter-spacing: -0.01em; }
+.reveal h4 { font-size: 0.95em; color: var(--color-text-muted); font-weight: 600; }
+
+.reveal p { margin: 0.45em 0; }
+.reveal a { color: var(--color-text); text-decoration: underline; text-decoration-color: var(--color-gold); text-underline-offset: 3px; text-decoration-thickness: 1.5px; }
+.reveal a:hover { text-decoration-color: var(--color-text); }
+
+.reveal strong { color: var(--color-text); font-weight: 600; }
+.reveal em { font-style: italic; color: var(--color-text-muted); }
+
+.reveal blockquote {
+  background: var(--color-surface);
+  border-left: 3px solid var(--color-border-strong);
+  border-radius: 0 6px 6px 0;
+  padding: 0.6em 1em;
+  margin: 0.5em 0;
+  font-size: 0.92em;
+  color: var(--color-text);
+  font-style: normal;
+  box-shadow: none;
+  width: auto;
+}
+.reveal blockquote p { margin: 0; }
+
+.reveal ul, .reveal ol { margin: 0.35em 0 0.35em 1.4em; padding: 0; }
+.reveal li { margin: 0.18em 0; }
+.reveal li::marker { color: var(--color-gold); font-weight: 700; }
+
+.reveal pre, .reveal code { font-family: var(--font-mono); }
+.reveal code { background: var(--color-surface); padding: 1px 6px; border-radius: 4px; font-size: 0.85em; color: var(--color-text); border: 1px solid var(--color-border); font-variant-ligatures: none; }
+.reveal pre { background: var(--color-code-bg); border-radius: 10px; padding: 16px 20px; margin: 0.4em 0; font-size: 0.72em; box-shadow: none; width: 100%; box-sizing: border-box; color: var(--color-code-text); }
+.reveal pre code { background: transparent; padding: 0; color: var(--color-code-text); border: none; display: block; font-variant-ligatures: none; }
+
+.reveal table { width: 100%; border-collapse: collapse; font-size: 0.74em; margin: 0.4em 0; background: var(--color-bg); }
+.reveal table th { background: var(--color-surface); border-bottom: 2px solid var(--color-border-strong); padding: 10px 14px; text-align: left; font-weight: 600; color: var(--color-text); font-size: 0.95em; }
+.reveal table td { padding: 10px 14px; border-bottom: 1px solid var(--color-border); vertical-align: top; }
+.reveal table tr:last-child td { border-bottom: none; }
+.reveal table.compact { font-size: 0.68em; }
+.reveal table.compact th, .reveal table.compact td { padding: 7px 11px; }
+.reveal table code { font-size: 0.95em; }
+
+.reveal .diagram-img { display: block; margin: 0.4em auto; max-width: 100%; max-height: 68vh; width: auto; height: auto; }
+.reveal .diagram-img-tall { max-height: 74vh; }
+.reveal .two-col-viz .diagram-img { max-height: 56vh; }
+
+.ptw-wordmark { position: absolute; top: 22px; left: 30px; display: flex; align-items: center; gap: 10px; z-index: 10; }
+.ptw-wordmark img { height: 24px; width: auto; display: block; }
+.ptw-wordmark-text { font-family: var(--font-sans); font-size: 10px; font-weight: 600; color: var(--color-text); letter-spacing: 0.12em; text-transform: uppercase; }
+.ptw-wordmark-text .suffix { color: var(--color-text-muted); font-weight: 500; }
+
+.slide-title { text-align: center; display: flex !important; flex-direction: column; justify-content: center; }
+.slide-title h1 { font-size: 3.2em; margin-top: 0.2em; margin-bottom: 0.3em; letter-spacing: -0.025em; line-height: 1.05; }
+.slide-title .lede { font-size: 1.1em; color: var(--color-text-muted); max-width: 900px; margin: 0.4em auto 2em auto; line-height: 1.45; }
+.slide-title .meta { color: var(--color-text-muted); font-size: 0.72em; letter-spacing: 0.04em; margin: 0.3em 0; }
+.slide-title .meta strong { color: var(--color-text); font-weight: 600; }
+
+.slide-part-divider { display: flex !important; flex-direction: column; justify-content: center; background: var(--color-surface); }
+.slide-part-divider .eyebrow { font-size: 0.62em; letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-gold); font-weight: 700; margin-bottom: 0.8em; }
+.slide-part-divider h1 { font-size: 2.8em; margin-bottom: 0.25em; letter-spacing: -0.025em; }
+.slide-part-divider .duration { font-size: 0.7em; color: var(--color-text-muted); margin-bottom: 0; font-family: var(--font-mono); letter-spacing: 0.04em; }
+
+.figure-caption { text-align: center; font-size: 0.7em; color: var(--color-text-muted); margin-top: 0.5em; font-style: italic; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+.two-col-viz { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: stretch; }
+.two-col-viz h3 { font-size: 0.7em; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted); font-weight: 700; margin-bottom: 0.4em; text-align: center; }
+
+/* Agenda list with monospace durations */
+.agenda-list { list-style: none; margin: 0.4em 0; padding: 0; counter-reset: agenda; }
+.agenda-list li { counter-increment: agenda; display: flex; align-items: baseline; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--color-border); font-size: 0.95em; }
+.agenda-list li:last-child { border-bottom: none; }
+.agenda-list li::before { content: counter(agenda); font-family: var(--font-mono); font-size: 0.7em; color: var(--color-gold); font-weight: 700; min-width: 22px; }
+.agenda-list .label { flex: 1; }
+.agenda-list .duration { font-family: var(--font-mono); font-size: 0.72em; color: var(--color-text-muted); letter-spacing: 0.02em; white-space: nowrap; }
+
+/* Pull-quote for slide 4 + 23 */
+.pullquote { border-top: 1px solid var(--color-gold); border-bottom: 1px solid var(--color-gold); padding: 0.9em 0; margin: 0.7em 0; font-size: 1.2em; line-height: 1.4; color: var(--color-text); font-style: normal; }
+.pullquote.small { font-size: 0.92em; color: var(--color-text-muted); padding: 0.6em 0; }
+.pullquote-attr { display: block; margin-top: 0.6em; font-size: 0.65em; color: var(--color-text-muted); letter-spacing: 0.02em; }
+.pullquote.small .pullquote-attr { font-size: 0.7em; }
+
+/* Numbered intro list for slide 3 */
+.intro-list { margin: 0.5em 0 0.3em 1.6em; padding: 0; }
+.intro-list li { margin: 0.3em 0; }
+
+/* Project specifics list */
+.project-list { list-style: none; margin: 0.4em 0; padding: 0; }
+.project-list li { margin: 0.35em 0; padding-left: 24px; position: relative; font-size: 0.92em; }
+.project-list li::before { content: "—"; position: absolute; left: 0; top: 0; color: var(--color-gold); font-weight: 700; }
+
+/* Risk callout */
+.risk-callout { background: var(--color-surface); border-left: 3px solid var(--color-gold); border-radius: 0 6px 6px 0; padding: 0.7em 1em; margin: 0.8em 0 0; font-size: 0.78em; color: var(--color-text-muted); line-height: 1.5; }
+
+/* Slide 6 layout — text-left, viz-right */
+.surfaces-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 36px; align-items: center; }
+.surfaces-grid p { font-size: 0.82em; margin: 0.4em 0; }
+.surfaces-grid img { width: 100%; height: auto; max-height: 68vh; object-fit: contain; }
+
+/* Slide 23 takeaways */
+.takeaways { list-style: none; margin: 0.5em 0; padding: 0; }
+.takeaways li { padding: 0.55em 0 0.55em 22px; position: relative; font-size: 0.95em; line-height: 1.45; border-bottom: 1px solid var(--color-border); }
+.takeaways li:last-child { border-bottom: none; }
+.takeaways li::before { content: ""; position: absolute; left: 0; top: 0.9em; width: 12px; height: 2px; background: var(--color-gold); }
+
+/* Operational Context Center visual */
+.ocs-viz { display: block; width: 100%; max-width: 980px; max-height: 56vh; margin: 0.4em auto 0; height: auto; }
+
+/* Slide 22 — top-anchored to keep title clear of wordmark */
+section.slide-spaceship { justify-content: flex-start !important; padding-top: 80px !important; }
+section.slide-spaceship h2 { margin-top: 0.1em; }
+
+.reveal .slide-number { font-family: var(--font-mono); background: transparent; color: var(--color-text-faint); font-size: 0.6em; right: 24px; bottom: 16px; letter-spacing: 0.04em; }
+.reveal .progress { height: 2px; color: var(--color-gold); }
+.reveal .controls { display: none; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============== SLIDE 1: TITLE ============== -->
+<section class="slide-title">
+  <div class="ptw-wordmark">
+    <img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt="">
+    <span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span>
+  </div>
+  <h1>Working session 2</h1>
+  <p class="lede">Day to day with AI.</p>
+  <p class="meta"><strong>Friday 2026-05-29</strong> · Passport to Wealth · Clarity App</p>
+</section>
+
+<!-- ============== SLIDE 2: TODAY'S AGENDA ============== -->
+<section>
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Today's agenda</h2>
+  <ol class="agenda-list">
+    <li><span class="label">Where we left off, and how Levie thinks about adoption</span><span class="duration">~5 min</span></li>
+    <li><span class="label">Three ways to work with Claude — Chat, Cowork, and Code</span><span class="duration">~7 min</span></li>
+    <li><span class="label">Before you start: terminal basics</span><span class="duration">~5 min</span></li>
+    <li><span class="label">Using Claude Code day to day</span><span class="duration">~6 min</span></li>
+    <li><span class="label">Building your Operational Context Center</span><span class="duration">~6 min</span></li>
+    <li><span class="label">Two dials: automation and risk</span><span class="duration">~8 min</span></li>
+    <li><span class="label">The wait calculation</span><span class="duration">~5 min</span></li>
+    <li><span class="label">Four projects to practice between now and next session</span><span class="duration">~8 min</span></li>
+  </ol>
+</section>
+
+<!-- ============== SLIDE 3: WHERE WE LEFT OFF ============== -->
+<section>
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Where we left off</h2>
+  <p>Two weeks ago we installed Claude Code on your laptop and worked through the first prompts.</p>
+  <p>The goal of the next sixty minutes is to leave you with three things:</p>
+  <ol class="intro-list">
+    <li>A clearer picture of which Claude surface to use for which kind of work.</li>
+    <li>A starter folder of conventions and frameworks that any future AI tool can read.</li>
+    <li>Four concrete projects to continue exploring with AI.</li>
+  </ol>
+</section>
+
+<!-- ============== SLIDE 4: LEVIE QUOTE ============== -->
+<section>
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Everyone is trying to untangle what AI adoption means in practice</h2>
+  <div class="pullquote">
+    Take whatever number of people you thought might be in jobs related to AI deployment in the enterprise and multiply it by 10. Then probably 10 again.
+    <span class="pullquote-attr">— Aaron Levie, CEO of Box · May 2026 · <a href="https://x.com/levie/status/2059839815273824423">full thread on X</a></span>
+  </div>
+  <p>The implementation gap between having a chat window open and having agents running on production work is wider than most teams plan for, and that gap is where the actual job is.</p>
+</section>
+
+<!-- ============== PART 1 DIVIDER ============== -->
+<section class="slide-part-divider">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <p class="eyebrow">Part 1</p>
+  <h1>Three ways to work with Claude</h1>
+  <p class="duration">3 slides · ~7 min</p>
+</section>
+
+<!-- ============== SLIDE 6: CHAT, COWORK, CODE ============== -->
+<section class="dense">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Chat, Cowork, Code</h2>
+  <div class="surfaces-grid">
+    <div>
+      <p>There are three places you'll run into Claude, and they behave like three different products because they are. Knowing which one to reach for is most of the skill.</p>
+      <p><strong>Chat</strong> is the conversational surface at claude.ai. You ask a question and you get an answer in the same window. Best for quick exchanges — sanity-checking a claim before a meeting, summarizing a dense PDF, drafting a paragraph you can paste somewhere else.</p>
+      <p><strong>Claude Cowork</strong> is the desktop application. You point it at a folder or a connected system (Outlook, Drive, Slack, a spreadsheet) and you describe the outcome you want. Cowork plans the steps, executes them, and gives you back a finished deliverable.</p>
+      <p><strong>Claude Code</strong> is the terminal application. It runs on your laptop, reads and writes files in a project folder, and can run shell commands. Best when you want something bespoke — a small web tool, a script that processes a CSV, a one-pager generated from a profile.</p>
+    </div>
+    <div>
+      <img src="diagrams/slide-06-surfaces.png" alt="Three columns: Chat at claude.ai answers quick exchanges, Cowork on the desktop delivers finished deliverables, Code in the terminal builds bespoke artifacts.">
+    </div>
+  </div>
+</section>
+
+<!-- ============== SLIDE 7: WHEN TO REACH FOR EACH ============== -->
+<section>
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>When to reach for each</h2>
+  <p>The decision is usually obvious once you state the task out loud. If the table feels arbitrary, the rule of thumb is that Chat answers, Cowork delivers, and Code builds.</p>
+  <table>
+    <thead><tr><th>If the task is…</th><th>Reach for</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>A question, a rewrite, a quick brainstorm</td><td><strong>Chat</strong></td><td>Fast, conversational, no setup.</td></tr>
+      <tr><td>Research, analysis, or a finished document built from your files and systems</td><td><strong>Claude Cowork</strong></td><td>Folder access, connectors, skills, scheduled runs.</td></tr>
+      <tr><td>Writing, testing, or shipping something custom (homebrew apps or interactive artifacts)</td><td><strong>Claude Code</strong></td><td>Codebase access, file edits, shell, dev environments.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============== SLIDE 8: USAGE ROADMAP / MATURITY LADDER ============== -->
+<section class="dense">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Using AI today progresses from Chat, all the way to reinventing workflows</h2>
+  <table class="compact">
+    <thead><tr><th style="width: 22%;">Usage complexity</th><th>What it looks like</th></tr></thead>
+    <tbody>
+      <tr><td><strong>0</strong></td><td>Use Chat for questions and rewrites. Most people sit here.</td></tr>
+      <tr><td><strong>1</strong></td><td>Hand Claude a folder, get back a finished deliverable you actually use.</td></tr>
+      <tr><td><strong>2</strong></td><td>Turn that deliverable into a skill — one markdown file that runs the same task the same way every time.</td></tr>
+      <tr><td><strong>3</strong></td><td>Bundle skills together, schedule them to run on their own.</td></tr>
+      <tr><td><strong>4</strong></td><td>A full plugin for a specific function, maintained as shared infrastructure.</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size: 0.88em; margin-top: 0.6em;">The near-term focus for the next few months is climbing to a confident Level 1 — building kits. That means generating concrete artifacts you'd otherwise produce by hand: HTML tools that sit on your site, Excel sheets that summarize a position, written summaries of a client's situation. Once the kit exists, the harder work begins: noticing which workflows you repeat often enough to be worth encoding, and identifying where a small piece of automation would compound. That second phase is what Level 2 and Level 3 actually look like in practice.</p>
+</section>
+
+<!-- ============== PART 2 DIVIDER ============== -->
+<section class="slide-part-divider">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <p class="eyebrow">Part 2</p>
+  <h1>Before you start: terminal basics</h1>
+  <p class="duration">1 slide · ~5 min</p>
+</section>
+
+<!-- ============== SLIDE 10: NAVIGATING + CLEAN FOLDER ============== -->
+<section class="dense">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Navigating, and a clean working folder</h2>
+  <p>Before you ever type <code>claude</code>, you need to be in the folder you want Claude to work in.</p>
+  <table class="compact">
+    <thead><tr><th>Task</th><th>Mac · Linux</th><th>Windows PowerShell</th></tr></thead>
+    <tbody>
+      <tr><td>Show where you are</td><td><code>pwd</code></td><td><code>pwd</code></td></tr>
+      <tr><td>List what's in this folder</td><td><code>ls</code></td><td><code>ls</code> or <code>dir</code></td></tr>
+      <tr><td>Go into a folder</td><td><code>cd folder-name</code></td><td><code>cd folder-name</code></td></tr>
+      <tr><td>Go back up one folder</td><td><code>cd ..</code></td><td><code>cd ..</code></td></tr>
+      <tr><td>Make a new folder</td><td><code>mkdir folder-name</code></td><td><code>mkdir folder-name</code></td></tr>
+      <tr><td>Open the folder in Finder/Explorer</td><td><code>open .</code></td><td><code>explorer .</code></td></tr>
+    </tbody>
+  </table>
+  <pre><code>cd ~/Documents
+mkdir claude-work
+cd claude-work
+claude</code></pre>
+  <p style="font-size: 0.85em;">That sequence creates a folder called <code>claude-work</code> inside Documents, moves into it, and starts Claude Code there. Every project from here on can live as a subfolder inside <code>claude-work</code>.</p>
+</section>
+
+<!-- ============== PART 3 DIVIDER ============== -->
+<section class="slide-part-divider">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <p class="eyebrow">Part 3</p>
+  <h1>Using Claude Code</h1>
+  <p class="duration">2 slides · ~6 min</p>
+</section>
+
+<!-- ============== SLIDE 12: DAILY COMMANDS ============== -->
+<section class="dense">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Daily commands</h2>
+  <p>These are the commands you'll use most days. There are more, but you don't need them yet.</p>
+  <table class="compact">
+    <thead><tr><th style="width: 28%;">Command</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>claude</code></td><td>Start a session in the current folder.</td></tr>
+      <tr><td><code>/init</code></td><td>Have Claude read your project and write a <code>CLAUDE.md</code> file describing it.</td></tr>
+      <tr><td><code>/clear</code></td><td>Clear the current conversation; keep the folder context.</td></tr>
+      <tr><td><code>/resume</code></td><td>Pick up an earlier conversation by name.</td></tr>
+      <tr><td><code>/model</code></td><td>Switch which Claude model you're using.</td></tr>
+      <tr><td><code>/login</code> and <code>/logout</code></td><td>Sign into or out of your Anthropic account.</td></tr>
+      <tr><td><code>/permissions</code></td><td>See and edit which tools Claude can run without asking.</td></tr>
+      <tr><td><code>/help</code></td><td>List every command.</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size: 0.88em;">The two worth committing to memory now are <code>/init</code> and <code>/permissions</code>. The first is how you give Claude its starting context for a project. The second is how you teach Claude what it's allowed to do without interrupting you each time.</p>
+</section>
+
+<!-- ============== SLIDE 13: WHAT YOU TYPE VS WHAT CLAUDE DOES ============== -->
+<section class="dense">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>What you type vs. what Claude does</h2>
+  <p>When you type a sentence into Claude Code, Claude breaks it into a sequence of small tool calls — read this file, search for that string, run this command. Most of the work happens in those tool calls. Watching them go by, even loosely, gives you a feel for what's possible.</p>
+  <table class="compact">
+    <thead><tr><th style="width: 42%;">What you type</th><th>What Claude does under the hood</th></tr></thead>
+    <tbody>
+      <tr><td>"Summarize what's in this folder."</td><td><code>Glob</code> to list files, then <code>Read</code> on each, then writes a prose summary.</td></tr>
+      <tr><td>"Find every place we mention the FIRE calculator."</td><td><code>Grep</code> across the folder, then <code>Read</code> the matching files for context.</td></tr>
+      <tr><td>"Make a one-pager for this new client based on this profile."</td><td><code>Read</code> the profile, then <code>Write</code> a new file containing the one-pager.</td></tr>
+      <tr><td>"Set this project up so I can come back to it later."</td><td><code>/init</code> triggers <code>Read</code> of README, package files, source tree, then <code>Write</code> a <code>CLAUDE.md</code>.</td></tr>
+      <tr><td>"Pull last week's market commentary from my notes and draft a newsletter intro."</td><td><code>Read</code> your notes folder, optionally <code>Grep</code> for dates, then drafts a new file.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============== PART 4 DIVIDER ============== -->
+<section class="slide-part-divider">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <p class="eyebrow">Part 4</p>
+  <h1>Build your Operational Context Center</h1>
+  <p class="duration">2 slides · ~6 min</p>
+</section>
+
+<!-- ============== SLIDE 15: WHAT IT IS, WHY NOW (VISUAL) ============== -->
+<section class="dense">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>What an Operational Context Center is, and why now</h2>
+  <p style="font-size: 0.92em;">A folder of plain markdown files that encode how you work and how Passport to Wealth presents itself. The same folder feeds every Claude surface — and every future model that reads files.</p>
+  <svg class="ocs-viz" viewBox="0 0 1000 420" xmlns="http://www.w3.org/2000/svg" aria-label="A single 'context/' folder containing two layers of markdown files — Individual practice and Firm-level — feeding into the three Claude surfaces: Chat, Cowork, and Code.">
+    <!-- Folder tab -->
+    <path d="M 90 80 L 90 60 Q 90 52 98 52 L 240 52 Q 248 52 252 60 L 260 80 Z" fill="#0F1E33"/>
+    <text x="135" y="73" font-family="-apple-system, sans-serif" font-size="14" font-weight="700" fill="#f8f6f1" letter-spacing="0.08em">context/</text>
+    <!-- Folder body -->
+    <rect x="80" y="78" width="840" height="200" rx="6" fill="#f8f6f1" stroke="#0F1E33" stroke-width="1.5"/>
+
+    <!-- Individual column -->
+    <text x="130" y="115" font-family="-apple-system, sans-serif" font-size="13" font-weight="700" fill="#5a6478" letter-spacing="0.14em">INDIVIDUAL PRACTICE</text>
+    <line x1="130" y1="124" x2="455" y2="124" stroke="#C9A75D" stroke-width="1.5"/>
+    <text x="130" y="152" font-family="-apple-system, sans-serif" font-size="18" fill="#0F1E33">meeting-note-template.md</text>
+    <text x="130" y="182" font-family="-apple-system, sans-serif" font-size="18" fill="#0F1E33">prep-checklist.md</text>
+    <text x="130" y="212" font-family="-apple-system, sans-serif" font-size="18" fill="#0F1E33">common-questions.md</text>
+    <text x="130" y="242" font-family="-apple-system, sans-serif" font-size="18" fill="#0F1E33">jurisdiction-notes.md</text>
+
+    <!-- Firm column -->
+    <text x="540" y="115" font-family="-apple-system, sans-serif" font-size="13" font-weight="700" fill="#5a6478" letter-spacing="0.14em">FIRM</text>
+    <line x1="540" y1="124" x2="870" y2="124" stroke="#C9A75D" stroke-width="1.5"/>
+    <text x="540" y="152" font-family="-apple-system, sans-serif" font-size="18" fill="#0F1E33">house-view.md</text>
+    <text x="540" y="182" font-family="-apple-system, sans-serif" font-size="18" fill="#0F1E33">fee-and-engagement.md</text>
+    <text x="540" y="212" font-family="-apple-system, sans-serif" font-size="18" fill="#0F1E33">brand-voice.md</text>
+    <text x="540" y="242" font-family="-apple-system, sans-serif" font-size="18" fill="#0F1E33">who-we-serve.md</text>
+
+    <!-- Arrows down to surfaces -->
+    <g stroke="#C9A75D" stroke-width="2" fill="none">
+      <line x1="250" y1="290" x2="250" y2="328"/>
+      <polygon points="244,322 250,336 256,322" fill="#C9A75D" stroke="none"/>
+      <line x1="500" y1="290" x2="500" y2="328"/>
+      <polygon points="494,322 500,336 506,322" fill="#C9A75D" stroke="none"/>
+      <line x1="750" y1="290" x2="750" y2="328"/>
+      <polygon points="744,322 750,336 756,322" fill="#C9A75D" stroke="none"/>
+    </g>
+
+    <!-- Three surface pills -->
+    <rect x="180" y="340" width="140" height="60" rx="6" fill="#ffffff" stroke="#0F1E33" stroke-width="1.5"/>
+    <text x="250" y="378" font-family="-apple-system, sans-serif" font-size="22" font-weight="700" text-anchor="middle" fill="#0F1E33">Chat</text>
+    <rect x="430" y="340" width="140" height="60" rx="6" fill="#f8f6f1" stroke="#C9A75D" stroke-width="2"/>
+    <text x="500" y="378" font-family="-apple-system, sans-serif" font-size="22" font-weight="700" text-anchor="middle" fill="#0F1E33">Cowork</text>
+    <rect x="680" y="340" width="140" height="60" rx="6" fill="#ffffff" stroke="#0F1E33" stroke-width="1.5"/>
+    <text x="750" y="378" font-family="-apple-system, sans-serif" font-size="22" font-weight="700" text-anchor="middle" fill="#0F1E33">Code</text>
+  </svg>
+</section>
+
+<!-- ============== SLIDE 16: WHAT TO PUT IN IT ============== -->
+<section class="dense">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>What to put in it</h2>
+  <table class="compact">
+    <thead><tr><th>Individual practice</th><th>Firm-level</th></tr></thead>
+    <tbody>
+      <tr><td>Your meeting-note template — the structure you use every time.</td><td>The PTW house view on the top five planning topics you get asked about.</td></tr>
+      <tr><td>Your standard pre-meeting prep checklist.</td><td>Your fee structure and engagement model, written out in normal sentences.</td></tr>
+      <tr><td>A running list of common client questions, with your standard answers.</td><td>Standard disclosures and compliance language you reuse.</td></tr>
+      <tr><td>Your default follow-up email shape.</td><td>The PTW brand voice guide — tone, what to avoid, examples of good and bad copy.</td></tr>
+      <tr><td>Notes on your top five client jurisdictions and the residency/tax quirks each one has.</td><td>A one-page description of who PTW serves and who it doesn't.</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size: 0.88em;">You don't have to start with all ten. Pick three, write them as plain markdown files, and put them in a folder called <code>context</code> inside your <code>claude-work</code> folder — that folder is the Operational Context Center on disk. The next time you ask Claude for something client-facing, point it at that folder. The difference in output will be obvious.</p>
+</section>
+
+<!-- ============== PART 5 DIVIDER ============== -->
+<section class="slide-part-divider">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <p class="eyebrow">Part 5</p>
+  <h1>Two dials: automation and risk</h1>
+  <p class="duration">3 slides · ~8 min</p>
+</section>
+
+<!-- ============== SLIDE 18: INCREASING AUTOMATION ============== -->
+<section class="dense">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Increasing automation</h2>
+  <p>Give Claude more context up front, so it asks fewer questions and produces better output without supervision. Four levers worth knowing:</p>
+  <table class="compact">
+    <thead><tr><th style="width: 22%;">Lever</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><strong>CLAUDE.md</strong></td><td>A file at the root of a project that Claude reads at the start of every session. Project conventions live here.</td></tr>
+      <tr><td><strong>Skills</strong></td><td>Markdown files describing a specific task in enough detail that Claude runs it the same way every time.</td></tr>
+      <tr><td><strong>Allowed tools</strong></td><td>Pre-approve specific commands in a settings file so they don't trigger a permission prompt each time.</td></tr>
+      <tr><td><strong>Headless runs</strong></td><td>Claude executing a defined task end-to-end on a schedule or trigger, without sitting in front of you. Level 3 territory.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============== SLIDE 19: DECREASING RISK ============== -->
+<section class="dense">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Decreasing risk</h2>
+  <p>The risk surface is getting smaller over time as models and tooling mature, but it does not go to zero. This is the first widely-deployed category of software with agency — Word, Excel, and Slack sit still until you click; Claude takes actions on your behalf.</p>
+  <p style="margin-top: 0.6em;">Four habits worth keeping for the foreseeable future:</p>
+  <ul>
+    <li>Work in a fresh folder for anything experimental, not where your real client documents live.</li>
+    <li>Initialize git in any project folder before Claude does heavy work, so you can roll back.</li>
+    <li>Leave permission mode set to ask. Only pre-approve specific commands you understand.</li>
+    <li>No AI tool gets full write access to production — CRM, live website, email — until the guardrails are real and tested.</li>
+  </ul>
+  <div class="risk-callout">
+    In July 2025, an AI coding agent deleted a live production database during an active code freeze, then misreported what had happened when asked. The lesson is not that AI is unsafe — it's that "unsupervised access to production" remains the wrong default, regardless of how good the model is.
+  </div>
+</section>
+
+<!-- ============== SLIDE 20: CLIENT DATA WHERE IT GOES ============== -->
+<section class="dense-xs">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Client data: where it goes</h2>
+  <p style="font-size: 0.95em;">Each Claude surface handles data differently. If you're a fiduciary handling client information, knowing which surface keeps what where is part of your basic duty of care. This is the short version; Anthropic's data policy pages are the long version, and worth a careful read at some point.</p>
+  <table class="compact" style="font-size: 0.6em;">
+    <thead><tr><th style="width: 14%;">Surface</th><th>What leaves your laptop</th><th>What stays local</th><th>Audit-trail posture</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Chat</strong><br>(claude.ai)</td>
+        <td>The full conversation, sent to Anthropic. On a consumer plan, conversations may be retained up to 5 years and used to train future models unless you've explicitly opted out. On Team or Enterprise, conversations are not used for training; retention is 30 days.</td>
+        <td>Nothing. The conversation lives on Anthropic's servers.</td>
+        <td>Your account history in the web UI.</td>
+      </tr>
+      <tr>
+        <td><strong>Cowork</strong><br>(desktop)</td>
+        <td>The prompts you send, plus the specific file contents Claude needs to read to do the task. Claude does not upload your whole folder — only what it pulls in. On Team/Enterprise, data is not used for training.</td>
+        <td>Everything in your local files and connected systems, unless Claude is actively reading from them for a task.</td>
+        <td>Visible activity in the desktop app, plus your account history.</td>
+      </tr>
+      <tr>
+        <td><strong>Code</strong><br>(terminal)</td>
+        <td>The prompts you send, plus the contents of any files Claude reads or writes. On Team/Enterprise or API access, retention is 7 days and data is never used for training.</td>
+        <td>Your project folder and anything Claude has not been pointed at.</td>
+        <td>Git history (if you initialized git) plus a per-session transcript on your laptop.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="font-size: 0.85em;">For client work, the practical guidance is to use a Team or Enterprise plan, keep Chat for non-sensitive questions and Cowork/Code for work that touches client information, and to use git in any project folder so you have a local audit trail you can review later.</p>
+</section>
+
+<!-- ============== PART 6 DIVIDER ============== -->
+<section class="slide-part-divider">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <p class="eyebrow">Part 6</p>
+  <h1>The wait calculation</h1>
+  <p class="duration">2 slides · ~5 min</p>
+</section>
+
+<!-- ============== SLIDE 22: SPACESHIP PARADOX ============== -->
+<section class="dense slide-spaceship">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>The spaceship paradox</h2>
+  <img class="diagram-img" src="diagrams/slide-22-spaceship.png" alt="Timeline from 2026 to 2100. Ship 1 launches at 2026 with a shallow trajectory toward a destination star. Ship 2 launches at 2050 with a steeper trajectory and overtakes Ship 1 before either reaches the star.">
+  <p class="figure-caption" style="font-size: 0.85em; font-style: normal; color: var(--color-text);">Launch a slow ship to a distant star today; a faster ship launched fifty years later can still get there first.</p>
+  <aside class="notes">
+    The wait calculation, sometimes called the incessant obsolescence postulate, comes from Robert Forward in 1996. The point of the story is not literal interstellar travel. The point is that there is sometimes an optimal date to commit to a long-running project, and that date is rarely "right now." If technology is improving fast enough, a later start with better tools beats an earlier start that gets stuck with worse ones. The next slide is what this means for how to invest in AI-adjacent work today.
+  </aside>
+</section>
+
+<!-- ============== SLIDE 23: WHAT THIS MEANS FOR YOU ============== -->
+<section class="dense">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>What this means for you</h2>
+  <ul class="takeaways">
+    <li>Build the smallest version of a thing that solves today's problem. Resist the urge to make it general.</li>
+    <li>Expect to rebuild when capabilities change. The rebuild is not a sign you did it wrong; it's a sign the ground moved.</li>
+    <li>Optimize for ease of rebuild, not durability. The Operational Context Center, your conventions, and your understanding of the workflow are what carry across versions. The specific tool you built around them does not need to.</li>
+  </ul>
+  <div class="pullquote small">
+    Half of what you've done is obsolete, and the other half needs to be upgraded to take advantage of new capabilities.
+    <span class="pullquote-attr">— Aaron Levie · <a href="https://x.com/levie/status/2059839815273824423">full thread</a></span>
+  </div>
+</section>
+
+<!-- ============== PART 7 DIVIDER ============== -->
+<section class="slide-part-divider">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <p class="eyebrow">Part 7</p>
+  <h1>Four projects to practice</h1>
+  <p class="duration">4 slides · ~8 min</p>
+</section>
+
+<!-- ============== SLIDE 25: PROJECT 1 ============== -->
+<section class="dense">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Project 1 · Cross-border planning checklist</h2>
+  <p>A single-page web tool that lives at a fixed URL on your site. A visitor answers four or five questions about their residency, citizenship, employer type, and household. The tool produces a tailored checklist of the planning decisions they should think about before our intro call.</p>
+  <ul class="project-list">
+    <li><strong>What it solves:</strong> the friction between landing on your site and deciding to book a call. A free, useful artifact gives them a reason to engage and to share their email.</li>
+    <li><strong>Rough scope:</strong> one HTML page, no backend. Logic is a small set of if-this-then-that rules you write out in plain language. Email capture goes to your existing mailing-list tool.</li>
+    <li><strong>What you'll learn:</strong> how to scope a single-page tool, how to give Claude Code a clear spec, how to deploy something publicly without standing up infrastructure.</li>
+    <li><strong>First step:</strong> open Claude Code in a new folder, describe the tool, let Claude propose a first draft.</li>
+  </ul>
+</section>
+
+<!-- ============== SLIDE 26: PROJECT 2 ============== -->
+<section class="dense">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Project 2 · FAQ from your meeting notes</h2>
+  <p>You almost certainly answer the same five or six questions over and over in client meetings. Pulling those out into a written FAQ gives you a content asset for your site and a piece of your Operational Context Center. The point is not to publish a FAQ page that already exists somewhere — it's to harvest the FAQ that is implicit in your real meeting record.</p>
+  <ul class="project-list">
+    <li><strong>What it solves:</strong> turning repeated conversational work into a published asset. Every future client who reads the FAQ is one less repeat explanation in a meeting.</li>
+    <li><strong>Rough scope:</strong> export anonymized notes from your meeting record into a folder. Point Claude Code at the folder. Ask it to identify the recurring questions and draft answers in your voice, using your Operational Context Center for tone.</li>
+    <li><strong>What you'll learn:</strong> how Claude reads across many files at once, how to make it write in a specific voice, how to redline machine-drafted prose without losing your own voice in the process.</li>
+    <li><strong>First step:</strong> export ten anonymized note sets into a <code>notes/</code> subfolder. Verify they're scrubbed of identifying information before pointing Claude at them.</li>
+  </ul>
+</section>
+
+<!-- ============== SLIDE 27: PROJECT 3 ============== -->
+<section class="dense">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Project 3 · Onboarding doc kit per new client</h2>
+  <p>Every new client gets roughly the same welcome packet — an intro letter, a what-to-expect timeline, a data-collection sheet, instructions for sharing documents securely. Today you assemble that packet by hand. The project is to turn a short profile of the new client into a generated kit you only need to spot-check.</p>
+  <ul class="project-list">
+    <li><strong>What it solves:</strong> thirty to sixty minutes of administrative assembly per new client, delivered the same way every time. The kit also reads like you wrote it, because it pulls from your Operational Context Center.</li>
+    <li><strong>Rough scope:</strong> a small Claude Code project that takes a one-paragraph client profile as input and writes four documents as output. The templates for each document are markdown files in your Operational Context Center.</li>
+    <li><strong>What you'll learn:</strong> how to combine your conventions (the Operational Context Center) with a specific input (the profile) to produce repeatable output. This is the basic shape of a "skill" in Anthropic's vocabulary.</li>
+    <li><strong>First step:</strong> write your current onboarding documents as markdown templates with <code>{{placeholder}}</code> markers where the client-specific details go. That alone is a useful exercise.</li>
+  </ul>
+</section>
+
+<!-- ============== SLIDE 28: PROJECT 4 ============== -->
+<section class="dense">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>Project 4 · Build a portfolio review tool</h2>
+  <p>Inspired by an independent developer's writeup: he handed Claude Code a brokerage CSV and a few stated goals (income needs, tax bracket, retirement horizon) and got back a phased rebalancing plan with tax-impact analysis. An evening of work that replaced a week of spreadsheet building. (<a href="https://mattstockton.com/2026/02/10/building-a-portfolio-optimization-plan-with-claude-code.html">writeup</a>)</p>
+  <ul class="project-list">
+    <li><strong>What it solves:</strong> the same review you do client-by-client, but with a repeatable input format and a draft output you only need to refine. Faster prep, more consistent recommendations.</li>
+    <li><strong>Rough scope:</strong> a Claude Code project that reads a holdings CSV plus a one-paragraph client profile, then drafts a phased plan with rationale, tax notes, and questions to confirm in the next meeting.</li>
+    <li><strong>What you'll learn:</strong> how to feed Claude structured numerical data alongside qualitative context, how to constrain output to your house format, how to keep recommendations conservative by default.</li>
+    <li><strong>First step:</strong> take one anonymized client's recent holdings export and a short profile, drop them into a fresh folder, and ask Claude Code to produce a draft review.</li>
+  </ul>
+</section>
+
+<!-- ============== SLIDE 29: WHAT SHOULD YOU DO NEXT ============== -->
+<section class="dense">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h2>What should you do next?</h2>
+  <ol>
+    <li>Create the folder structure we set up today. Inside <code>~/Documents/claude-work/</code>, make a <code>context</code> subfolder — your Operational Context Center on disk — and put at least three markdown files into it: your meeting-note template, your top five recurring client questions with your standard answers, and a one-page description of who PTW serves.</li>
+    <li>Pick one of the four projects above and do the first step. Just the first step. You don't need to finish the project; you need to start it so we can talk about what was hard and what was easier than expected.</li>
+    <li>Send me a note about anything that broke, anything that felt awkward, or any moment when you weren't sure what to type. Those are the parts worth focusing on next time.</li>
+  </ol>
+</section>
+
+<!-- ============== SLIDE 30: THANKS ============== -->
+<section class="slide-title">
+  <div class="ptw-wordmark"><img src="https://passporttowealth.app/assets/brand/logo-blue.png" alt=""><span class="ptw-wordmark-text">PASSPORT TO WEALTH<span class="suffix"> · CLARITY APP</span></span></div>
+  <h1>Thank you!</h1>
+  <p class="meta"><strong>WS2</strong> · 2026-05-29</p>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: 'c/t',
+  transition: 'fade',
+  transitionSpeed: 'fast',
+  controls: false,
+  progress: true,
+  width: 1280,
+  height: 720,
+  margin: 0.04,
+  minScale: 0.2,
+  maxScale: 2.0
+});
+</script>
+</body>
+</html>
