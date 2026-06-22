@@ -14,6 +14,6 @@ PyYAML~=6.0          # rules.yaml, config.yaml, fx_overrides.yaml
 chardet~=5.2         # CSV encoding detection in normalize.py
 
 # Demo kit generator
-reportlab~=4.4       # synthetic PDF generation (paystub, tax doc, Amazon)
+reportlab~=5.0       # synthetic PDF generation (paystub, tax doc, Amazon)
 
 # (Tests use Python stdlib only — no pytest/etc. dependency.)
